@@ -1,0 +1,13 @@
+# Eclipse metadata
+.metadata/
+
+# Accidental SSH key files
+passphrase
+passphrase.pub
+
+# SSH folder
+.ssh/
+
+# OS generated files
+.DS_Store
+Thumbs.db

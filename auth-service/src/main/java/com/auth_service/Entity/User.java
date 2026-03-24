@@ -21,6 +21,6 @@ public class User {
     private String email;
 
     private String password;
-
-    private boolean enabled = true;
+    
+    private String role;    private boolean enabled = true;
 }

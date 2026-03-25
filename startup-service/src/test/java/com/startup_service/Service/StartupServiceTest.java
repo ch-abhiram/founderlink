@@ -82,7 +82,7 @@ class StartupServiceTest {
         assertEquals("FounderLink", created.getName());
         assertEquals("founder@test.com", created.getFounderEmail());
         
-        verify(rabbitTemplate, times(1)).convertAndSend(eq("STARTUP_EXCHANGE"), eq("startup.created"), any(Object.class));
+        verify(rabbitTemplate, times(1)).convertAndSend(eq("startup.exchange"), eq("startup.created"), any(Object.class));
     }
 
     @Test

@@ -1,5 +1,6 @@
 package com.api_gateway.Filter;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.http.HttpStatus;
@@ -16,6 +17,7 @@ import reactor.core.publisher.Mono;
 
 @RequiredArgsConstructor
 @Component
+@Slf4j
 public class JwtFilter implements GlobalFilter {
 
     private final JwtUtil jwtUtil;
@@ -29,7 +31,9 @@ public class JwtFilter implements GlobalFilter {
         // ✅ Public endpoints
         if (path.startsWith("/auth/login") ||
             path.startsWith("/auth/register") ||
+            path.startsWith("/auth/verify") ||
             path.startsWith("/auth/refresh") ||
+            path.startsWith("/actuator") ||
             path.contains("/v3/api-docs") || 
             path.contains("/swagger-ui")) {
 
@@ -54,7 +58,7 @@ public class JwtFilter implements GlobalFilter {
                 return exchange.getResponse().setComplete();
             }
         } catch (Exception e) {
-            System.out.println("Redis down, skipping blacklist");
+            log.warn("Redis unavailable, skipping blacklist check");
         }
 
         String email;

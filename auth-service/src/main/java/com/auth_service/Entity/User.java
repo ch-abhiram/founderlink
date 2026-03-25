@@ -1,5 +1,7 @@
 package com.auth_service.Entity;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -21,6 +23,17 @@ public class User {
     private String email;
 
     private String password;
-    
-    private String role;    private boolean enabled = true;
+
+    private String role;
+
+    private boolean enabled = true;
+
+    @Column(name = "email_verified")
+    private Boolean emailVerified = true;
+
+    @Column(name = "verification_token")
+    private String verificationToken;
+
+    @Column(name = "verification_token_expiry")
+    private LocalDateTime verificationTokenExpiry;
 }

@@ -6,9 +6,11 @@ import com.auth_service.Feign.UserClient;
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserServiceClientWrapper {
 
     private final UserClient userClient;
@@ -19,7 +21,7 @@ public class UserServiceClientWrapper {
     }
 
     public String fallback(String email, Exception ex) {
-        System.out.println("🔥 Circuit Breaker Triggered: " + ex.getMessage());
+        log.warn("User service circuit breaker triggered for email={}: {}", email, ex.getMessage());
         return "USER";
     }
 }

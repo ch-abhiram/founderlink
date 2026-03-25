@@ -34,8 +34,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleRuntimeException(RuntimeException ex, HttpServletRequest request) {
         if ("User not found".equals(ex.getMessage())) {
             return ResponseEntity.status(404).body(new ErrorResponse(LocalDateTime.now(), 404, ex.getMessage(), request.getRequestURI()));
+        } else if ("User already exists".equals(ex.getMessage())) {
+            return ResponseEntity.status(409).body(new ErrorResponse(LocalDateTime.now(), 409, ex.getMessage(), request.getRequestURI()));
         } else if ("Invalid credentials".equals(ex.getMessage())) {
             return ResponseEntity.status(401).body(new ErrorResponse(LocalDateTime.now(), 401, ex.getMessage(), request.getRequestURI()));
+        } else if ("Email not verified. Please verify your email before logging in.".equals(ex.getMessage())
+                || "Invalid or expired verification token".equals(ex.getMessage())) {
+            return ResponseEntity.status(403).body(new ErrorResponse(LocalDateTime.now(), 403, ex.getMessage(), request.getRequestURI()));
         }
         return ResponseEntity.status(500).body(new ErrorResponse(LocalDateTime.now(), 500, ex.getMessage(), request.getRequestURI()));
     }

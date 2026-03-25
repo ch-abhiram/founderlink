@@ -1,6 +1,8 @@
 package com.startup_service.Service;
 
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -18,9 +20,6 @@ import com.startup_service.Repository.StartupRepository;
 import com.startup_service.Util.StartupSpecification;
 
 import lombok.RequiredArgsConstructor;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
 
 @Service
 @RequiredArgsConstructor
@@ -57,7 +56,8 @@ public class StartupService {
         event.put("startupId", saved.getId());
         event.put("founderEmail", saved.getFounderEmail());
         event.put("name", saved.getName());
-        rabbitTemplate.convertAndSend("STARTUP_EXCHANGE", "startup.created", event);
+        event.put("status", saved.getStatus());
+        rabbitTemplate.convertAndSend("startup.exchange", "startup.created", event);
 
         return saved;
     }

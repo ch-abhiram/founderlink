@@ -8,4 +8,5 @@ import com.auth_service.Entity.User;
 
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
+    Optional<User> findByVerificationToken(String verificationToken);
 }

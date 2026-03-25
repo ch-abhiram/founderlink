@@ -9,11 +9,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.auth_service.DTO.AuthRequest;
 import com.auth_service.DTO.LoginResponse;
 import com.auth_service.DTO.RegisterResponse;
+import com.auth_service.DTO.VerificationResponse;
 import com.auth_service.Service.AuthService;
 
 import lombok.RequiredArgsConstructor;
@@ -37,6 +39,11 @@ public class AuthController {
     @PostMapping("/login")
     public LoginResponse login(@RequestBody @Valid AuthRequest request) {
         return authService.login(request.getEmail(), request.getPassword());
+    }
+
+    @GetMapping("/verify")
+    public VerificationResponse verifyEmail(@RequestParam("token") String token) {
+        return authService.verifyEmail(token);
     }
     
     @GetMapping("/test")

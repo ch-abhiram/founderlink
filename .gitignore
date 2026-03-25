@@ -1,5 +1,26 @@
+# Build output
+**/target/
+*.class
+*.log
+
+# Local Maven cache and settings
+.m2/
+maven-settings.xml
+
 # Eclipse metadata
 .metadata/
+**/.settings/
+**/.classpath
+**/.project
+**/.factorypath
+
+# IntelliJ / VS Code
+.idea/
+*.iml
+.vscode/
+
+# Local config repo mirror
+config-repo/
 
 # Accidental SSH key files
 passphrase

@@ -7,9 +7,11 @@ import com.startup_service.Feign.UserClient;
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class Wrapper {
 
     private final UserClient userClient;
@@ -19,12 +21,8 @@ public class Wrapper {
         return userClient.getUser(email);
     }
 
-    // ✅ Fallback method MUST match signature
     public UserDto fallbackUser(String email, Throwable ex) {
-        System.out.println("🔥 Circuit Breaker Triggered for email: " + email);
-        System.out.println("Reason: " + ex.getMessage());
-
-        // return safe default user
+        log.warn("User service fallback triggered for email={}: {}", email, ex.getMessage());
         return new UserDto(email, "Unknown", "USER");
     }
 }

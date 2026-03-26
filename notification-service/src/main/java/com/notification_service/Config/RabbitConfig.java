@@ -17,11 +17,13 @@ public class RabbitConfig {
     public static final String EXCHANGE_INVESTMENT = "investment.exchange";
     public static final String EXCHANGE_STARTUP = "startup.exchange";
     public static final String EXCHANGE_TEAM = "team.exchange";
+    public static final String EXCHANGE_MESSAGING = "messaging.exchange";
 
     public static final String QUEUE_NOTIFY_INVESTMENT_CREATED = "notify.investment.created.queue";
     public static final String QUEUE_NOTIFY_INVESTMENT_STATUS = "notify.investment.status.queue";
     public static final String QUEUE_NOTIFY_STARTUP_CREATED = "notify.startup.created.queue";
     public static final String QUEUE_NOTIFY_TEAM_INVITE = "notify.team.invite.queue";
+    public static final String QUEUE_NOTIFY_MESSAGE_REPLY = "notify.message.reply.queue";
 
     @Bean
     public MessageConverter jsonMessageConverter() {
@@ -51,6 +53,11 @@ public class RabbitConfig {
     }
 
     @Bean
+    public DirectExchange messagingExchange() {
+        return new DirectExchange(EXCHANGE_MESSAGING, true, false);
+    }
+
+    @Bean
     public Queue notifyInvestmentCreatedQueue() {
         return new Queue(QUEUE_NOTIFY_INVESTMENT_CREATED, true);
     }
@@ -71,6 +78,11 @@ public class RabbitConfig {
     }
 
     @Bean
+    public Queue notifyMessageReplyQueue() {
+        return new Queue(QUEUE_NOTIFY_MESSAGE_REPLY, true);
+    }
+
+    @Bean
     public Binding bindingNotifyInvestmentCreated() {
         return BindingBuilder.bind(notifyInvestmentCreatedQueue()).to(investmentExchange()).with("investment.created");
     }
@@ -88,5 +100,10 @@ public class RabbitConfig {
     @Bean
     public Binding bindingNotifyTeamInvite() {
         return BindingBuilder.bind(notifyTeamInviteQueue()).to(teamExchange()).with("team.invite.sent");
+    }
+
+    @Bean
+    public Binding bindingNotifyMessageReply() {
+        return BindingBuilder.bind(notifyMessageReplyQueue()).to(messagingExchange()).with("message.reply.founder");
     }
 }

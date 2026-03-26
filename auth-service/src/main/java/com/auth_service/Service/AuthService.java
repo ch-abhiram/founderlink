@@ -48,6 +48,13 @@ public class AuthService {
         user.setVerificationTokenExpiry(LocalDateTime.now().plusHours(24));
         userRepository.save(user);
 
+        try {
+            userServiceClientWrapper.createUserProfile(normalizedEmail, role);
+        } catch (Exception ex) {
+            // Keep auth registration resilient even if user-service is down or user already exists.
+            log.warn("User profile sync to user-service failed for email={}: {}", normalizedEmail, ex.getMessage());
+        }
+
         log.info("Email verification token generated for email={}: {}", normalizedEmail, verificationToken);
 
         return new RegisterResponse(

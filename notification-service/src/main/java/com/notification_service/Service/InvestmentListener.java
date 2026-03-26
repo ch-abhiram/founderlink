@@ -23,16 +23,27 @@ public class InvestmentListener {
         log.info("Received investment created event for investorEmail={}, startupId={}",
                 event.getInvestorEmail(), event.getStartupId());
 
-        Notification notification = new Notification();
-        notification.setUserEmail(event.getInvestorEmail());
-        notification.setType("INVESTMENT");
-        notification.setTitle("Investment Initiated");
-        notification.setMessage(
+        Notification investorNotification = new Notification();
+        investorNotification.setUserEmail(event.getInvestorEmail());
+        investorNotification.setType("INVESTMENT");
+        investorNotification.setTitle("Investment Initiated");
+        investorNotification.setMessage(
                 "You successfully initiated an investment of " + event.getAmount() +
                 " in startup ID " + event.getStartupId() + ". Current status is " + event.getStatus() + "."
         );
+        repository.save(investorNotification);
 
-        repository.save(notification);
+        if (event.getFounderEmail() != null && !event.getFounderEmail().isBlank()) {
+            Notification founderNotification = new Notification();
+            founderNotification.setUserEmail(event.getFounderEmail());
+            founderNotification.setType("INVESTMENT");
+            founderNotification.setTitle("New Investment Received");
+            founderNotification.setMessage(
+                    "Your startup ID " + event.getStartupId() + " received a new investment of " +
+                    event.getAmount() + " from " + event.getInvestorEmail() + "."
+            );
+            repository.save(founderNotification);
+        }
     }
 
     @RabbitListener(queues = RabbitConfig.QUEUE_NOTIFY_INVESTMENT_STATUS)

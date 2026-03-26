@@ -48,6 +48,8 @@ public class InvestmentService {
         event.put("startupId", saved.getStartupId());
         event.put("investorEmail", saved.getInvestorEmail());
         event.put("amount", saved.getAmount());
+        event.put("status", saved.getStatus());
+        event.put("founderEmail", startup.getFounderEmail());
 
         rabbitTemplate.convertAndSend(
                 RabbitConfig.EXCHANGE,

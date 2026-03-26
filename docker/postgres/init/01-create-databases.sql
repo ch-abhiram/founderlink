@@ -1,0 +1,7 @@
+CREATE DATABASE auth_db;
+CREATE DATABASE user_db;
+CREATE DATABASE startup_db;
+CREATE DATABASE investment_db;
+CREATE DATABASE team_db;
+CREATE DATABASE messaging_db;
+CREATE DATABASE notification_db;

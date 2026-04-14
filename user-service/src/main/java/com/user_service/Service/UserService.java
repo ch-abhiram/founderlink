@@ -1,9 +1,7 @@
 package com.user_service.Service;
 
 
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.user_service.Entity.User;
 import com.user_service.Exception.UserNotFoundException;

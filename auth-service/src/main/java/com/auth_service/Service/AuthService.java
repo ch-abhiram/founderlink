@@ -6,10 +6,14 @@ import java.util.UUID;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.auth_service.Exception.ConflictException;
+import com.auth_service.Exception.ForbiddenOperationException;
 import com.auth_service.DTO.LoginResponse;
 import com.auth_service.DTO.RegisterResponse;
 import com.auth_service.DTO.VerificationResponse;
 import com.auth_service.Entity.RefreshToken;
+import com.auth_service.Exception.ResourceNotFoundException;
+import com.auth_service.Exception.UnauthorizedException;
 import com.auth_service.Entity.User;
 import com.auth_service.Repository.RefreshTokenRepository;
 import com.auth_service.Repository.UserRepository;
@@ -34,7 +38,7 @@ public class AuthService {
     public RegisterResponse register(String email, String password, String role) {
         String normalizedEmail = normalizeEmail(email);
         if (userRepository.findByEmail(normalizedEmail).isPresent()) {
-            throw new RuntimeException("User already exists");
+            throw new ConflictException("User already exists");
         }
 
         User user = new User();
@@ -55,7 +59,7 @@ public class AuthService {
             log.warn("User profile sync to user-service failed for email={}: {}", normalizedEmail, ex.getMessage());
         }
 
-        log.info("Email verification token generated for email={}: {}", normalizedEmail, verificationToken);
+        log.info("Email verification token generated for email={}", normalizedEmail);
 
         return new RegisterResponse(
                 "User registered successfully. Please verify your email before logging in.",
@@ -67,14 +71,14 @@ public class AuthService {
     public LoginResponse login(String email, String password) {
         String normalizedEmail = normalizeEmail(email);
         User user = userRepository.findByEmail(normalizedEmail)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new RuntimeException("Invalid credentials");
+            throw new UnauthorizedException("Invalid credentials");
         }
 
         if (Boolean.FALSE.equals(user.getEmailVerified())) {
-            throw new RuntimeException("Email not verified. Please verify your email before logging in.");
+            throw new ForbiddenOperationException("Email not verified. Please verify your email before logging in.");
         }
 
         String role = resolveRole(normalizedEmail, user.getRole());
@@ -101,14 +105,14 @@ public class AuthService {
 
     public LoginResponse refreshToken(String refreshToken) {
         RefreshToken token = refreshTokenRepository.findByToken(refreshToken)
-                .orElseThrow(() -> new RuntimeException("Invalid refresh token"));
+                .orElseThrow(() -> new UnauthorizedException("Invalid refresh token"));
 
         if (token.getExpiryDate().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("Refresh token expired");
+            throw new UnauthorizedException("Refresh token expired");
         }
 
         User user = userRepository.findByEmail(token.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         String role = resolveRole(token.getEmail(), user.getRole());
         String newAccessToken = jwtUtil.generateToken(token.getEmail(), role);
@@ -118,11 +122,11 @@ public class AuthService {
 
     public VerificationResponse verifyEmail(String token) {
         User user = userRepository.findByVerificationToken(token)
-                .orElseThrow(() -> new RuntimeException("Invalid or expired verification token"));
+                .orElseThrow(() -> new ForbiddenOperationException("Invalid or expired verification token"));
 
         if (user.getVerificationTokenExpiry() == null
                 || user.getVerificationTokenExpiry().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("Invalid or expired verification token");
+            throw new ForbiddenOperationException("Invalid or expired verification token");
         }
 
         user.setEmailVerified(true);

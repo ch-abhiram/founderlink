@@ -141,7 +141,8 @@ This brings up PostgreSQL, Redis, RabbitMQ, Config Server, Eureka Server, API Ga
 | RabbitMQ Management UI | `15672` |
 | Config Server | `18888` |
 | Eureka Dashboard | `18761` |
-| API Gateway | `18080` |
+| API Gateway | `19080` |
+| SonarQube | `19000` |
 
 ## Data Notes
 
@@ -177,6 +178,62 @@ Windows PowerShell:
 cd auth-service
 .\mvnw.cmd test
 ```
+
+## SonarQube
+
+The repo includes local SonarQube support through Docker Compose plus a root [sonar-project.properties](/d:/CAPGEMINI/founderlink/sonar-project.properties) file that scans all Spring Boot services together.
+
+### Start SonarQube
+
+```bash
+docker compose up -d postgres sonarqube
+```
+
+Open [http://localhost:19000](http://localhost:19000). On first login, SonarQube typically uses:
+
+- username: `admin`
+- password: `admin`
+
+After logging in, create a project token in SonarQube and export it as `SONAR_TOKEN`.
+
+### Build Before Scanning
+
+For a fuller Java analysis, build the services first so SonarQube can use compiled bytecode and test reports. The root config is intentionally tolerant for a first scan, so you can still run SonarQube before every service has been built.
+
+```powershell
+mvn -q -s .\maven-settings.xml -f .\api-gateway\pom.xml test
+mvn -q -s .\maven-settings.xml -f .\auth-service\pom.xml test
+mvn -q -s .\maven-settings.xml -f .\config-server\pom.xml test
+mvn -q -s .\maven-settings.xml -f .\eureka-server\pom.xml test
+mvn -q -s .\maven-settings.xml -f .\investment-service\pom.xml test
+mvn -q -s .\maven-settings.xml -f .\messaging-service\pom.xml test
+mvn -q -s .\maven-settings.xml -f .\notification-service\pom.xml test
+mvn -q -s .\maven-settings.xml -f .\startup-service\pom.xml test
+mvn -q -s .\maven-settings.xml -f .\team-service\pom.xml test
+mvn -q -s .\maven-settings.xml -f .\user-service\pom.xml test
+```
+
+### Run the Scan
+
+If you have `sonar-scanner` installed locally:
+
+```powershell
+$env:SONAR_TOKEN="your-token"
+sonar-scanner -Dsonar.host.url=http://localhost:19000 -Dsonar.token=$env:SONAR_TOKEN
+```
+
+If you prefer Docker instead of a local scanner:
+
+```powershell
+$env:SONAR_TOKEN="your-token"
+docker run --rm `
+  -e SONAR_HOST_URL="http://host.docker.internal:19000" `
+  -e SONAR_TOKEN="$env:SONAR_TOKEN" `
+  -v "${PWD}:/usr/src" `
+  sonarsource/sonar-scanner-cli
+```
+
+This setup lets you track bugs, vulnerabilities, code smells, and duplication across the full microservices repo from one SonarQube project. Test and coverage data become richer after the individual services are built and tested.
 
 ## What Makes This Project Strong
 
@@ -251,4 +308,3 @@ If this project keeps growing, a strong direction would be:
 - document service-level environment variables clearly
 - keep the gateway as the main client entry point
 - add architecture decisions as the platform evolves
-

@@ -65,7 +65,7 @@ class AuthServiceTest {
 
         RegisterResponse response = authService.register("test@test.com", "password", "ROLE_FOUNDER");
 
-        assertEquals("User registered successfully", response.getMessage());
+        assertEquals("User registered successfully. Please verify your email before logging in.", response.getMessage());
         assertEquals("test@test.com", response.getEmail());
         assertEquals("ROLE_FOUNDER", response.getRole());
         verify(userRepository, times(1)).save(any(User.class));

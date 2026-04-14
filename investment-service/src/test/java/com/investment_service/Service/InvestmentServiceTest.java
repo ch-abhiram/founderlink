@@ -6,6 +6,7 @@ import com.investment_service.DTO.StartupDto;
 import com.investment_service.Entity.Investment;
 import com.investment_service.Feign.StartupClient;
 import com.investment_service.Repository.InvestmentRepository;
+import feign.FeignException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -95,13 +96,28 @@ class InvestmentServiceTest {
 
     @Test
     void testInvest_StartupNotFound() {
-        when(startupClient.getStartup(10L)).thenThrow(new RuntimeException("Not found"));
+        FeignException.NotFound notFound = mock(FeignException.NotFound.class);
+        when(startupClient.getStartup(10L)).thenThrow(notFound);
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
             investmentService.invest(createRequest, "investor@test.com");
         });
 
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    void testInvest_StartupServiceUnavailable() {
+        FeignException upstreamError = mock(FeignException.class);
+        when(startupClient.getStartup(10L)).thenThrow(upstreamError);
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
+            investmentService.invest(createRequest, "investor@test.com");
+        });
+
+        assertEquals(HttpStatus.BAD_GATEWAY, exception.getStatusCode());
+        assertEquals("Unable to load startup details", exception.getReason());
         verify(repository, never()).save(any());
     }
 
@@ -131,6 +147,23 @@ class InvestmentServiceTest {
         });
 
         assertEquals(HttpStatus.FORBIDDEN, exception.getStatusCode());
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    void testUpdateStatus_StartupServiceUnavailable() {
+        setupSecurityContext("founder@test.com", "FOUNDER");
+
+        FeignException upstreamError = mock(FeignException.class);
+        when(repository.findById(1L)).thenReturn(Optional.of(investment));
+        when(startupClient.getStartup(10L)).thenThrow(upstreamError);
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
+            investmentService.updateStatus(1L, "COMPLETED");
+        });
+
+        assertEquals(HttpStatus.BAD_GATEWAY, exception.getStatusCode());
+        assertEquals("Unable to load startup details", exception.getReason());
         verify(repository, never()).save(any());
     }
 }

@@ -10,6 +10,7 @@ import com.messaging_service.Entity.Message;
 import com.messaging_service.Feign.StartupClient;
 import com.messaging_service.Repository.ConversationRepository;
 import com.messaging_service.Repository.MessageRepository;
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -45,8 +46,10 @@ public class MessagingService {
         StartupDto startup;
         try {
             startup = startupClient.getStartup(request.getStartupId());
-        } catch (Exception e) {
+        } catch (FeignException.NotFound e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Startup not found");
+        } catch (FeignException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Unable to load startup details");
         }
 
         String participantEmail;
@@ -109,8 +112,10 @@ public class MessagingService {
         StartupDto startup;
         try {
             startup = startupClient.getStartup(startupId);
-        } catch (Exception e) {
+        } catch (FeignException.NotFound e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Startup not found");
+        } catch (FeignException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Unable to load startup details");
         }
 
         if (!startup.getFounderEmail().equals(currentUser)) {
@@ -152,8 +157,10 @@ public class MessagingService {
         StartupDto startup;
         try {
             startup = startupClient.getStartup(conversation.getStartupId());
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error resolving startup");
+        } catch (FeignException.NotFound e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Startup not found");
+        } catch (FeignException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Unable to load startup details");
         }
         
         if (!startup.getFounderEmail().equals(currentUser)) {

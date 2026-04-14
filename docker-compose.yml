@@ -4,7 +4,7 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-root}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: postgres
     ports:
       - "${POSTGRES_HOST_PORT:-15432}:5432"
@@ -38,6 +38,9 @@ services:
   rabbitmq:
     image: rabbitmq:3-management-alpine
     restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
     ports:
       - "${RABBITMQ_HOST_PORT:-15673}:5672"
       - "${RABBITMQ_MANAGEMENT_HOST_PORT:-15672}:15672"
@@ -48,6 +51,33 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
+    networks:
+      - founderlink
+
+  zipkin:
+    image: openzipkin/zipkin:3
+    restart: unless-stopped
+    ports:
+      - "${ZIPKIN_HOST_PORT:-19411}:9411"
+    networks:
+      - founderlink
+
+  sonarqube:
+    image: sonarqube:community
+    restart: unless-stopped
+    environment:
+      SONAR_JDBC_URL: jdbc:postgresql://postgres:5432/sonar_db
+      SONAR_JDBC_USERNAME: ${POSTGRES_USER:-postgres}
+      SONAR_JDBC_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "${SONARQUBE_HOST_PORT:-19000}:9000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube_logs:/opt/sonarqube/logs
     networks:
       - founderlink
 
@@ -101,10 +131,11 @@ services:
       EUREKA_DEFAULT_ZONE: http://eureka-server:8761/eureka/
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      MANAGEMENT_TRACING_ENABLED: "false"
-      JWT_SECRET: ${JWT_SECRET:-mysecretkeymysecretkeymysecretkey}
+      MANAGEMENT_TRACING_ENABLED: "true"
+      ZIPKIN_ENDPOINT: http://zipkin:9411/api/v2/spans
+      JWT_SECRET: ${JWT_SECRET}
     ports:
-      - "${API_GATEWAY_HOST_PORT:-18080}:8083"
+      - "${API_GATEWAY_HOST_PORT:-19080}:8083"
     depends_on:
       config-server:
         condition: service_healthy
@@ -112,6 +143,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      zipkin:
+        condition: service_started
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O - http://localhost:8083/actuator/health | grep UP || exit 1"]
       interval: 15s
@@ -130,15 +163,16 @@ services:
       EUREKA_DEFAULT_ZONE: http://eureka-server:8761/eureka/
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/auth_db
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-root}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       REDIS_HOST: redis
       REDIS_PORT: 6379
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
-      RABBITMQ_USERNAME: guest
-      RABBITMQ_PASSWORD: guest
-      MANAGEMENT_TRACING_ENABLED: "false"
-      JWT_SECRET: ${JWT_SECRET:-mysecretkeymysecretkeymysecretkey}
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+      MANAGEMENT_TRACING_ENABLED: "true"
+      ZIPKIN_ENDPOINT: http://zipkin:9411/api/v2/spans
+      JWT_SECRET: ${JWT_SECRET}
     depends_on:
       postgres:
         condition: service_healthy
@@ -150,6 +184,8 @@ services:
         condition: service_healthy
       eureka-server:
         condition: service_healthy
+      zipkin:
+        condition: service_started
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O - http://localhost:8089/actuator/health | grep UP || exit 1"]
       interval: 15s
@@ -168,8 +204,9 @@ services:
       EUREKA_DEFAULT_ZONE: http://eureka-server:8761/eureka/
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/user_db
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-root}
-      MANAGEMENT_TRACING_ENABLED: "false"
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      MANAGEMENT_TRACING_ENABLED: "true"
+      ZIPKIN_ENDPOINT: http://zipkin:9411/api/v2/spans
     depends_on:
       postgres:
         condition: service_healthy
@@ -177,6 +214,8 @@ services:
         condition: service_healthy
       eureka-server:
         condition: service_healthy
+      zipkin:
+        condition: service_started
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O - http://localhost:9000/actuator/health | grep UP || exit 1"]
       interval: 15s
@@ -195,12 +234,13 @@ services:
       EUREKA_DEFAULT_ZONE: http://eureka-server:8761/eureka/
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/startup_db
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-root}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
-      RABBITMQ_USERNAME: guest
-      RABBITMQ_PASSWORD: guest
-      MANAGEMENT_TRACING_ENABLED: "false"
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+      MANAGEMENT_TRACING_ENABLED: "true"
+      ZIPKIN_ENDPOINT: http://zipkin:9411/api/v2/spans
     depends_on:
       postgres:
         condition: service_healthy
@@ -210,6 +250,8 @@ services:
         condition: service_healthy
       eureka-server:
         condition: service_healthy
+      zipkin:
+        condition: service_started
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O - http://localhost:8084/actuator/health | grep UP || exit 1"]
       interval: 15s
@@ -228,12 +270,13 @@ services:
       EUREKA_DEFAULT_ZONE: http://eureka-server:8761/eureka/
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/investment_db
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-root}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
-      RABBITMQ_USERNAME: guest
-      RABBITMQ_PASSWORD: guest
-      MANAGEMENT_TRACING_ENABLED: "false"
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+      MANAGEMENT_TRACING_ENABLED: "true"
+      ZIPKIN_ENDPOINT: http://zipkin:9411/api/v2/spans
     depends_on:
       postgres:
         condition: service_healthy
@@ -243,6 +286,8 @@ services:
         condition: service_healthy
       eureka-server:
         condition: service_healthy
+      zipkin:
+        condition: service_started
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O - http://localhost:8088/actuator/health | grep UP || exit 1"]
       interval: 15s
@@ -261,12 +306,13 @@ services:
       EUREKA_DEFAULT_ZONE: http://eureka-server:8761/eureka/
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/team_db
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-root}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
-      RABBITMQ_USERNAME: guest
-      RABBITMQ_PASSWORD: guest
-      MANAGEMENT_TRACING_ENABLED: "false"
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+      MANAGEMENT_TRACING_ENABLED: "true"
+      ZIPKIN_ENDPOINT: http://zipkin:9411/api/v2/spans
     depends_on:
       postgres:
         condition: service_healthy
@@ -276,6 +322,8 @@ services:
         condition: service_healthy
       eureka-server:
         condition: service_healthy
+      zipkin:
+        condition: service_started
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O - http://localhost:8085/actuator/health | grep UP || exit 1"]
       interval: 15s
@@ -294,12 +342,13 @@ services:
       EUREKA_DEFAULT_ZONE: http://eureka-server:8761/eureka/
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/messaging_db
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-root}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
-      RABBITMQ_USERNAME: guest
-      RABBITMQ_PASSWORD: guest
-      MANAGEMENT_TRACING_ENABLED: "false"
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+      MANAGEMENT_TRACING_ENABLED: "true"
+      ZIPKIN_ENDPOINT: http://zipkin:9411/api/v2/spans
     depends_on:
       postgres:
         condition: service_healthy
@@ -309,6 +358,8 @@ services:
         condition: service_healthy
       eureka-server:
         condition: service_healthy
+      zipkin:
+        condition: service_started
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O - http://localhost:8087/actuator/health | grep UP || exit 1"]
       interval: 15s
@@ -327,12 +378,13 @@ services:
       EUREKA_DEFAULT_ZONE: http://eureka-server:8761/eureka/
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/notification_db
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-root}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
-      RABBITMQ_USERNAME: guest
-      RABBITMQ_PASSWORD: guest
-      MANAGEMENT_TRACING_ENABLED: "false"
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+      MANAGEMENT_TRACING_ENABLED: "true"
+      ZIPKIN_ENDPOINT: http://zipkin:9411/api/v2/spans
     depends_on:
       postgres:
         condition: service_healthy
@@ -342,6 +394,8 @@ services:
         condition: service_healthy
       eureka-server:
         condition: service_healthy
+      zipkin:
+        condition: service_started
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O - http://localhost:8086/actuator/health | grep UP || exit 1"]
       interval: 15s
@@ -355,6 +409,9 @@ volumes:
   postgres_data:
   redis_data:
   rabbitmq_data:
+  sonarqube_data:
+  sonarqube_extensions:
+  sonarqube_logs:
 
 networks:
   founderlink:

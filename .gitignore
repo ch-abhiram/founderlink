@@ -2,6 +2,13 @@
 **/target/
 *.class
 *.log
+.scannerwork/
+.sonar/
+
+# Local environment files
+.env
+.env.local
+.env.*.local
 
 # Local Maven cache and settings
 .m2/
@@ -32,3 +39,6 @@ passphrase.pub
 # OS generated files
 .DS_Store
 Thumbs.db
+
+# Local docs
+docs/

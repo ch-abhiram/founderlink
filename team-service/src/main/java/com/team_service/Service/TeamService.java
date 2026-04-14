@@ -14,12 +14,12 @@ import org.springframework.web.server.ResponseStatusException;
 import com.team_service.Config.RabbitConfig;
 import com.team_service.DTO.InviteMemberRequest;
 import com.team_service.DTO.StartupDto;
-import com.team_service.DTO.UserDto;
 import com.team_service.Entity.TeamMember;
 import com.team_service.Feign.StartupClient;
 import com.team_service.Feign.UserClient;
 import com.team_service.Repository.TeamMemberRepository;
 
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -37,19 +37,22 @@ public class TeamService {
         StartupDto startup;
         try {
             startup = startupClient.getStartup(request.getStartupId());
-        } catch (Exception e) {
+        } catch (FeignException.NotFound e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Startup not found");
+        } catch (FeignException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Unable to load startup details");
         }
 
         if (!startup.getFounderEmail().equals(currentUser)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only founder can invite members");
         }
 
-        UserDto invitedUser;
         try {
-            invitedUser = userClient.getUserByEmail(request.getUserEmail());
-        } catch (Exception e) {
+            userClient.getUserByEmail(request.getUserEmail());
+        } catch (FeignException.NotFound e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User to invite not found");
+        } catch (FeignException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Unable to load invited user details");
         }
 
         Optional<TeamMember> existing = repository.findByStartupIdAndUserEmail(request.getStartupId(), request.getUserEmail());
@@ -118,8 +121,10 @@ public class TeamService {
         StartupDto startup;
         try {
             startup = startupClient.getStartup(member.getStartupId());
-        } catch (Exception e) {
+        } catch (FeignException.NotFound e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Startup not found");
+        } catch (FeignException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Unable to load startup details");
         }
 
         if (!startup.getFounderEmail().equals(currentUser) && !member.getUserEmail().equals(currentUser)) {

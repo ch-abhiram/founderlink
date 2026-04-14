@@ -2,7 +2,6 @@ package com.startup_service.DTO;
 
 import lombok.Data;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Data
 public class StartupResponseDTO {

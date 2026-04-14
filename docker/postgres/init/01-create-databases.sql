@@ -5,3 +5,4 @@ CREATE DATABASE investment_db;
 CREATE DATABASE team_db;
 CREATE DATABASE messaging_db;
 CREATE DATABASE notification_db;
+CREATE DATABASE sonar_db;

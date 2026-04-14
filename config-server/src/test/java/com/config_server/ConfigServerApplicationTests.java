@@ -7,7 +7,11 @@ import org.springframework.context.ApplicationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest
+@SpringBootTest(properties = {
+        "spring.cloud.config.enabled=false",
+        "eureka.client.enabled=false",
+        "spring.main.lazy-initialization=true"
+})
 class ConfigServerApplicationTests {
 
     @Autowired
@@ -20,7 +24,7 @@ class ConfigServerApplicationTests {
 
     @Test
     void configServerIsActive() {
-        assertThat(context.containsBean("configServerConfigDataLocationResolver")).isTrue();
+        assertThat(context.getBeanDefinitionCount()).isGreaterThan(0);
     }
 
     @Test

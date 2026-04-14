@@ -17,6 +17,7 @@ import com.investment_service.Entity.Investment;
 import com.investment_service.Feign.StartupClient;
 import com.investment_service.Repository.InvestmentRepository;
 
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -32,8 +33,10 @@ public class InvestmentService {
         StartupDto startup;
         try {
             startup = startupClient.getStartup(request.getStartupId());
-        } catch (Exception e) {
+        } catch (FeignException.NotFound e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Startup not found");
+        } catch (FeignException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Unable to load startup details");
         }
 
         Investment investment = new Investment();
@@ -68,8 +71,10 @@ public class InvestmentService {
         StartupDto startup;
         try {
             startup = startupClient.getStartup(startupId);
-        } catch (Exception e) {
+        } catch (FeignException.NotFound e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Startup not found");
+        } catch (FeignException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Unable to load startup details");
         }
         
         String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -90,15 +95,17 @@ public class InvestmentService {
         StartupDto startup;
         try {
             startup = startupClient.getStartup(investment.getStartupId());
-        } catch (Exception e) {
+        } catch (FeignException.NotFound e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Startup not found");
+        } catch (FeignException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Unable to load startup details");
         }
 
         String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
         boolean isAdmin = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
 
-        if (!status.equals("COMPLETED") && !startup.getFounderEmail().equals(currentUser) && !isAdmin) {
+        if (!startup.getFounderEmail().equals(currentUser) && !isAdmin) {
              throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only founder or admin can update investment status");
         }
 

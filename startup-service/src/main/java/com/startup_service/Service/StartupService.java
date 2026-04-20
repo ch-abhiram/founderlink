@@ -25,6 +25,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class StartupService {
 
+    private static final List<String> ALLOWED_STATUSES = List.of("PENDING", "OPEN", "CLOSED", "REJECTED");
+
     private final StartupRepository repository;
     private final Wrapper wrapper;
     private final RabbitTemplate rabbitTemplate;
@@ -109,7 +111,7 @@ public class StartupService {
 
     public Startup updateStatus(Long id, String status) {
         Startup existing = getById(id);
-        existing.setStatus(status.toUpperCase());
+        existing.setStatus(normalizeStatus(status));
         return repository.save(existing);
     }
 
@@ -131,5 +133,13 @@ public class StartupService {
 
     public List<String> getFollowers(Long id) {
         return getById(id).getFollowers();
+    }
+
+    private String normalizeStatus(String status) {
+        String normalized = status == null ? "" : status.trim().toUpperCase();
+        if (!ALLOWED_STATUSES.contains(normalized)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid startup status");
+        }
+        return normalized;
     }
 }

@@ -108,6 +108,7 @@ public class AuthService {
                 .orElseThrow(() -> new UnauthorizedException("Invalid refresh token"));
 
         if (token.getExpiryDate().isBefore(LocalDateTime.now())) {
+            refreshTokenRepository.deleteByToken(refreshToken);
             throw new UnauthorizedException("Refresh token expired");
         }
 
@@ -116,8 +117,10 @@ public class AuthService {
 
         String role = resolveRole(token.getEmail(), user.getRole());
         String newAccessToken = jwtUtil.generateToken(token.getEmail(), role);
+        String newRefreshToken = createRefreshToken(token.getEmail());
+        refreshTokenRepository.delete(token);
 
-        return new LoginResponse(newAccessToken, refreshToken, token.getEmail(), role);
+        return new LoginResponse(newAccessToken, newRefreshToken, token.getEmail(), role);
     }
 
     public VerificationResponse verifyEmail(String token) {

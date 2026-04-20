@@ -24,6 +24,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class InvestmentService {
 
+    private static final List<String> ALLOWED_STATUSES = List.of("PENDING", "SUCCESS", "FAILED", "COMPLETED", "APPROVED", "REJECTED");
+
     private final InvestmentRepository repository;
     private final StartupClient startupClient;
     private final RabbitTemplate rabbitTemplate;
@@ -109,7 +111,7 @@ public class InvestmentService {
              throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only founder or admin can update investment status");
         }
 
-        investment.setStatus(status.toUpperCase());
+        investment.setStatus(normalizeStatus(status));
         Investment saved = repository.save(investment);
 
         Map<String, Object> event = new HashMap<>();
@@ -125,5 +127,13 @@ public class InvestmentService {
         );
 
         return saved;
+    }
+
+    private String normalizeStatus(String status) {
+        String normalized = status == null ? "" : status.trim().toUpperCase();
+        if (!ALLOWED_STATUSES.contains(normalized)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid investment status");
+        }
+        return normalized;
     }
 }

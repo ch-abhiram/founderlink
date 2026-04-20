@@ -27,11 +27,16 @@ public class GatewayAuthFilter extends OncePerRequestFilter {
             UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                     email,
                     null,
-                    Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()))
+                    Collections.singletonList(new SimpleGrantedAuthority(normalizeRole(role)))
             );
             SecurityContextHolder.getContext().setAuthentication(auth);
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private String normalizeRole(String role) {
+        String trimmedRole = role.trim().toUpperCase();
+        return trimmedRole.startsWith("ROLE_") ? trimmedRole : "ROLE_" + trimmedRole;
     }
 }

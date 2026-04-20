@@ -57,6 +57,7 @@ class AuthServiceTest {
         mockUser.setEmail("test@test.com");
         mockUser.setPassword("encodedPassword");
         mockUser.setRole("ROLE_FOUNDER");
+        mockUser.setEmailVerified(true);
     }
 
     @Test
@@ -112,5 +113,26 @@ class AuthServiceTest {
         });
 
         assertEquals("Refresh token expired", exception.getMessage());
+        verify(refreshTokenRepository).deleteByToken("mockRefreshToken");
+    }
+
+    @Test
+    void testRefreshTokenRotatesOnSuccess() {
+        RefreshToken token = new RefreshToken();
+        token.setToken("mockRefreshToken");
+        token.setEmail("test@test.com");
+        token.setExpiryDate(LocalDateTime.now().plusDays(1));
+
+        when(refreshTokenRepository.findByToken("mockRefreshToken")).thenReturn(Optional.of(token));
+        when(userRepository.findByEmail("test@test.com")).thenReturn(Optional.of(mockUser));
+        when(userServiceClientWrapper.getUserRole("test@test.com")).thenReturn("ROLE_FOUNDER");
+        when(jwtUtil.generateToken("test@test.com", "ROLE_FOUNDER")).thenReturn("newAccessToken");
+
+        LoginResponse response = authService.refreshToken("mockRefreshToken");
+
+        assertEquals("newAccessToken", response.getAccessToken());
+        assertNotEquals("mockRefreshToken", response.getRefreshToken());
+        verify(refreshTokenRepository).save(any(RefreshToken.class));
+        verify(refreshTokenRepository).delete(token);
     }
 }

@@ -2,6 +2,7 @@ package com.api_gateway.Util;
 
 import java.security.Key;
 
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -15,8 +16,18 @@ public class JwtUtil {
     @Value("${jwt.secret}")
     private String secret;
 
+    private Key signingKey;
+
+    @PostConstruct
+    void init() {
+        if (secret == null || secret.isBlank()) {
+            throw new IllegalStateException("JWT secret must be configured");
+        }
+        this.signingKey = Keys.hmacShaKeyFor(secret.getBytes());
+    }
+
     private Key getKey() {
-        return Keys.hmacShaKeyFor(secret.getBytes());
+        return signingKey;
     }
 
     public Claims extractAllClaims(String token) {

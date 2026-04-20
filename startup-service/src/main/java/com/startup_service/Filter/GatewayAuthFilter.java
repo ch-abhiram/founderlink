@@ -22,9 +22,14 @@ public class GatewayAuthFilter extends OncePerRequestFilter {
         String role = request.getHeader("X-User-Role");
         if (email != null && role != null) {
             UsernamePasswordAuthenticationToken auth =
-                new UsernamePasswordAuthenticationToken(email, null, List.of(new SimpleGrantedAuthority(role)));
+                new UsernamePasswordAuthenticationToken(email, null, List.of(new SimpleGrantedAuthority(normalizeRole(role))));
             SecurityContextHolder.getContext().setAuthentication(auth);
         }
         chain.doFilter(request, response);
+    }
+
+    private String normalizeRole(String role) {
+        String trimmedRole = role.trim().toUpperCase();
+        return trimmedRole.startsWith("ROLE_") ? trimmedRole : "ROLE_" + trimmedRole;
     }
 }

@@ -4,6 +4,7 @@ package com.user_service.Service;
 import org.springframework.stereotype.Service;
 
 import com.user_service.Entity.User;
+import com.user_service.Exception.ConflictException;
 import com.user_service.Exception.UserNotFoundException;
 import com.user_service.Repository.UserRepository;
 
@@ -23,7 +24,7 @@ public class UserService {
 
     public User createUser(String email, String name, String role) {
         if (userRepository.findByEmail(email).isPresent()) {
-            throw new RuntimeException("User already exists: " + email);
+            throw new ConflictException("User already exists: " + email);
         }
         User user = new User();
         user.setEmail(email);

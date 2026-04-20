@@ -29,7 +29,7 @@ public class User {
     private boolean enabled = true;
 
     @Column(name = "email_verified")
-    private Boolean emailVerified = true;
+    private Boolean emailVerified = false;
 
     @Column(name = "verification_token")
     private String verificationToken;

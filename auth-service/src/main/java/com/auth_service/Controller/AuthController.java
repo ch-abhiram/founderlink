@@ -12,10 +12,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.auth_service.DTO.AuthRequest;
+import com.auth_service.DTO.LoginRequest;
 import com.auth_service.DTO.LoginResponse;
+import com.auth_service.DTO.RegisterRequest;
 import com.auth_service.DTO.RegisterResponse;
 import com.auth_service.DTO.VerificationResponse;
+import com.auth_service.Exception.UnauthorizedException;
 import com.auth_service.Service.AuthService;
 
 import lombok.RequiredArgsConstructor;
@@ -28,7 +30,7 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public RegisterResponse register(@RequestBody @Valid AuthRequest request) {
+    public RegisterResponse register(@RequestBody @Valid RegisterRequest request) {
         return authService.register(
                 request.getEmail(),
                 request.getPassword(),
@@ -37,7 +39,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public LoginResponse login(@RequestBody @Valid AuthRequest request) {
+    public LoginResponse login(@RequestBody @Valid LoginRequest request) {
         return authService.login(request.getEmail(), request.getPassword());
     }
 
@@ -59,7 +61,7 @@ public class AuthController {
     @PostMapping("/logout")
     public String logout(@RequestHeader(value = "Authorization", required = false) String authHeader) {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            throw new RuntimeException("Missing or invalid Authorization header");
+            throw new UnauthorizedException("Missing or invalid Authorization header");
         }
         String token = authHeader.substring(7);
         authService.logout(token);

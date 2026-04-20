@@ -9,4 +9,5 @@ import com.auth_service.Entity.RefreshToken;
 public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long> {
     Optional<RefreshToken> findByToken(String token);
     void deleteByEmail(String email);
+    void deleteByToken(String token);
 }

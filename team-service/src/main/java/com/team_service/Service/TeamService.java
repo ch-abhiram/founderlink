@@ -26,6 +26,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class TeamService {
 
+    private static final List<String> ALLOWED_STATUSES = List.of("PENDING", "ACCEPTED", "REJECTED");
+
     private final TeamMemberRepository repository;
     private final StartupClient startupClient;
     private final UserClient userClient;
@@ -90,7 +92,7 @@ public class TeamService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only update your own invites");
         }
 
-        member.setStatus(status.toUpperCase());
+        member.setStatus(normalizeStatus(status));
         TeamMember saved = repository.save(member);
 
         Map<String, Object> event = new HashMap<>();
@@ -132,5 +134,13 @@ public class TeamService {
         }
 
         repository.delete(member);
+    }
+
+    private String normalizeStatus(String status) {
+        String normalized = status == null ? "" : status.trim().toUpperCase();
+        if (!ALLOWED_STATUSES.contains(normalized)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid invite status");
+        }
+        return normalized;
     }
 }

@@ -8,6 +8,9 @@ import java.util.List;
 
 public class StartupSpecification {
 
+    private StartupSpecification() {
+    }
+
     public static Specification<Startup> search(String category, String status, String currentRound) {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();

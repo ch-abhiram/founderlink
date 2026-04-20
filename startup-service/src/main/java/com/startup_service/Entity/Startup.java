@@ -7,17 +7,19 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import org.hibernate.annotations.CreationTimestamp;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import jakarta.persistence.ElementCollection;
 import java.util.List;
 import java.util.ArrayList;
 
 @Entity
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
-@AllArgsConstructor
+@EqualsAndHashCode(of = "id")
 public class Startup {
 
     @Id
@@ -46,5 +48,6 @@ public class Startup {
     private List<String> followers = new ArrayList<>();
 
     @CreationTimestamp
+    @jakarta.persistence.Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 }

@@ -135,4 +135,64 @@ class AuthServiceTest {
         verify(refreshTokenRepository).save(any(RefreshToken.class));
         verify(refreshTokenRepository).delete(token);
     }
+
+    @Test
+    void testLoginEmailNotVerified() {
+        mockUser.setEmailVerified(false);
+        when(userRepository.findByEmail("test@test.com")).thenReturn(Optional.of(mockUser));
+        when(passwordEncoder.matches("password", "encodedPassword")).thenReturn(true);
+
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+            authService.login("test@test.com", "password");
+        });
+
+        assertEquals("Email not verified. Please verify your email before logging in.", exception.getMessage());
+    }
+
+    @Test
+    void testVerifyEmailSuccess() {
+        mockUser.setVerificationToken("token123");
+        mockUser.setVerificationTokenExpiry(LocalDateTime.now().plusHours(1));
+        when(userRepository.findByVerificationToken("token123")).thenReturn(Optional.of(mockUser));
+
+        var response = authService.verifyEmail("token123");
+
+        assertEquals("Email verified successfully", response.getMessage());
+        assertEquals("test@test.com", response.getEmail());
+        assertTrue(mockUser.getEmailVerified());
+        verify(userRepository).save(mockUser);
+    }
+
+    @Test
+    void testVerifyEmailExpiredToken() {
+        mockUser.setVerificationToken("token123");
+        mockUser.setVerificationTokenExpiry(LocalDateTime.now().minusHours(1));
+        when(userRepository.findByVerificationToken("token123")).thenReturn(Optional.of(mockUser));
+
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+            authService.verifyEmail("token123");
+        });
+
+        assertEquals("Invalid or expired verification token", exception.getMessage());
+    }
+
+    @Test
+    void testVerifyEmailInvalidToken() {
+        when(userRepository.findByVerificationToken("missing-token")).thenReturn(Optional.empty());
+
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+            authService.verifyEmail("missing-token");
+        });
+
+        assertEquals("Invalid or expired verification token", exception.getMessage());
+    }
+
+    @Test
+    void testLogoutBlacklistsToken() {
+        when(jwtUtil.getRemainingTime("access-token")).thenReturn(12345L);
+
+        authService.logout("access-token");
+
+        verify(redisService).blacklistToken("access-token", 12345L);
+    }
 }

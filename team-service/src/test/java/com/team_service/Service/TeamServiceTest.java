@@ -22,6 +22,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -128,5 +129,34 @@ class TeamServiceTest {
 
         assertEquals("ACCEPTED", result.getStatus());
         verify(rabbitTemplate, times(1)).convertAndSend(eq(RabbitConfig.EXCHANGE), eq(RabbitConfig.ROUTING_KEY_STATUS), any(Map.class));
+    }
+
+    @Test
+    void testGetStartupTeam() {
+        when(repository.findByStartupId(1L)).thenReturn(List.of(member));
+
+        List<TeamMember> result = teamService.getStartupTeam(1L);
+
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void testGetMyInvites() {
+        when(repository.findByUserEmail("user@test.com")).thenReturn(List.of(member));
+
+        List<TeamMember> result = teamService.getMyInvites("user@test.com");
+
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void testRemoveMemberFounderAllowed() {
+        setupSecurityContext("founder@test.com");
+        when(repository.findById(10L)).thenReturn(Optional.of(member));
+        when(startupClient.getStartup(1L)).thenReturn(startupDto);
+
+        teamService.removeMember(10L);
+
+        verify(repository).delete(member);
     }
 }

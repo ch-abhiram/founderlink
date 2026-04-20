@@ -6,9 +6,11 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,9 +19,10 @@ import jakarta.persistence.ElementCollection;
 
 @Entity
 @Table(name = "users")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
-@AllArgsConstructor
+@EqualsAndHashCode(of = "id")
 public class User {
 
     @Id
@@ -44,5 +47,7 @@ public class User {
     @ElementCollection
     private List<String> portfolioLinks;
 
-    private LocalDateTime createdAt = LocalDateTime.now();
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 }

@@ -3,6 +3,7 @@ package com.startup_service.Service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -11,6 +12,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -20,7 +22,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.startup_service.DTO.CreateStartupRequest;
@@ -65,6 +71,13 @@ class StartupServiceTest {
         mockStartup.setId(1L);
         mockStartup.setName("FounderLink");
         mockStartup.setFounderEmail("founder@test.com");
+        mockStartup.setFollowers(new java.util.ArrayList<>());
+    }
+
+    private void setupSecurityContext(String email, String role) {
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(email, null, List.of(() -> role))
+        );
     }
 
     @Test
@@ -117,5 +130,88 @@ class StartupServiceTest {
         assertThrows(ResponseStatusException.class, () -> {
             startupService.getById(2L);
         });
+    }
+
+    @Test
+    void testGetAllReturnsPage() {
+        when(repository.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(List.of(mockStartup)));
+
+        var result = startupService.getAll(Pageable.unpaged());
+
+        assertEquals(1, result.getTotalElements());
+    }
+
+    @Test
+    void testSearchDelegatesToRepository() {
+        when(repository.findAll(any(org.springframework.data.jpa.domain.Specification.class), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(mockStartup)));
+
+        var result = startupService.search("Tech", "OPEN", "Seed", Pageable.unpaged());
+
+        assertEquals(1, result.getTotalElements());
+    }
+
+    @Test
+    void testUpdateSuccess() {
+        setupSecurityContext("founder@test.com", "ROLE_FOUNDER");
+        when(repository.findById(1L)).thenReturn(Optional.of(mockStartup));
+        when(repository.save(any(Startup.class))).thenAnswer(i -> i.getArgument(0));
+
+        var request = new com.startup_service.DTO.UpdateStartupRequest();
+        request.setDescription("Updated");
+
+        Startup updated = startupService.update(1L, request);
+
+        assertEquals("Updated", updated.getDescription());
+    }
+
+    @Test
+    void testDeleteFounderAllowed() {
+        setupSecurityContext("founder@test.com", "ROLE_FOUNDER");
+        when(repository.findById(1L)).thenReturn(Optional.of(mockStartup));
+
+        startupService.delete(1L);
+
+        verify(repository).deleteById(1L);
+    }
+
+    @Test
+    void testUpdateStatusRejectsInvalidValue() {
+        when(repository.findById(1L)).thenReturn(Optional.of(mockStartup));
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
+            startupService.updateStatus(1L, "INVALID");
+        });
+
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+    }
+
+    @Test
+    void testFollowAddsFollower() {
+        when(repository.findById(1L)).thenReturn(Optional.of(mockStartup));
+
+        startupService.follow(1L, "user@test.com");
+
+        assertEquals(List.of("user@test.com"), mockStartup.getFollowers());
+        verify(repository).save(mockStartup);
+    }
+
+    @Test
+    void testUnfollowRemovesFollower() {
+        mockStartup.getFollowers().add("user@test.com");
+        when(repository.findById(1L)).thenReturn(Optional.of(mockStartup));
+
+        startupService.unfollow(1L, "user@test.com");
+
+        assertTrue(mockStartup.getFollowers().isEmpty());
+        verify(repository).save(mockStartup);
+    }
+
+    @Test
+    void testGetFollowersReturnsList() {
+        mockStartup.getFollowers().add("user@test.com");
+        when(repository.findById(1L)).thenReturn(Optional.of(mockStartup));
+
+        assertEquals(List.of("user@test.com"), startupService.getFollowers(1L));
     }
 }

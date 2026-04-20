@@ -21,6 +21,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -123,5 +124,50 @@ class MessagingServiceTest {
         assertNotNull(result);
         assertEquals(10L, result.getConversationId());
         assertEquals("founder@test.com", result.getSenderEmail());
+    }
+
+    @Test
+    void testGetMessagesReturnsConversationMessages() {
+        setupSecurityContext("user@test.com");
+        Message message = new Message();
+        message.setId(100L);
+        message.setConversationId(10L);
+        message.setSenderEmail("user@test.com");
+        message.setContent("Hello world");
+
+        when(conversationRepository.findById(10L)).thenReturn(Optional.of(conversation));
+        when(messageRepository.findByConversationIdOrderByCreatedAtAsc(10L)).thenReturn(List.of(message));
+
+        List<MessageResponseDTO> result = messagingService.getMessages(10L);
+
+        assertEquals(1, result.size());
+        assertEquals("Hello world", result.get(0).getContent());
+    }
+
+    @Test
+    void testGetStartupConversationsFounderOnly() {
+        setupSecurityContext("founder@test.com");
+        when(startupClient.getStartup(1L)).thenReturn(startupDto);
+        when(conversationRepository.findByStartupId(1L)).thenReturn(List.of(conversation));
+
+        var result = messagingService.getStartupConversations(1L);
+
+        assertEquals(1, result.size());
+        assertEquals("user@test.com", result.get(0).getParticipantEmail());
+    }
+
+    @Test
+    void testGetMyConversationsMergesParticipantAndSenderViews() {
+        setupSecurityContext("user@test.com");
+        Message sentMessage = new Message();
+        sentMessage.setConversationId(10L);
+        when(conversationRepository.findByParticipantEmail("user@test.com")).thenReturn(List.of(conversation));
+        when(messageRepository.findBySenderEmailOrderByCreatedAtDesc("user@test.com")).thenReturn(List.of(sentMessage));
+        when(conversationRepository.findAllById(any())).thenReturn(List.of(conversation));
+
+        var result = messagingService.getMyConversations();
+
+        assertEquals(1, result.size());
+        assertEquals(10L, result.get(0).getId());
     }
 }

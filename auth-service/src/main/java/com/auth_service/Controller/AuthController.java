@@ -1,7 +1,5 @@
 package com.auth_service.Controller;
 
-import java.util.Map;
-
 import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.auth_service.DTO.LoginRequest;
 import com.auth_service.DTO.LoginResponse;
+import com.auth_service.DTO.RefreshRequest;
 import com.auth_service.DTO.RegisterRequest;
 import com.auth_service.DTO.RegisterResponse;
 import com.auth_service.DTO.VerificationResponse;
@@ -47,15 +46,10 @@ public class AuthController {
     public VerificationResponse verifyEmail(@RequestParam("token") String token) {
         return authService.verifyEmail(token);
     }
-    
-    @GetMapping("/test")
-    public String test() {
-        return "Auth working";
-    }
-    
+
     @PostMapping("/refresh")
-    public LoginResponse refresh(@RequestBody Map<String, String> request) {
-        return authService.refreshToken(request.get("refreshToken"));
+    public LoginResponse refresh(@RequestBody @Valid RefreshRequest request) {
+        return authService.refreshToken(request.getRefreshToken());
     }
     
     @PostMapping("/logout")

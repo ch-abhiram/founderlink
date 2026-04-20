@@ -1,6 +1,7 @@
 package com.user_service.Service;
 
 import com.user_service.Entity.User;
+import com.user_service.Exception.ConflictException;
 import com.user_service.Exception.UserNotFoundException;
 import com.user_service.Repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,6 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -72,10 +74,41 @@ class UserServiceTest {
     void testCreateUser_DuplicateEmail() {
         when(userRepository.findByEmail("test@test.com")).thenReturn(Optional.of(mockUser));
 
-        Exception exception = assertThrows(RuntimeException.class, () -> {
+        Exception exception = assertThrows(ConflictException.class, () -> {
             userService.createUser("test@test.com", "Another Name", "ROLE_FOUNDER");
         });
 
         assertTrue(exception.getMessage().contains("User already exists"));
+    }
+
+    @Test
+    void testGetAllUsers() {
+        when(userRepository.findAll()).thenReturn(List.of(mockUser));
+
+        List<User> users = userService.getAllUsers();
+
+        assertEquals(1, users.size());
+    }
+
+    @Test
+    void testUpdateUser() {
+        when(userRepository.findByEmail("test@test.com")).thenReturn(Optional.of(mockUser));
+        when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
+
+        User updated = userService.updateUser("test@test.com", "Updated", "Bio", "5 years", List.of("Java"), List.of("portfolio"));
+
+        assertEquals("Updated", updated.getName());
+        assertEquals("Bio", updated.getBio());
+        assertEquals(List.of("Java"), updated.getSkills());
+    }
+
+    @Test
+    void testUpdateUserRole() {
+        when(userRepository.findByEmail("test@test.com")).thenReturn(Optional.of(mockUser));
+        when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
+
+        User updated = userService.updateUserRole("test@test.com", "ROLE_ADMIN");
+
+        assertEquals("ROLE_ADMIN", updated.getRole());
     }
 }

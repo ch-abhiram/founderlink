@@ -15,13 +15,13 @@ public class StartupSpecification {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            if (category != null && !category.isEmpty()) {
+            if (category != null && !category.isBlank()) {
                 predicates.add(criteriaBuilder.equal(criteriaBuilder.lower(root.get("category")), category.toLowerCase()));
             }
-            if (status != null && !status.isEmpty()) {
+            if (status != null && !status.isBlank()) {
                 predicates.add(criteriaBuilder.equal(criteriaBuilder.upper(root.get("status")), status.toUpperCase()));
             }
-            if (currentRound != null && !currentRound.isEmpty()) {
+            if (currentRound != null && !currentRound.isBlank()) {
                 predicates.add(criteriaBuilder.equal(criteriaBuilder.lower(root.get("currentRound")), currentRound.toLowerCase()));
             }
 

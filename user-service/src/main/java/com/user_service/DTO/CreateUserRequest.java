@@ -16,6 +16,6 @@ public class CreateUserRequest {
     private String name;
 
     @NotNull
-    @Pattern(regexp = "ROLE_FOUNDER|ROLE_INVESTOR|ROLE_COFOUNDER|ROLE_ADMIN")
+    @Pattern(regexp = "ROLE_FOUNDER|ROLE_INVESTOR|ROLE_COFOUNDER")
     private String role;
 }

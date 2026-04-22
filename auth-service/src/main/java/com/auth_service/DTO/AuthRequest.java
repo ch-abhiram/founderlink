@@ -17,6 +17,6 @@ public class AuthRequest {
     private String password;
 
     @jakarta.validation.constraints.NotNull(message = "Role is required")
-    @jakarta.validation.constraints.Pattern(regexp="ROLE_FOUNDER|ROLE_INVESTOR|ROLE_COFOUNDER|ROLE_ADMIN", message="Invalid role")
+    @jakarta.validation.constraints.Pattern(regexp="ROLE_FOUNDER|ROLE_INVESTOR|ROLE_COFOUNDER", message="Invalid role")
     private String role;
 }

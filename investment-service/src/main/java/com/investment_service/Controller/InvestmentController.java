@@ -5,8 +5,10 @@ import java.util.stream.Collectors;
 
 import jakarta.validation.Valid;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import java.net.URI;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,7 +30,10 @@ public class InvestmentController {
     @PostMapping
     public ResponseEntity<InvestmentResponseDTO> invest(@RequestBody @Valid CreateInvestmentRequest request) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return ResponseEntity.ok(toDto(service.invest(request, email)));
+        Investment investment = service.invest(request, email);
+        return ResponseEntity
+                .created(URI.create("/investments/" + investment.getId()))
+                .body(toDto(investment));
     }
 
     @GetMapping("/me")

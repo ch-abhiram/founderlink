@@ -96,6 +96,8 @@ public class AuthService {
     }
 
     public String createRefreshToken(String email) {
+        refreshTokenRepository.deleteByEmail(email);
+
         String token = UUID.randomUUID().toString();
 
         RefreshToken refreshToken = new RefreshToken();
@@ -148,13 +150,20 @@ public class AuthService {
     public VerificationResponse verifyOtp(String email, String otp) {
         String normalizedEmail = normalizeEmail(email);
 
+        int attempts = redisService.incrementOtpAttempts(normalizedEmail);
+        if (attempts > 5) {
+            redisService.deleteOtp(normalizedEmail);
+            throw new ForbiddenOperationException("Too many failed attempts. Please request a new OTP.");
+        }
+
         String storedOtp = redisService.getOtp(normalizedEmail);
         if (storedOtp == null) {
+            redisService.clearOtpAttempts(normalizedEmail);
             throw new ForbiddenOperationException("OTP has expired or was never issued. Please request a new one.");
         }
 
         if (!storedOtp.equals(otp)) {
-            throw new ForbiddenOperationException("Invalid OTP. Please check the code and try again.");
+            throw new ForbiddenOperationException("Invalid OTP. " + (5 - attempts) + " attempts remaining.");
         }
 
         User user = userRepository.findByEmail(normalizedEmail)
@@ -164,6 +173,7 @@ public class AuthService {
         userRepository.save(user);
 
         redisService.deleteOtp(normalizedEmail);
+        redisService.clearOtpAttempts(normalizedEmail);
 
         return new VerificationResponse("Email verified successfully", normalizedEmail);
     }
@@ -171,12 +181,19 @@ public class AuthService {
     public void resendOtp(String email) {
         String normalizedEmail = normalizeEmail(email);
 
+        if (redisService.isOtpCooldownActive(normalizedEmail)) {
+            throw new ForbiddenOperationException("Please wait 2 minutes before requesting another OTP.");
+        }
+
         User user = userRepository.findByEmail(normalizedEmail)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         if (Boolean.TRUE.equals(user.getEmailVerified())) {
             throw new ConflictException("Email is already verified.");
         }
+
+        redisService.setOtpCooldown(normalizedEmail);
+        redisService.clearOtpAttempts(normalizedEmail);
 
         String otp = generateOtp();
         redisService.storeOtp(normalizedEmail, otp, otpExpiryMinutes);
@@ -186,6 +203,21 @@ public class AuthService {
     public void logout(String token) {
         long expiry = jwtUtil.getRemainingTime(token);
         redisService.blacklistToken(token, expiry);
+    }
+
+    public void changePassword(String email, String currentPassword, String newPassword) {
+        String normalizedEmail = normalizeEmail(email);
+        User user = userRepository.findByEmail(normalizedEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            throw new UnauthorizedException("Current password is incorrect");
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+
+        refreshTokenRepository.deleteByEmail(normalizedEmail);
     }
 
     private String resolveRole(String email, String authRole) {

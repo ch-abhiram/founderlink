@@ -17,6 +17,7 @@ public class RabbitConfig {
     public static final String EXCHANGE = "investment.exchange";
     public static final String ROUTING_KEY = "investment.created";
     public static final String QUEUE = "investment.queue";
+    public static final String APPROVED_QUEUE = "startup.investment.approved";
 
     @Bean
     public MessageConverter jsonMessageConverter() {
@@ -46,6 +47,11 @@ public class RabbitConfig {
     }
 
     @Bean
+    public Queue approvedQueue() {
+        return new Queue(APPROVED_QUEUE, true);
+    }
+
+    @Bean
     public Binding bindingCreated(Queue queue, DirectExchange exchange) {
         return BindingBuilder.bind(queue)
                 .to(exchange)
@@ -55,6 +61,13 @@ public class RabbitConfig {
     @Bean
     public Binding bindingStatus(Queue queue, DirectExchange exchange) {
         return BindingBuilder.bind(queue)
+                .to(exchange)
+                .with("investment.status");
+    }
+
+    @Bean
+    public Binding bindingApproved(Queue approvedQueue, DirectExchange exchange) {
+        return BindingBuilder.bind(approvedQueue)
                 .to(exchange)
                 .with("investment.status");
     }

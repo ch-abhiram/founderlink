@@ -19,7 +19,7 @@ public class RegisterRequest {
 
     @NotBlank(message = "Role is required")
     @Pattern(
-            regexp = "ROLE_FOUNDER|ROLE_INVESTOR|ROLE_COFOUNDER|ROLE_ADMIN",
+            regexp = "ROLE_FOUNDER|ROLE_INVESTOR|ROLE_COFOUNDER",
             message = "Invalid role"
     )
     private String role;

@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import java.net.URI;
 
 import com.team_service.DTO.InviteMemberRequest;
 import com.team_service.DTO.TeamMemberResponseDTO;
@@ -26,7 +27,10 @@ public class TeamController {
 
     @PostMapping("/invite")
     public ResponseEntity<TeamMemberResponseDTO> inviteMember(@RequestBody @Valid InviteMemberRequest request) {
-        return ResponseEntity.ok(toDto(service.inviteMember(request)));
+        TeamMember member = service.inviteMember(request);
+        return ResponseEntity
+                .created(URI.create("/team/invite/" + member.getId()))
+                .body(toDto(member));
     }
 
     @PutMapping("/invite/{id}/status")

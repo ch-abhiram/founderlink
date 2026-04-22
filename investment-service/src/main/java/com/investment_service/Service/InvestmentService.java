@@ -30,7 +30,7 @@ public class InvestmentService {
     private final StartupClient startupClient;
     private final RabbitTemplate rabbitTemplate;
 
-    public Investment invest(CreateInvestmentRequest request, String email) {
+public Investment invest(CreateInvestmentRequest request, String email) {
 
         StartupDto startup;
         try {
@@ -39,6 +39,15 @@ public class InvestmentService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Startup not found");
         } catch (FeignException e) {
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Unable to load startup details");
+        }
+
+        if (startup.getFounderEmail().equals(email)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Founders cannot invest in their own startup");
+        }
+
+        boolean alreadyInvested = repository.findByInvestorEmailAndStartupId(email, request.getStartupId()).isPresent();
+        if (alreadyInvested) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "You have already submitted an investment request for this startup");
         }
 
         Investment investment = new Investment();
@@ -118,6 +127,7 @@ public class InvestmentService {
         event.put("investmentId", saved.getId());
         event.put("startupId", saved.getStartupId());
         event.put("investorEmail", saved.getInvestorEmail());
+        event.put("amount", saved.getAmount());
         event.put("status", saved.getStatus());
 
         rabbitTemplate.convertAndSend(

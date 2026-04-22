@@ -12,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 public class RedisService {
 
     private static final String OTP_PREFIX = "otp:";
+    private static final String OTP_ATTEMPT_PREFIX = "otp_attempts:";
+    private static final String OTP_COOLDOWN_PREFIX = "otp_cooldown:";
 
     private final StringRedisTemplate redisTemplate;
 
@@ -33,5 +35,26 @@ public class RedisService {
 
     public void deleteOtp(String email) {
         redisTemplate.delete(OTP_PREFIX + email);
+    }
+
+    public int incrementOtpAttempts(String email) {
+        String key = OTP_ATTEMPT_PREFIX + email;
+        Long count = redisTemplate.opsForValue().increment(key);
+        if (count != null && count == 1) {
+            redisTemplate.expire(key, 10, TimeUnit.MINUTES);
+        }
+        return count != null ? count.intValue() : 1;
+    }
+
+    public void clearOtpAttempts(String email) {
+        redisTemplate.delete(OTP_ATTEMPT_PREFIX + email);
+    }
+
+    public boolean isOtpCooldownActive(String email) {
+        return Boolean.TRUE.equals(redisTemplate.hasKey(OTP_COOLDOWN_PREFIX + email));
+    }
+
+    public void setOtpCooldown(String email) {
+        redisTemplate.opsForValue().set(OTP_COOLDOWN_PREFIX + email, "1", 2, TimeUnit.MINUTES);
     }
 }

@@ -7,7 +7,9 @@ import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import java.net.URI;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -32,7 +34,9 @@ public class StartupController {
     public ResponseEntity<StartupResponseDTO> create(@RequestBody @Valid CreateStartupRequest request) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         Startup startup = service.create(request, email);
-        return ResponseEntity.ok(toDto(startup));
+        return ResponseEntity
+                .created(URI.create("/startups/" + startup.getId()))
+                .body(toDto(startup));
     }
 
     @GetMapping
@@ -60,9 +64,9 @@ public class StartupController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
-        return ResponseEntity.ok("Deleted successfully");
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{id}/approve")

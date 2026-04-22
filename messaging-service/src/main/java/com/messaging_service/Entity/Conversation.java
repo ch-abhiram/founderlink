@@ -20,8 +20,10 @@ public class Conversation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private Long startupId;
 
+    @Column(nullable = false, length = 255)
     private String participantEmail;
 
     @CreationTimestamp

@@ -19,8 +19,10 @@ public class Message {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private Long conversationId;
 
+    @Column(nullable = false, length = 255)
     private String senderEmail;
 
     @Column(columnDefinition = "TEXT")

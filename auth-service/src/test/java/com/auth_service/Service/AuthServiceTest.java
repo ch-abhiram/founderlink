@@ -4,6 +4,8 @@ import com.auth_service.Entity.RefreshToken;
 import com.auth_service.Entity.User;
 import com.auth_service.Exception.ConflictException;
 import com.auth_service.Exception.ForbiddenOperationException;
+import com.auth_service.Exception.ResourceNotFoundException;
+import com.auth_service.Exception.UnauthorizedException;
 import com.auth_service.DTO.VerificationResponse;
 import com.auth_service.Repository.RefreshTokenRepository;
 import com.auth_service.Repository.UserRepository;
@@ -207,6 +209,7 @@ class AuthServiceTest {
     @Test
     void testVerifyOtpSuccess() {
         mockUser.setEmailVerified(false);
+        when(redisService.incrementOtpAttempts("test@test.com")).thenReturn(1);
         when(redisService.getOtp("test@test.com")).thenReturn("123456");
         when(userRepository.findByEmail("test@test.com")).thenReturn(Optional.of(mockUser));
 
@@ -215,10 +218,12 @@ class AuthServiceTest {
         assertEquals("Email verified successfully", response.getMessage());
         assertTrue(mockUser.getEmailVerified());
         verify(redisService).deleteOtp("test@test.com");
+        verify(redisService).clearOtpAttempts("test@test.com");
     }
 
     @Test
     void testVerifyOtpWrongOtpThrowsForbidden() {
+        when(redisService.incrementOtpAttempts("test@test.com")).thenReturn(1);
         when(redisService.getOtp("test@test.com")).thenReturn("999999");
 
         assertThrows(ForbiddenOperationException.class,
@@ -229,10 +234,22 @@ class AuthServiceTest {
 
     @Test
     void testVerifyOtpExpiredOtpThrowsForbidden() {
+        when(redisService.incrementOtpAttempts("test@test.com")).thenReturn(1);
         when(redisService.getOtp("test@test.com")).thenReturn(null);
 
         assertThrows(ForbiddenOperationException.class,
                 () -> authService.verifyOtp("test@test.com", "123456"));
+    }
+
+    @Test
+    void testVerifyOtpTooManyAttemptsInvalidatesOtp() {
+        when(redisService.incrementOtpAttempts("test@test.com")).thenReturn(6);
+
+        assertThrows(ForbiddenOperationException.class,
+                () -> authService.verifyOtp("test@test.com", "123456"));
+
+        verify(redisService).deleteOtp("test@test.com");
+        verify(userRepository, never()).save(any());
     }
 
     @Test
@@ -242,6 +259,7 @@ class AuthServiceTest {
 
         authService.resendOtp("test@test.com");
 
+        verify(redisService).clearOtpAttempts("test@test.com");
         verify(redisService).storeOtp(eq("test@test.com"), anyString(), anyLong());
         verify(otpEmailService).sendOtp(eq("test@test.com"), anyString());
     }
@@ -253,6 +271,55 @@ class AuthServiceTest {
 
         assertThrows(ConflictException.class,
                 () -> authService.resendOtp("test@test.com"));
+    }
+
+    @Test
+    void testResendOtpCooldownActiveThrowsForbidden() {
+        mockUser.setEmailVerified(false);
+        when(redisService.isOtpCooldownActive("test@test.com")).thenReturn(true);
+
+        assertThrows(ForbiddenOperationException.class,
+                () -> authService.resendOtp("test@test.com"));
+
+        verify(userRepository, never()).findByEmail(any());
+        verify(redisService, never()).storeOtp(anyString(), anyString(), anyLong());
+    }
+
+    @Test
+    void testChangePasswordSuccess() {
+        mockUser.setEmailVerified(true);
+        when(userRepository.findByEmail("test@test.com")).thenReturn(Optional.of(mockUser));
+        when(passwordEncoder.matches("current", "encodedPassword")).thenReturn(true);
+        when(passwordEncoder.encode("newpass")).thenReturn("newEncodedPassword");
+
+        authService.changePassword("test@test.com", "current", "newpass");
+
+        assertEquals("newEncodedPassword", mockUser.getPassword());
+        verify(userRepository).save(mockUser);
+        verify(refreshTokenRepository).deleteByEmail("test@test.com");
+    }
+
+    @Test
+    void testChangePasswordWrongCurrentPasswordThrowsUnauthorized() {
+        when(userRepository.findByEmail("test@test.com")).thenReturn(Optional.of(mockUser));
+        when(passwordEncoder.matches("wrong", "encodedPassword")).thenReturn(false);
+
+        assertThrows(UnauthorizedException.class,
+                () -> authService.changePassword("test@test.com", "wrong", "newpass"));
+
+        verify(userRepository, never()).save(any());
+        verify(refreshTokenRepository, never()).deleteByEmail(anyString());
+    }
+
+    @Test
+    void testChangePasswordUserNotFoundThrowsNotFound() {
+        when(userRepository.findByEmail("test@test.com")).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> authService.changePassword("test@test.com", "current", "newpass"));
+
+        verify(userRepository, never()).save(any());
+        verify(refreshTokenRepository, never()).deleteByEmail(anyString());
     }
 
     @Test

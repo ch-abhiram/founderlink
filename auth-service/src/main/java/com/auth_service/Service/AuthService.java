@@ -1,8 +1,8 @@
 package com.auth_service.Service;
 
 import java.time.LocalDateTime;
-import java.util.Random;
 import java.util.UUID;
+import java.security.SecureRandom;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,6 +28,8 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 public class AuthService {
+
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -244,7 +246,7 @@ public class AuthService {
     }
 
     private String generateOtp() {
-        int otp = 100_000 + new Random().nextInt(900_000);
+        int otp = 100_000 + SECURE_RANDOM.nextInt(900_000);
         return String.valueOf(otp);
     }
 }

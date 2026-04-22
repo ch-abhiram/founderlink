@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.mockito.ArgumentCaptor;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -91,7 +92,35 @@ class InvestmentServiceTest {
         assertEquals("investor@test.com", result.getInvestorEmail());
         assertEquals("PENDING", result.getStatus());
 
-        verify(rabbitTemplate, times(1)).convertAndSend(eq(RabbitConfig.EXCHANGE), eq(RabbitConfig.ROUTING_KEY), any(Map.class));
+        ArgumentCaptor<Map<String, Object>> payloadCaptor = ArgumentCaptor.forClass(Map.class);
+        verify(rabbitTemplate, times(1)).convertAndSend(eq(RabbitConfig.EXCHANGE), eq(RabbitConfig.ROUTING_KEY), payloadCaptor.capture());
+        assertEquals(50000.0, payloadCaptor.getValue().get("amount"));
+    }
+
+    @Test
+    void testInvest_FounderCannotInvestInOwnStartup() {
+        startupDto.setFounderEmail("investor@test.com");
+        when(startupClient.getStartup(10L)).thenReturn(startupDto);
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () ->
+                investmentService.invest(createRequest, "investor@test.com"));
+
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+        assertEquals("Founders cannot invest in their own startup", exception.getReason());
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    void testInvest_DuplicateInvestmentThrowsConflict() {
+        when(startupClient.getStartup(10L)).thenReturn(startupDto);
+        when(repository.findByInvestorEmailAndStartupId("investor@test.com", 10L)).thenReturn(Optional.of(investment));
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () ->
+                investmentService.invest(createRequest, "investor@test.com"));
+
+        assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
+        assertEquals("You have already submitted an investment request for this startup", exception.getReason());
+        verify(repository, never()).save(any());
     }
 
     @Test

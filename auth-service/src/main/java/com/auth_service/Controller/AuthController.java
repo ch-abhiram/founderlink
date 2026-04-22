@@ -13,8 +13,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.auth_service.DTO.LoginRequest;
 import com.auth_service.DTO.LoginResponse;
 import com.auth_service.DTO.RefreshRequest;
+import com.auth_service.DTO.ResendOtpRequest;
 import com.auth_service.DTO.RegisterRequest;
 import com.auth_service.DTO.RegisterResponse;
+import com.auth_service.DTO.VerifyOtpRequest;
 import com.auth_service.DTO.VerificationResponse;
 import com.auth_service.Exception.UnauthorizedException;
 import com.auth_service.Service.AuthService;
@@ -45,6 +47,17 @@ public class AuthController {
     @GetMapping("/verify")
     public VerificationResponse verifyEmail(@RequestParam("token") String token) {
         return authService.verifyEmail(token);
+    }
+
+    @PostMapping("/verify-otp")
+    public VerificationResponse verifyOtp(@RequestBody @Valid VerifyOtpRequest request) {
+        return authService.verifyOtp(request.getEmail(), request.getOtp());
+    }
+
+    @PostMapping("/resend-otp")
+    public String resendOtp(@RequestBody @Valid ResendOtpRequest request) {
+        authService.resendOtp(request.getEmail());
+        return "A new verification code has been sent to your email.";
     }
 
     @PostMapping("/refresh")

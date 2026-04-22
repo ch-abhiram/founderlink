@@ -2,6 +2,9 @@ package com.auth_service.Service;
 
 import com.auth_service.Entity.RefreshToken;
 import com.auth_service.Entity.User;
+import com.auth_service.Exception.ConflictException;
+import com.auth_service.Exception.ForbiddenOperationException;
+import com.auth_service.DTO.VerificationResponse;
 import com.auth_service.Repository.RefreshTokenRepository;
 import com.auth_service.Repository.UserRepository;
 import com.auth_service.Util.JwtUtil;
@@ -46,6 +49,9 @@ class AuthServiceTest {
     @Mock
     private UserServiceClientWrapper userServiceClientWrapper;
 
+    @Mock
+    private OtpEmailService otpEmailService;
+
     @InjectMocks
     private AuthService authService;
 
@@ -66,10 +72,12 @@ class AuthServiceTest {
 
         RegisterResponse response = authService.register("test@test.com", "password", "ROLE_FOUNDER");
 
-        assertEquals("User registered successfully. Please verify your email before logging in.", response.getMessage());
+        assertEquals("User registered successfully. Please check your email for a 6-digit verification code.", response.getMessage());
         assertEquals("test@test.com", response.getEmail());
         assertEquals("ROLE_FOUNDER", response.getRole());
         verify(userRepository, times(1)).save(any(User.class));
+        verify(redisService).storeOtp(eq("test@test.com"), anyString(), anyLong());
+        verify(otpEmailService).sendOtp(eq("test@test.com"), anyString());
     }
 
     @Test
@@ -194,5 +202,66 @@ class AuthServiceTest {
         authService.logout("access-token");
 
         verify(redisService).blacklistToken("access-token", 12345L);
+    }
+
+    @Test
+    void testVerifyOtpSuccess() {
+        mockUser.setEmailVerified(false);
+        when(redisService.getOtp("test@test.com")).thenReturn("123456");
+        when(userRepository.findByEmail("test@test.com")).thenReturn(Optional.of(mockUser));
+
+        VerificationResponse response = authService.verifyOtp("test@test.com", "123456");
+
+        assertEquals("Email verified successfully", response.getMessage());
+        assertTrue(mockUser.getEmailVerified());
+        verify(redisService).deleteOtp("test@test.com");
+    }
+
+    @Test
+    void testVerifyOtpWrongOtpThrowsForbidden() {
+        when(redisService.getOtp("test@test.com")).thenReturn("999999");
+
+        assertThrows(ForbiddenOperationException.class,
+                () -> authService.verifyOtp("test@test.com", "123456"));
+
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void testVerifyOtpExpiredOtpThrowsForbidden() {
+        when(redisService.getOtp("test@test.com")).thenReturn(null);
+
+        assertThrows(ForbiddenOperationException.class,
+                () -> authService.verifyOtp("test@test.com", "123456"));
+    }
+
+    @Test
+    void testResendOtpSuccess() {
+        mockUser.setEmailVerified(false);
+        when(userRepository.findByEmail("test@test.com")).thenReturn(Optional.of(mockUser));
+
+        authService.resendOtp("test@test.com");
+
+        verify(redisService).storeOtp(eq("test@test.com"), anyString(), anyLong());
+        verify(otpEmailService).sendOtp(eq("test@test.com"), anyString());
+    }
+
+    @Test
+    void testResendOtpAlreadyVerifiedThrowsConflict() {
+        mockUser.setEmailVerified(true);
+        when(userRepository.findByEmail("test@test.com")).thenReturn(Optional.of(mockUser));
+
+        assertThrows(ConflictException.class,
+                () -> authService.resendOtp("test@test.com"));
+    }
+
+    @Test
+    void testRegisterSendOtpCalledOnce() {
+        when(passwordEncoder.encode("password")).thenReturn("encodedPassword");
+
+        authService.register("test@test.com", "password", "ROLE_FOUNDER");
+
+        verify(redisService).storeOtp(eq("test@test.com"), anyString(), anyLong());
+        verify(otpEmailService).sendOtp(eq("test@test.com"), anyString());
     }
 }

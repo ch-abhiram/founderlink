@@ -1,8 +1,10 @@
 package com.auth_service.Service;
 
 import java.time.LocalDateTime;
+import java.util.Random;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -34,6 +36,10 @@ public class AuthService {
     private final EventPublisher eventPublisher;
     private final RedisService redisService;
     private final UserServiceClientWrapper userServiceClientWrapper;
+    private final OtpEmailService otpEmailService;
+
+    @Value("${founderlink.otp.expiry-minutes:10}")
+    private long otpExpiryMinutes;
 
     public RegisterResponse register(String email, String password, String role) {
         String normalizedEmail = normalizeEmail(email);
@@ -42,15 +48,16 @@ public class AuthService {
         }
 
         User user = new User();
-        String verificationToken = UUID.randomUUID().toString();
 
         user.setEmail(normalizedEmail);
         user.setPassword(passwordEncoder.encode(password));
         user.setRole(role);
         user.setEmailVerified(false);
-        user.setVerificationToken(verificationToken);
-        user.setVerificationTokenExpiry(LocalDateTime.now().plusHours(24));
         userRepository.save(user);
+
+        String otp = generateOtp();
+        redisService.storeOtp(normalizedEmail, otp, otpExpiryMinutes);
+        otpEmailService.sendOtp(normalizedEmail, otp);
 
         try {
             userServiceClientWrapper.createUserProfile(normalizedEmail, role);
@@ -59,10 +66,8 @@ public class AuthService {
             log.warn("User profile sync to user-service failed for email={}: {}", normalizedEmail, ex.getMessage());
         }
 
-        log.info("Email verification token generated for email={}", normalizedEmail);
-
         return new RegisterResponse(
-                "User registered successfully. Please verify your email before logging in.",
+                "User registered successfully. Please check your email for a 6-digit verification code.",
                 normalizedEmail,
                 role
         );
@@ -140,6 +145,44 @@ public class AuthService {
         return new VerificationResponse("Email verified successfully", user.getEmail());
     }
 
+    public VerificationResponse verifyOtp(String email, String otp) {
+        String normalizedEmail = normalizeEmail(email);
+
+        String storedOtp = redisService.getOtp(normalizedEmail);
+        if (storedOtp == null) {
+            throw new ForbiddenOperationException("OTP has expired or was never issued. Please request a new one.");
+        }
+
+        if (!storedOtp.equals(otp)) {
+            throw new ForbiddenOperationException("Invalid OTP. Please check the code and try again.");
+        }
+
+        User user = userRepository.findByEmail(normalizedEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        user.setEmailVerified(true);
+        userRepository.save(user);
+
+        redisService.deleteOtp(normalizedEmail);
+
+        return new VerificationResponse("Email verified successfully", normalizedEmail);
+    }
+
+    public void resendOtp(String email) {
+        String normalizedEmail = normalizeEmail(email);
+
+        User user = userRepository.findByEmail(normalizedEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        if (Boolean.TRUE.equals(user.getEmailVerified())) {
+            throw new ConflictException("Email is already verified.");
+        }
+
+        String otp = generateOtp();
+        redisService.storeOtp(normalizedEmail, otp, otpExpiryMinutes);
+        otpEmailService.sendOtp(normalizedEmail, otp);
+    }
+
     public void logout(String token) {
         long expiry = jwtUtil.getRemainingTime(token);
         redisService.blacklistToken(token, expiry);
@@ -166,5 +209,10 @@ public class AuthService {
 
     private String normalizeEmail(String email) {
         return email == null ? null : email.trim().toLowerCase();
+    }
+
+    private String generateOtp() {
+        int otp = 100_000 + new Random().nextInt(900_000);
+        return String.valueOf(otp);
     }
 }

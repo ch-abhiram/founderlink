@@ -42,3 +42,7 @@ Thumbs.db
 
 # Local docs
 docs/
+
+# Local helper scripts and exported archives
+scripts/Import-LocalEnv.ps1
+config-repo.zip

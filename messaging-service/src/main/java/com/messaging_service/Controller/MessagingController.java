@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -20,7 +21,10 @@ public class MessagingController {
 
     @PostMapping
     public ResponseEntity<MessageResponseDTO> sendMessage(@RequestBody @Valid SendMessageRequest request) {
-        return ResponseEntity.ok(service.sendMessage(request));
+        MessageResponseDTO dto = service.sendMessage(request);
+        return ResponseEntity
+                .created(URI.create("/messages/conversation/" + dto.getConversationId()))
+                .body(dto);
     }
 
     @GetMapping("/conversation/{id}")

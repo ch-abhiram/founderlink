@@ -34,7 +34,7 @@ public class NotificationController {
     @PutMapping("/read-all")
     public ResponseEntity<Void> markAllAsRead() {
         service.markAllAsRead();
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     private NotificationResponseDTO toDto(com.notification_service.Entity.Notification notification) {

@@ -35,8 +35,9 @@ public class SecurityConfig {
                     "/swagger-ui.html",
                     "/actuator/**"
                 ).permitAll()
-                .requestMatchers(HttpMethod.GET, "/users", "/users/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/users").permitAll()
+                .requestMatchers(HttpMethod.GET, "/users").authenticated()
+                .requestMatchers(HttpMethod.GET, "/users/*").authenticated()
                 .anyRequest().authenticated()
             );
 

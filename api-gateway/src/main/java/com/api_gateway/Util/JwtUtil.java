@@ -48,30 +48,14 @@ public class JwtUtil {
     }
 
     public String extractRole(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(getKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .get("role", String.class);
+        return extractAllClaims(token).get("role", String.class);
     }
     
     public String extractEmail(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(getKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
+        return extractAllClaims(token).getSubject();
     }
     
     public boolean isTokenExpired(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(getKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getExpiration()
-                .before(new java.util.Date());
+        return extractAllClaims(token).getExpiration().before(new java.util.Date());
     }
 }

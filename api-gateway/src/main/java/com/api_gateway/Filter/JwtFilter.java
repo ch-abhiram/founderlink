@@ -32,6 +32,8 @@ public class JwtFilter implements GlobalFilter {
         if (path.startsWith("/auth/login") ||
             path.startsWith("/auth/register") ||
             path.startsWith("/auth/verify") ||
+            path.startsWith("/auth/resend-otp") ||
+            path.startsWith("/auth/change-password") ||
             path.startsWith("/auth/refresh") ||
             path.startsWith("/actuator") ||
             path.contains("/v3/api-docs") || 
@@ -69,7 +71,7 @@ public class JwtFilter implements GlobalFilter {
             email = claims.getSubject();
             role = claims.get("role", String.class);
 
-            if (path.startsWith("/admin") && !"ADMIN".equals(role)) {
+            if (path.startsWith("/admin") && !"ROLE_ADMIN".equals(role)) {
                 exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
                 return exchange.getResponse().setComplete();
             }

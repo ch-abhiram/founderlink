@@ -1,6 +1,7 @@
 package com.user_service.Controller;
 
 import org.springframework.http.ResponseEntity;
+import java.net.URI;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,10 +17,10 @@ import org.springframework.security.access.AccessDeniedException;
 import jakarta.validation.Valid;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.user_service.DTO.CreateUserRequest;
+import com.user_service.DTO.UpdateRoleRequest;
 import com.user_service.DTO.UpdateUserRequest;
 import com.user_service.DTO.UserResponseDTO;
 import com.user_service.Entity.User;
@@ -43,10 +44,13 @@ public class UserController {
     @PostMapping
     public ResponseEntity<UserResponseDTO> createUser(@RequestBody @Valid CreateUserRequest request) {
         User user = userService.createUser(request.getEmail(), request.getName(), request.getRole());
-        return ResponseEntity.ok(toDTO(user));
+        return ResponseEntity
+                .created(URI.create("/users/" + user.getEmail()))
+                .body(toDTO(user));
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers().stream().map(this::toDTO).collect(Collectors.toList()));
     }
@@ -63,8 +67,8 @@ public class UserController {
 
     @PutMapping("/{email:.+}/role")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<UserResponseDTO> updateUserRole(@PathVariable String email, @RequestBody Map<String, String> request) {
-        User user = userService.updateUserRole(email, request.get("role"));
+    public ResponseEntity<UserResponseDTO> updateUserRole(@PathVariable String email, @RequestBody @Valid UpdateRoleRequest request) {
+        User user = userService.updateUserRole(email, request.getRole());
         return ResponseEntity.ok(toDTO(user));
     }
 

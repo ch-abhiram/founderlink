@@ -32,11 +32,23 @@ public class Startup {
 
     private String founderEmail;
 
+    private String tagline;
+
+    private String location;
+
+    private Integer foundedYear;
+
+    private Integer teamSize = 0;
+
+    private Double mrr = 0.0;
+
     private Double fundingGoal;
 
     private Double currentFunding = 0.0;
 
     private String category;
+
+    private String stage;
 
     private String currentRound;
 

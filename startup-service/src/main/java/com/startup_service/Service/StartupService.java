@@ -45,8 +45,14 @@ public class StartupService {
         Startup startup = new Startup();
         startup.setName(request.getName());
         startup.setDescription(request.getDescription());
+        startup.setTagline(request.getTagline());
+        startup.setLocation(request.getLocation());
+        startup.setFoundedYear(request.getFoundedYear());
+        startup.setTeamSize(request.getTeamSize() != null ? request.getTeamSize() : 0);
+        startup.setMrr(request.getMrr() != null ? request.getMrr() : 0.0);
         startup.setFundingGoal(request.getFundingGoal());
         startup.setCategory(request.getCategory());
+        startup.setStage(request.getStage());
         startup.setCurrentRound(request.getCurrentRound());
         startup.setValuation(request.getValuation());
         startup.setFounderEmail(email);
@@ -76,8 +82,8 @@ public class StartupService {
                 ));
     }
 
-    public Page<Startup> search(String category, String status, String currentRound, Pageable pageable) {
-        return repository.findAll(StartupSpecification.search(category, status, currentRound), pageable);
+    public Page<Startup> search(String category, String status, String currentRound, String stage, Pageable pageable) {
+        return repository.findAll(StartupSpecification.search(category, status, currentRound, stage), pageable);
     }
 
     public Startup update(Long id, UpdateStartupRequest request) {
@@ -90,8 +96,14 @@ public class StartupService {
 
         if (request.getName() != null) existing.setName(request.getName());
         if (request.getDescription() != null) existing.setDescription(request.getDescription());
+        if (request.getTagline() != null) existing.setTagline(request.getTagline());
+        if (request.getLocation() != null) existing.setLocation(request.getLocation());
+        if (request.getFoundedYear() != null) existing.setFoundedYear(request.getFoundedYear());
+        if (request.getTeamSize() != null) existing.setTeamSize(request.getTeamSize());
+        if (request.getMrr() != null) existing.setMrr(request.getMrr());
         if (request.getFundingGoal() != null) existing.setFundingGoal(request.getFundingGoal());
         if (request.getCategory() != null) existing.setCategory(request.getCategory());
+        if (request.getStage() != null) existing.setStage(request.getStage());
         if (request.getCurrentRound() != null) existing.setCurrentRound(request.getCurrentRound());
         if (request.getValuation() != null) existing.setValuation(request.getValuation());
 

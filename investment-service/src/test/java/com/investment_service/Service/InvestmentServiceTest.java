@@ -55,6 +55,7 @@ class InvestmentServiceTest {
         createRequest = new CreateInvestmentRequest();
         createRequest.setStartupId(10L);
         createRequest.setAmount(50000.0);
+        createRequest.setInvestorFirm("Sequoia Capital");
 
         startupDto = new StartupDto();
         startupDto.setId(10L);
@@ -90,6 +91,8 @@ class InvestmentServiceTest {
         assertNotNull(result);
         assertEquals(1L, result.getId());
         assertEquals("investor@test.com", result.getInvestorEmail());
+        assertEquals("Sequoia Capital", result.getInvestorFirm());
+        assertEquals("founder@test.com", result.getFounderEmail());
         assertEquals("PENDING", result.getStatus());
 
         ArgumentCaptor<Map<String, Object>> payloadCaptor = ArgumentCaptor.forClass(Map.class);

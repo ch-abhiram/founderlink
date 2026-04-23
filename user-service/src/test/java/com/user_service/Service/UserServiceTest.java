@@ -95,10 +95,22 @@ class UserServiceTest {
         when(userRepository.findByEmail("test@test.com")).thenReturn(Optional.of(mockUser));
         when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
 
-        User updated = userService.updateUser("test@test.com", "Updated", "Bio", "5 years", List.of("Java"), List.of("portfolio"));
+        User updated = userService.updateUser(
+                "test@test.com",
+                "Updated",
+                "Bio",
+                "5 years",
+                "Founder building tools",
+                "Bengaluru",
+                "https://example.com/avatar.png",
+                "Find a cofounder",
+                List.of("Java"),
+                List.of("portfolio"));
 
         assertEquals("Updated", updated.getName());
         assertEquals("Bio", updated.getBio());
+        assertEquals("Founder building tools", updated.getHeadline());
+        assertEquals("Bengaluru", updated.getLocation());
         assertEquals(List.of("Java"), updated.getSkills());
     }
 

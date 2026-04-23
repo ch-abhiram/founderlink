@@ -60,6 +60,12 @@ class StartupServiceTest {
         createRequest.setDescription("A great platform");
         createRequest.setFundingGoal(1000000.0);
         createRequest.setCategory("Tech");
+        createRequest.setTagline("Build faster together");
+        createRequest.setLocation("Bengaluru");
+        createRequest.setFoundedYear(2023);
+        createRequest.setTeamSize(12);
+        createRequest.setMrr(45000.0);
+        createRequest.setStage("EARLY_TRACTION");
         createRequest.setCurrentRound("Seed");
         createRequest.setValuation(5000000.0);
 
@@ -94,6 +100,8 @@ class StartupServiceTest {
         assertNotNull(created);
         assertEquals("FounderLink", created.getName());
         assertEquals("founder@test.com", created.getFounderEmail());
+        assertEquals("Build faster together", created.getTagline());
+        assertEquals("EARLY_TRACTION", created.getStage());
         
         verify(rabbitTemplate, times(1)).convertAndSend(eq("startup.exchange"), eq("startup.created"), any(Object.class));
     }
@@ -146,7 +154,7 @@ class StartupServiceTest {
         when(repository.findAll(any(org.springframework.data.jpa.domain.Specification.class), any(Pageable.class)))
                 .thenReturn(new PageImpl<>(List.of(mockStartup)));
 
-        var result = startupService.search("Tech", "OPEN", "Seed", Pageable.unpaged());
+        var result = startupService.search("Tech", "OPEN", "Seed", "EARLY_TRACTION", Pageable.unpaged());
 
         assertEquals(1, result.getTotalElements());
     }

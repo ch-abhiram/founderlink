@@ -64,6 +64,8 @@ public class TeamController {
         dto.setUserEmail(member.getUserEmail());
         dto.setRole(member.getRole());
         dto.setStatus(member.getStatus());
+        dto.setEquityPercentage(member.getEquityPercentage());
+        dto.setPermissionLevel(member.getPermissionLevel());
         dto.setCreatedAt(member.getCreatedAt());
         return dto;
     }

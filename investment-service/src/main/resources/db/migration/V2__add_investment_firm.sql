@@ -1,0 +1,2 @@
+ALTER TABLE investment ADD COLUMN IF NOT EXISTS investor_firm VARCHAR(255);
+ALTER TABLE investment ADD COLUMN IF NOT EXISTS founder_email VARCHAR(255);

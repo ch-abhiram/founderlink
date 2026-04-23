@@ -16,6 +16,12 @@ public class CreateStartupRequest {
     private Double fundingGoal;
     @NotBlank
     private String category;
+    private String tagline;
+    private String location;
+    private Integer foundedYear;
+    private Integer teamSize;
+    private Double mrr;
+    private String stage;
     private String currentRound;
     private Double valuation;
 }

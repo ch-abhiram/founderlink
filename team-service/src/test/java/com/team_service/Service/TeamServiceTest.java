@@ -58,6 +58,8 @@ class TeamServiceTest {
         inviteRequest.setStartupId(1L);
         inviteRequest.setUserEmail("user@test.com");
         inviteRequest.setRole("EMPLOYEE");
+        inviteRequest.setEquityPercentage(15.0);
+        inviteRequest.setPermissionLevel("ADMIN");
 
         startupDto = new StartupDto();
         startupDto.setId(1L);
@@ -75,6 +77,8 @@ class TeamServiceTest {
         member.setUserEmail("user@test.com");
         member.setRole("EMPLOYEE");
         member.setStatus("PENDING");
+        member.setEquityPercentage(15.0);
+        member.setPermissionLevel("ADMIN");
     }
 
     private void setupSecurityContext(String email) {
@@ -102,6 +106,8 @@ class TeamServiceTest {
         assertNotNull(result);
         assertEquals(10L, result.getId());
         assertEquals("PENDING", result.getStatus());
+        assertEquals(15.0, result.getEquityPercentage());
+        assertEquals("ADMIN", result.getPermissionLevel());
         verify(rabbitTemplate, times(1)).convertAndSend(eq(RabbitConfig.EXCHANGE), eq(RabbitConfig.ROUTING_KEY_INVITE), any(Map.class));
     }
 

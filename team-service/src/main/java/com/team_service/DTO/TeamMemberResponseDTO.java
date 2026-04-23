@@ -10,5 +10,7 @@ public class TeamMemberResponseDTO {
     private String userEmail;
     private String role;
     private String status;
+    private Double equityPercentage;
+    private String permissionLevel;
     private LocalDateTime createdAt;
 }

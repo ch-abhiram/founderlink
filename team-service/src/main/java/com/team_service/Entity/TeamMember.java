@@ -35,6 +35,12 @@ public class TeamMember {
     @Column(nullable = false)
     private String status = "PENDING"; // PENDING, ACCEPTED, REJECTED
 
+    @Column(nullable = false)
+    private Double equityPercentage = 0.0;
+
+    @Column(nullable = false)
+    private String permissionLevel = "MEMBER"; // OWNER, ADMIN, MEMBER
+
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;

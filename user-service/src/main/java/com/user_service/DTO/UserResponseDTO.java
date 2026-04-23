@@ -10,6 +10,10 @@ public class UserResponseDTO {
     private String role;
     private String bio;
     private String experience;
+    private String headline;
+    private String location;
+    private String avatarUrl;
+    private String primaryGoal;
     private java.util.List<String> skills;
     private java.util.List<String> portfolioLinks;
     private java.time.LocalDateTime createdAt;

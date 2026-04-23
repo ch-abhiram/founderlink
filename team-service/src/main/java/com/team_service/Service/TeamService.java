@@ -27,6 +27,7 @@ import lombok.RequiredArgsConstructor;
 public class TeamService {
 
     private static final List<String> ALLOWED_STATUSES = List.of("PENDING", "ACCEPTED", "REJECTED");
+    private static final List<String> ALLOWED_PERMISSION_LEVELS = List.of("OWNER", "ADMIN", "MEMBER");
 
     private final TeamMemberRepository repository;
     private final StartupClient startupClient;
@@ -67,6 +68,8 @@ public class TeamService {
         member.setUserEmail(request.getUserEmail());
         member.setRole(request.getRole());
         member.setStatus("PENDING");
+        member.setEquityPercentage(request.getEquityPercentage() != null ? request.getEquityPercentage() : 0.0);
+        member.setPermissionLevel(normalizePermissionLevel(request.getPermissionLevel()));
 
         TeamMember saved = repository.save(member);
 
@@ -151,6 +154,17 @@ public class TeamService {
         String normalized = status == null ? "" : status.trim().toUpperCase();
         if (!ALLOWED_STATUSES.contains(normalized)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid invite status");
+        }
+        return normalized;
+    }
+
+    private String normalizePermissionLevel(String permissionLevel) {
+        if (permissionLevel == null || permissionLevel.isBlank()) {
+            return "MEMBER";
+        }
+        String normalized = permissionLevel.trim().toUpperCase();
+        if (!ALLOWED_PERMISSION_LEVELS.contains(normalized)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid permission level");
         }
         return normalized;
     }

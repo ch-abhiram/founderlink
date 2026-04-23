@@ -16,9 +16,16 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 
 import com.startup_service.DTO.CreateStartupRequest;
+import com.startup_service.DTO.CreateStartupDocumentRequest;
+import com.startup_service.DTO.CreateStartupUpdateRequest;
+import com.startup_service.DTO.StartupDocumentResponseDTO;
 import com.startup_service.DTO.UpdateStartupRequest;
 import com.startup_service.DTO.StartupResponseDTO;
+import com.startup_service.DTO.StartupUpdateResponseDTO;
+import com.startup_service.Entity.StartupDocument;
 import com.startup_service.Entity.Startup;
+import com.startup_service.Entity.StartupUpdate;
+import com.startup_service.Service.StartupContentService;
 import com.startup_service.Service.StartupService;
 
 import lombok.RequiredArgsConstructor;
@@ -29,6 +36,7 @@ import lombok.RequiredArgsConstructor;
 public class StartupController {
 
     private final StartupService service;
+    private final StartupContentService startupContentService;
 
     @PostMapping
     public ResponseEntity<StartupResponseDTO> create(@RequestBody @Valid CreateStartupRequest request) {
@@ -49,8 +57,9 @@ public class StartupController {
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String currentRound,
+            @RequestParam(required = false) String stage,
             @PageableDefault(size = 10) Pageable pageable) {
-        return ResponseEntity.ok(service.search(category, status, currentRound, pageable).map(this::toDto));
+        return ResponseEntity.ok(service.search(category, status, currentRound, stage, pageable).map(this::toDto));
     }
 
     @GetMapping("/{id}")
@@ -100,20 +109,77 @@ public class StartupController {
         return ResponseEntity.ok(service.getFollowers(id));
     }
 
+    @PostMapping("/{id}/updates")
+    public ResponseEntity<StartupUpdateResponseDTO> createUpdate(
+            @PathVariable Long id,
+            @RequestBody @Valid CreateStartupUpdateRequest request) {
+        StartupUpdate update = startupContentService.createUpdate(id, request);
+        return ResponseEntity
+                .created(URI.create("/startups/" + id + "/updates/" + update.getId()))
+                .body(toDto(update));
+    }
+
+    @GetMapping("/{id}/updates")
+    public ResponseEntity<List<StartupUpdateResponseDTO>> getUpdates(@PathVariable Long id) {
+        return ResponseEntity.ok(startupContentService.getUpdates(id).stream().map(this::toDto).collect(Collectors.toList()));
+    }
+
+    @PostMapping("/{id}/documents")
+    public ResponseEntity<StartupDocumentResponseDTO> createDocument(
+            @PathVariable Long id,
+            @RequestBody @Valid CreateStartupDocumentRequest request) {
+        StartupDocument document = startupContentService.createDocument(id, request);
+        return ResponseEntity
+                .created(URI.create("/startups/" + id + "/documents/" + document.getId()))
+                .body(toDto(document));
+    }
+
+    @GetMapping("/{id}/documents")
+    public ResponseEntity<List<StartupDocumentResponseDTO>> getDocuments(@PathVariable Long id) {
+        return ResponseEntity.ok(startupContentService.getDocuments(id).stream().map(this::toDto).collect(Collectors.toList()));
+    }
+
     private StartupResponseDTO toDto(Startup startup) {
         StartupResponseDTO dto = new StartupResponseDTO();
         dto.setId(startup.getId());
         dto.setName(startup.getName());
         dto.setDescription(startup.getDescription());
         dto.setFounderEmail(startup.getFounderEmail());
+        dto.setTagline(startup.getTagline());
+        dto.setLocation(startup.getLocation());
+        dto.setFoundedYear(startup.getFoundedYear());
+        dto.setTeamSize(startup.getTeamSize());
+        dto.setMrr(startup.getMrr());
         dto.setFundingGoal(startup.getFundingGoal());
         dto.setCurrentFunding(startup.getCurrentFunding());
         dto.setCategory(startup.getCategory());
+        dto.setStage(startup.getStage());
         dto.setCurrentRound(startup.getCurrentRound());
         dto.setValuation(startup.getValuation());
         dto.setStatus(startup.getStatus());
         dto.setFollowersCount(startup.getFollowers() != null ? startup.getFollowers().size() : 0);
         dto.setCreatedAt(startup.getCreatedAt());
+        return dto;
+    }
+
+    private StartupUpdateResponseDTO toDto(StartupUpdate update) {
+        StartupUpdateResponseDTO dto = new StartupUpdateResponseDTO();
+        dto.setId(update.getId());
+        dto.setStartupId(update.getStartupId());
+        dto.setTitle(update.getTitle());
+        dto.setContent(update.getContent());
+        dto.setCreatedAt(update.getCreatedAt());
+        return dto;
+    }
+
+    private StartupDocumentResponseDTO toDto(StartupDocument document) {
+        StartupDocumentResponseDTO dto = new StartupDocumentResponseDTO();
+        dto.setId(document.getId());
+        dto.setStartupId(document.getStartupId());
+        dto.setName(document.getName());
+        dto.setUrl(document.getUrl());
+        dto.setDocType(document.getDocType());
+        dto.setCreatedAt(document.getCreatedAt());
         return dto;
     }
 }

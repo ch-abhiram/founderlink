@@ -24,7 +24,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class InvestmentService {
 
-    private static final List<String> ALLOWED_STATUSES = List.of("PENDING", "SUCCESS", "FAILED", "COMPLETED", "APPROVED", "REJECTED");
+    private static final List<String> ALLOWED_STATUSES = List.of("PENDING", "COMPLETED", "APPROVED", "REJECTED");
 
     private final InvestmentRepository repository;
     private final StartupClient startupClient;
@@ -53,6 +53,8 @@ public Investment invest(CreateInvestmentRequest request, String email) {
         Investment investment = new Investment();
         investment.setStartupId(request.getStartupId());
         investment.setInvestorEmail(email);
+        investment.setInvestorFirm(request.getInvestorFirm());
+        investment.setFounderEmail(startup.getFounderEmail());
         investment.setAmount(request.getAmount());
 
         Investment saved = repository.save(investment);

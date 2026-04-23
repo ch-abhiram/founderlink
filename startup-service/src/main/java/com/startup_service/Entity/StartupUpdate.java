@@ -1,4 +1,4 @@
-package com.investment_service.Entity;
+package com.startup_service.Entity;
 
 import java.time.LocalDateTime;
 
@@ -9,19 +9,19 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import lombok.AllArgsConstructor;
+import jakarta.persistence.Table;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
+@Table(name = "startup_update")
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 @EqualsAndHashCode(of = "id")
-public class Investment {
+public class StartupUpdate {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,17 +31,10 @@ public class Investment {
     private Long startupId;
 
     @Column(nullable = false)
-    private String investorEmail;
+    private String title;
 
-    private String investorFirm;
-
-    private String founderEmail;
-
-    @Column(nullable = false)
-    private Double amount;
-
-    @Column(nullable = false)
-    private String status = "PENDING"; // PENDING / APPROVED / REJECTED / COMPLETED
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String content;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)

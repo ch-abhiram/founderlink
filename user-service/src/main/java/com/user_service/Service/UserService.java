@@ -37,11 +37,25 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public User updateUser(String email, String name, String bio, String experience, List<String> skills, List<String> portfolioLinks) {
+    public User updateUser(
+            String email,
+            String name,
+            String bio,
+            String experience,
+            String headline,
+            String location,
+            String avatarUrl,
+            String primaryGoal,
+            List<String> skills,
+            List<String> portfolioLinks) {
         User user = getUserByEmail(email);
         if (name != null) user.setName(name);
         if (bio != null) user.setBio(bio);
         if (experience != null) user.setExperience(experience);
+        if (headline != null) user.setHeadline(headline);
+        if (location != null) user.setLocation(location);
+        if (avatarUrl != null) user.setAvatarUrl(avatarUrl);
+        if (primaryGoal != null) user.setPrimaryGoal(primaryGoal);
         if (skills != null) user.setSkills(skills);
         if (portfolioLinks != null) user.setPortfolioLinks(portfolioLinks);
         return userRepository.save(user);

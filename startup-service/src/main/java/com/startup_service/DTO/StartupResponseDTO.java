@@ -9,9 +9,15 @@ public class StartupResponseDTO {
     private String name;
     private String description;
     private String founderEmail;
+    private String tagline;
+    private String location;
+    private Integer foundedYear;
+    private Integer teamSize;
+    private Double mrr;
     private Double fundingGoal;
     private Double currentFunding;
     private String category;
+    private String stage;
     private String currentRound;
     private Double valuation;
     private String status;

@@ -59,6 +59,8 @@ public class InvestmentController {
         dto.setId(investment.getId());
         dto.setStartupId(investment.getStartupId());
         dto.setInvestorEmail(investment.getInvestorEmail());
+        dto.setInvestorFirm(investment.getInvestorFirm());
+        dto.setFounderEmail(investment.getFounderEmail());
         dto.setAmount(investment.getAmount());
         dto.setStatus(investment.getStatus());
         dto.setCreatedAt(investment.getCreatedAt());

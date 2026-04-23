@@ -9,6 +9,7 @@ public class TeamInviteEvent {
     private Long inviteId;
     private Long startupId;
     private String startupName;
+    private String founderEmail;
     private String userEmail;
     private String role;
     private String status;

@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -38,5 +39,38 @@ class TeamListenerTest {
         assertEquals("user@test.com", notification.getUserEmail());
         assertEquals("TEAM", notification.getType());
         assertEquals("New Team Invitation", notification.getTitle());
+    }
+
+    @Test
+    void testConsumeTeamInviteStatusSavesFounderNotification() {
+        TeamInviteEvent event = new TeamInviteEvent();
+        event.setInviteId(42L);
+        event.setFounderEmail("founder@test.com");
+        event.setUserEmail("user@test.com");
+        event.setStatus("ACCEPTED");
+        event.setStartupName("MyStartup");
+
+        listener.consumeTeamInviteStatus(event);
+
+        ArgumentCaptor<Notification> captor = ArgumentCaptor.forClass(Notification.class);
+        verify(repository).save(captor.capture());
+
+        Notification notification = captor.getValue();
+        assertEquals("founder@test.com", notification.getUserEmail());
+        assertEquals("TEAM", notification.getType());
+        assertEquals("Team Invitation Updated", notification.getTitle());
+    }
+
+    @Test
+    void testConsumeTeamInviteStatusSkipsWhenFounderMissing() {
+        TeamInviteEvent event = new TeamInviteEvent();
+        event.setInviteId(42L);
+        event.setUserEmail("user@test.com");
+        event.setStatus("REJECTED");
+        event.setStartupName("MyStartup");
+
+        listener.consumeTeamInviteStatus(event);
+
+        verify(repository, never()).save(org.mockito.ArgumentMatchers.any());
     }
 }

@@ -45,6 +45,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(400).body(new ErrorResponse(LocalDateTime.now(), 400, msg, request.getRequestURI()));
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex, HttpServletRequest request) {
+        return ResponseEntity.status(400).body(new ErrorResponse(LocalDateTime.now(), 400, ex.getMessage(), request.getRequestURI()));
+    }
+
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ErrorResponse> handleRuntimeException(RuntimeException ex, HttpServletRequest request) {
         return ResponseEntity.status(500).body(new ErrorResponse(LocalDateTime.now(), 500, "Internal server error", request.getRequestURI()));

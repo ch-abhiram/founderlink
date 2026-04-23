@@ -18,9 +18,6 @@ public class RabbitConfig {
     public static final String ROUTING_KEY_INVITE = "team.invite.sent";
     public static final String ROUTING_KEY_STATUS = "team.invite.status";
 
-    public static final String QUEUE_INVITE = "team.invite.queue";
-    public static final String QUEUE_STATUS = "team.status.queue";
-
     @Bean
     public MessageConverter jsonMessageConverter() {
         Jackson2JsonMessageConverter converter = new Jackson2JsonMessageConverter();
@@ -38,25 +35,5 @@ public class RabbitConfig {
     @Bean
     public DirectExchange exchange() {
         return new DirectExchange(EXCHANGE, true, false);
-    }
-
-    @Bean
-    public Queue inviteQueue() {
-        return new Queue(QUEUE_INVITE, true);
-    }
-    
-    @Bean
-    public Queue statusQueue() {
-        return new Queue(QUEUE_STATUS, true);
-    }
-
-    @Bean
-    public Binding bindingInvite(Queue inviteQueue, DirectExchange exchange) {
-        return BindingBuilder.bind(inviteQueue).to(exchange).with(ROUTING_KEY_INVITE);
-    }
-    
-    @Bean
-    public Binding bindingStatus(Queue statusQueue, DirectExchange exchange) {
-        return BindingBuilder.bind(statusQueue).to(exchange).with(ROUTING_KEY_STATUS);
     }
 }

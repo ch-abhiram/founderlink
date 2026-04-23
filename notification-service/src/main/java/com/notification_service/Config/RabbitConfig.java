@@ -23,6 +23,7 @@ public class RabbitConfig {
     public static final String QUEUE_NOTIFY_INVESTMENT_STATUS = "notify.investment.status.queue";
     public static final String QUEUE_NOTIFY_STARTUP_CREATED = "notify.startup.created.queue";
     public static final String QUEUE_NOTIFY_TEAM_INVITE = "notify.team.invite.queue";
+    public static final String QUEUE_NOTIFY_TEAM_STATUS = "notify.team.status.queue";
     public static final String QUEUE_NOTIFY_MESSAGE_REPLY = "notify.message.reply.queue";
 
     @Bean
@@ -78,6 +79,11 @@ public class RabbitConfig {
     }
 
     @Bean
+    public Queue notifyTeamStatusQueue() {
+        return new Queue(QUEUE_NOTIFY_TEAM_STATUS, true);
+    }
+
+    @Bean
     public Queue notifyMessageReplyQueue() {
         return new Queue(QUEUE_NOTIFY_MESSAGE_REPLY, true);
     }
@@ -100,6 +106,11 @@ public class RabbitConfig {
     @Bean
     public Binding bindingNotifyTeamInvite() {
         return BindingBuilder.bind(notifyTeamInviteQueue()).to(teamExchange()).with("team.invite.sent");
+    }
+
+    @Bean
+    public Binding bindingNotifyTeamStatus() {
+        return BindingBuilder.bind(notifyTeamStatusQueue()).to(teamExchange()).with("team.invite.status");
     }
 
     @Bean

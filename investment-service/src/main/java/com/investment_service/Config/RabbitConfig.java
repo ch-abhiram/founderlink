@@ -59,13 +59,6 @@ public class RabbitConfig {
     }
 
     @Bean
-    public Binding bindingStatus(Queue queue, DirectExchange exchange) {
-        return BindingBuilder.bind(queue)
-                .to(exchange)
-                .with("investment.status");
-    }
-
-    @Bean
     public Binding bindingApproved(Queue approvedQueue, DirectExchange exchange) {
         return BindingBuilder.bind(approvedQueue)
                 .to(exchange)

@@ -234,22 +234,33 @@ class AuthServiceTest {
 
     @Test
     void testVerifyOtpExpiredOtpThrowsForbidden() {
-        when(redisService.incrementOtpAttempts("test@test.com")).thenReturn(1);
         when(redisService.getOtp("test@test.com")).thenReturn(null);
 
         assertThrows(ForbiddenOperationException.class,
                 () -> authService.verifyOtp("test@test.com", "123456"));
+
+        verify(redisService, never()).incrementOtpAttempts("test@test.com");
     }
 
     @Test
     void testVerifyOtpTooManyAttemptsInvalidatesOtp() {
+        when(redisService.getOtp("test@test.com")).thenReturn("123456");
         when(redisService.incrementOtpAttempts("test@test.com")).thenReturn(6);
 
         assertThrows(ForbiddenOperationException.class,
                 () -> authService.verifyOtp("test@test.com", "123456"));
 
         verify(redisService).deleteOtp("test@test.com");
+        verify(redisService).clearOtpAttempts("test@test.com");
         verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void testLoginBlankEmailThrowsIllegalArgument() {
+        assertThrows(IllegalArgumentException.class,
+                () -> authService.login("   ", "password"));
+
+        verify(userRepository, never()).findByEmail(any());
     }
 
     @Test

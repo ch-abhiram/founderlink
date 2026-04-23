@@ -27,7 +27,12 @@ public class StartupInvestmentListener {
         }
 
         Long startupId = ((Number) event.get("startupId")).longValue();
-        Double amount = ((Number) event.get("amount")).doubleValue();
+        Object amountObj = event.get("amount");
+        if (!(amountObj instanceof Number amountNumber)) {
+            log.warn("Missing amount in investment.status event for startupId={}", startupId);
+            return;
+        }
+        Double amount = amountNumber.doubleValue();
 
         Startup startup = repository.findById(startupId).orElse(null);
         if (startup == null) {

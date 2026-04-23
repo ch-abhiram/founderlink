@@ -9,6 +9,6 @@ import com.startup_service.DTO.UserDto;
 @FeignClient(name = "USER-SERVICE")
 public interface UserClient {
 
-	@GetMapping("/users/{email}")
+	@GetMapping("/users/{email:.+}")
 	UserDto getUser(@PathVariable("email") String email);
 }

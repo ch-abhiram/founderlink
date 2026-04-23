@@ -173,13 +173,13 @@ services:
       MANAGEMENT_TRACING_ENABLED: "true"
       ZIPKIN_ENDPOINT: http://zipkin:9411/api/v2/spans
       JWT_SECRET: ${JWT_SECRET}
-      MAIL_ENABLED: ${MAIL_ENABLED}
-      MAIL_FROM: ${MAIL_FROM}
-      MAIL_HOST: ${MAIL_HOST}
-      MAIL_PORT: ${MAIL_PORT}
-      MAIL_USERNAME: ${MAIL_USERNAME}
-      MAIL_PASSWORD: ${MAIL_PASSWORD}
-      OTP_EXPIRY_MINUTES: ${OTP_EXPIRY_MINUTES}
+      MAIL_ENABLED: ${MAIL_ENABLED:-false}
+      MAIL_FROM: ${MAIL_FROM:-no-reply@founderlink.local}
+      MAIL_HOST: ${MAIL_HOST:-smtp.gmail.com}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      OTP_EXPIRY_MINUTES: ${OTP_EXPIRY_MINUTES:-10}
     depends_on:
       postgres:
         condition: service_healthy

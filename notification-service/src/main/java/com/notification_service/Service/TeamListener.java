@@ -34,4 +34,23 @@ public class TeamListener {
 
         repository.save(notification);
     }
+
+    @RabbitListener(queues = RabbitConfig.QUEUE_NOTIFY_TEAM_STATUS)
+    public void consumeTeamInviteStatus(TeamInviteEvent event) {
+        if (event.getFounderEmail() == null || event.getFounderEmail().isBlank()) {
+            log.warn("Skipping team invite status notification because founderEmail is missing for inviteId={}", event.getInviteId());
+            return;
+        }
+
+        Notification notification = new Notification();
+        notification.setUserEmail(event.getFounderEmail());
+        notification.setType("TEAM");
+        notification.setTitle("Team Invitation Updated");
+        notification.setMessage(
+                event.getUserEmail() + " has " + event.getStatus().toLowerCase() +
+                " the invitation for startup '" + event.getStartupName() + "'."
+        );
+
+        repository.save(notification);
+    }
 }

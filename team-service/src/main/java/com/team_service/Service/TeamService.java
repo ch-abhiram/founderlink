@@ -95,9 +95,20 @@ public class TeamService {
         member.setStatus(normalizeStatus(status));
         TeamMember saved = repository.save(member);
 
+        StartupDto startup;
+        try {
+            startup = startupClient.getStartup(saved.getStartupId());
+        } catch (FeignException.NotFound e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Startup not found");
+        } catch (FeignException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Unable to load startup details");
+        }
+
         Map<String, Object> event = new HashMap<>();
         event.put("inviteId", saved.getId());
         event.put("startupId", saved.getStartupId());
+        event.put("startupName", startup.getName());
+        event.put("founderEmail", startup.getFounderEmail());
         event.put("userEmail", saved.getUserEmail());
         event.put("status", saved.getStatus());
 

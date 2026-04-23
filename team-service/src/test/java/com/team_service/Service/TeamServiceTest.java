@@ -11,6 +11,7 @@ import com.team_service.Repository.TeamMemberRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -123,12 +124,16 @@ class TeamServiceTest {
         setupSecurityContext("user@test.com");
         
         when(repository.findById(10L)).thenReturn(Optional.of(member));
+        when(startupClient.getStartup(1L)).thenReturn(startupDto);
         when(repository.save(any(TeamMember.class))).thenAnswer(i -> i.getArgument(0));
 
         TeamMember result = teamService.updateInviteStatus(10L, "ACCEPTED");
 
         assertEquals("ACCEPTED", result.getStatus());
-        verify(rabbitTemplate, times(1)).convertAndSend(eq(RabbitConfig.EXCHANGE), eq(RabbitConfig.ROUTING_KEY_STATUS), any(Map.class));
+        ArgumentCaptor<Map<String, Object>> eventCaptor = ArgumentCaptor.forClass(Map.class);
+        verify(rabbitTemplate, times(1)).convertAndSend(eq(RabbitConfig.EXCHANGE), eq(RabbitConfig.ROUTING_KEY_STATUS), eventCaptor.capture());
+        assertEquals("founder@test.com", eventCaptor.getValue().get("founderEmail"));
+        assertEquals("Test Startup", eventCaptor.getValue().get("startupName"));
     }
 
     @Test

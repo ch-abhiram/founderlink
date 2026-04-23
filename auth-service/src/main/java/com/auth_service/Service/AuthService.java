@@ -152,16 +152,16 @@ public class AuthService {
     public VerificationResponse verifyOtp(String email, String otp) {
         String normalizedEmail = normalizeEmail(email);
 
+        String storedOtp = redisService.getOtp(normalizedEmail);
+        if (storedOtp == null) {
+            throw new ForbiddenOperationException("OTP has expired or was never issued. Please request a new one.");
+        }
+
         int attempts = redisService.incrementOtpAttempts(normalizedEmail);
         if (attempts > 5) {
             redisService.deleteOtp(normalizedEmail);
-            throw new ForbiddenOperationException("Too many failed attempts. Please request a new OTP.");
-        }
-
-        String storedOtp = redisService.getOtp(normalizedEmail);
-        if (storedOtp == null) {
             redisService.clearOtpAttempts(normalizedEmail);
-            throw new ForbiddenOperationException("OTP has expired or was never issued. Please request a new one.");
+            throw new ForbiddenOperationException("Too many failed attempts. Please request a new OTP.");
         }
 
         if (!storedOtp.equals(otp)) {
@@ -242,7 +242,10 @@ public class AuthService {
     }
 
     private String normalizeEmail(String email) {
-        return email == null ? null : email.trim().toLowerCase();
+        if (email == null || email.isBlank()) {
+            throw new IllegalArgumentException("Email must not be blank");
+        }
+        return email.trim().toLowerCase();
     }
 
     private String generateOtp() {

@@ -412,6 +412,18 @@ services:
     networks:
       - founderlink
 
+  frontend:
+    build:
+      context: ./Frontend
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_HOST_PORT:-14200}:80"
+    depends_on:
+      api-gateway:
+        condition: service_healthy
+    networks:
+      - founderlink
+
 volumes:
   postgres_data:
   redis_data:

@@ -1,0 +1,41 @@
+<div class="max-w-4xl mx-auto flex flex-col gap-6">
+  
+  <div class="flex justify-between items-center border-b border-surface-border pb-6">
+    <div>
+      <h1 class="text-3xl font-bold text-text-primary">Notifications</h1>
+      <p class="text-text-muted mt-1">Stay updated on your platform activity.</p>
+    </div>
+    <button pButton label="Mark all read" icon="pi pi-check-circle" [outlined]="true" size="small" (click)="markAllAsRead()"></button>
+  </div>
+
+  <div class="bg-surface-card border border-surface-border rounded-xl p-4 md:p-6 flex flex-col gap-2">
+    <div *ngIf="loading" class="animate-pulse space-y-4">
+      <div *ngFor="let _ of [1,2,3,4,5]" class="h-16 bg-surface rounded-xl"></div>
+    </div>
+
+    <div *ngIf="!loading && notifications.length === 0" class="text-center py-12 text-text-muted">
+       <div class="w-16 h-16 rounded-full bg-surface border border-surface-border flex items-center justify-center mx-auto mb-4 text-2xl">
+         <i class="pi pi-bell-slash"></i>
+       </div>
+       <p>You have no notifications right now.</p>
+    </div>
+
+    <div *ngFor="let n of notifications" 
+         class="flex items-start gap-4 p-4 rounded-xl border transition-colors group"
+         [ngClass]="n.read ? 'bg-surface-card border-transparent hover:border-surface-border' : 'bg-primary/5 border-primary/20'">
+       
+       <div class="mt-1 w-12 h-12 shrink-0 rounded-full flex items-center justify-center text-xl" [ngClass]="getIcon(n.type)">
+         <i class="pi" [ngClass]="getIcon(n.type).split(' ')[0]"></i>
+       </div>
+       
+       <div class="flex-1">
+         <div class="flex justify-between items-start gap-2">
+            <h3 class="font-bold text-text-primary text-sm sm:text-base">{{ n.title }}</h3>
+            <span class="text-xs text-text-muted whitespace-nowrap">{{ n.createdAt | timeAgo }}</span>
+         </div>
+         <p class="text-sm text-text-muted mt-1 leading-relaxed">{{ n.message }}</p>
+       </div>
+    </div>
+  </div>
+
+</div>

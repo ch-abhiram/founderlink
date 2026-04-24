@@ -1,0 +1,64 @@
+<div class="w-full max-w-3xl bg-surface-card border border-surface-border p-8 rounded-2xl shadow-xl flex flex-col md:flex-row gap-12">
+  
+  <div class="flex-1 flex flex-col justify-center border-b border-surface-border pb-8 md:pb-0 md:border-b-0 md:border-r pr-0 md:pr-8">
+    <h2 class="text-2xl font-bold text-text-primary mb-2">Join FounderLink</h2>
+    <p class="text-text-muted text-sm mb-8">What brings you to the platform today?</p>
+    
+    <div class="flex flex-col gap-4">
+      <div *ngFor="let r of roles" 
+           class="p-4 rounded-xl border-2 cursor-pointer flex items-center gap-4 hover:-translate-y-1 transition-all duration-200"
+           [ngClass]="selectedRole === r.value ? 'bg-primary/10 border-primary shadow-[0_0_15px_-3px_rgba(99,102,241,0.2)]' : 'bg-surface border-surface-border hover:border-text-muted'"
+           (click)="selectRole(r.value)">
+        <div class="w-12 h-12 rounded-full flex items-center justify-center text-xl"
+             [ngClass]="selectedRole === r.value ? 'bg-primary text-white scale-110' : 'bg-surface-card text-text-muted'">
+          <i class="pi {{ r.icon }}"></i>
+        </div>
+        <div>
+           <h3 class="font-bold text-text-primary" [ngClass]="{'text-primary': selectedRole === r.value}">{{ r.title }}</h3>
+           <p class="text-xs text-text-muted">{{ r.desc }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex-1 flex flex-col justify-center">
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-5">
+      
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-semibold text-text-muted">Email address</label>
+        <input type="email" pInputText formControlName="email" class="w-full p-3" placeholder="you@example.com" autocomplete="email" />
+        <small class="text-danger" *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched">
+          Valid email is required
+        </small>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-semibold text-text-muted">Password</label>
+        <p-password formControlName="password" [toggleMask]="true" styleClass="w-full" inputStyleClass="w-full p-3" autocomplete="new-password">
+          <ng-template pTemplate="header">
+            <h6>Pick a password</h6>
+          </ng-template>
+          <ng-template pTemplate="footer">
+            <p-divider></p-divider>
+            <p class="mt-2 text-xs text-text-muted">Must be at least 6 characters long.</p>
+          </ng-template>
+        </p-password>
+      </div>
+
+      <div class="flex flex-col gap-2">
+         <label class="text-sm font-semibold text-text-muted">Confirm Password</label>
+         <input type="password" pInputText formControlName="confirmPassword" class="w-full p-3" placeholder="••••••••" autocomplete="new-password" />
+         <small class="text-danger" *ngIf="registerForm.hasError('mismatch') && registerForm.get('confirmPassword')?.touched">
+           Passwords do not match
+         </small>
+      </div>
+
+      <button pButton type="submit" label="Create Account" class="w-full mt-4" [loading]="loading" [disabled]="registerForm.invalid"></button>
+      
+    </form>
+    
+    <p class="text-center text-sm text-text-muted mt-8">
+      Already have an account? <a routerLink="/login" class="text-primary hover:underline font-semibold">Sign in</a>
+    </p>
+  </div>
+</div>

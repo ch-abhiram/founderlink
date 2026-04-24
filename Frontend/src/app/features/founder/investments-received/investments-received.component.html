@@ -1,0 +1,61 @@
+<div class="max-w-6xl mx-auto flex flex-col gap-6">
+  
+  <div class="flex items-center gap-4 border-b border-surface-border pb-6">
+    <a routerLink="/founder/my-startups" class="w-10 h-10 rounded-full bg-surface-card border border-surface-border flex items-center justify-center text-text-muted hover:text-text-primary transition-colors">
+      <i class="pi pi-arrow-left"></i>
+    </a>
+    <div>
+      <h1 class="text-3xl font-bold text-text-primary">Investments Received</h1>
+      <p class="text-text-muted mt-1">Review and manage capital commitments from investors.</p>
+    </div>
+  </div>
+
+  <div class="bg-surface-card border border-surface-border rounded-xl overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-sm text-text-primary">
+        <thead class="bg-surface text-text-muted uppercase text-xs">
+          <tr>
+            <th class="px-6 py-4">Investor</th>
+            <th class="px-6 py-4">Amount</th>
+            <th class="px-6 py-4">Date Submitted</th>
+            <th class="px-6 py-4">Status</th>
+            <th class="px-6 py-4 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-surface-border">
+          <tr *ngFor="let i of investments" class="hover:bg-surface/50 transition-colors">
+            <td class="px-6 py-4">
+               <div class="font-bold">{{ i.investorFirm || 'Private Investor' }}</div>
+               <div class="text-xs text-text-muted mt-0.5">{{ i.investorEmail }}</div>
+            </td>
+            <td class="px-6 py-4 font-bold text-emerald-500">{{ i.amount | currencyFormat }}</td>
+            <td class="px-6 py-4 text-text-muted">{{ i.createdAt | timeAgo }}</td>
+            <td class="px-6 py-4">
+               <span class="px-2 py-1 text-[10px] rounded p-tag bg-surface"
+                     [ngClass]="{
+                       'text-warning border border-warning/50': i.status === 'PENDING',
+                       'text-emerald-500 border border-emerald-500/50': i.status === 'COMPLETED' || i.status === 'SUCCESS' || i.status === 'APPROVED',
+                       'text-danger border border-danger/50': i.status === 'REJECTED' || i.status === 'FAILED'
+                     }">
+                 {{ i.status }}
+               </span>
+            </td>
+            <td class="px-6 py-4 flex gap-2 justify-end">
+               <ng-container *ngIf="i.status === 'PENDING'">
+                 <button pButton label="Approve" class="p-button-success p-button-sm" (click)="approve(i.id)"></button>
+                 <button pButton label="Reject" class="p-button-danger p-button-outlined p-button-sm" (click)="reject(i.id)"></button>
+               </ng-container>
+            </td>
+          </tr>
+          <tr *ngIf="investments.length === 0 && !loading">
+            <td colspan="5" class="px-6 py-12 text-center text-text-muted border-dashed border-t border-surface-border">No investment requests received yet. Ensure your startup is visible!</td>
+          </tr>
+          <tr *ngIf="loading">
+            <td colspan="5" class="px-6 py-12 text-center text-text-muted">Loading...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>

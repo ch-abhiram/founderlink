@@ -179,10 +179,20 @@ public class MessagingService {
     }
 
     private ConversationResponseDTO toConversationDto(Conversation conversation) {
+        StartupDto startup;
+        try {
+            startup = startupClient.getStartup(conversation.getStartupId());
+        } catch (FeignException.NotFound e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Startup not found");
+        } catch (FeignException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Unable to load startup details");
+        }
+
         ConversationResponseDTO dto = new ConversationResponseDTO();
         dto.setId(conversation.getId());
         dto.setStartupId(conversation.getStartupId());
         dto.setParticipantEmail(conversation.getParticipantEmail());
+        dto.setFounderEmail(startup.getFounderEmail());
         dto.setCreatedAt(conversation.getCreatedAt());
         dto.setUpdatedAt(conversation.getUpdatedAt());
         return dto;

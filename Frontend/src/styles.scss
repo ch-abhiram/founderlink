@@ -1,0 +1,18 @@
+@import "primeng/resources/themes/lara-dark-indigo/theme.css";
+@import "primeng/resources/primeng.min.css";
+@import "primeicons/primeicons.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body {
+    @apply h-full m-0 p-0 font-sans bg-surface text-text-primary;
+  }
+}
+
+// Global PrimeNG Overrides for better Tailwind integration
+.p-component {
+  font-family: inherit;
+}

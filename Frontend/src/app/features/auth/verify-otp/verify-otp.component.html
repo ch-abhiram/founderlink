@@ -1,0 +1,38 @@
+<div class="w-full max-w-md bg-surface-card border border-surface-border p-8 rounded-2xl shadow-xl">
+  <div class="text-center mb-8">
+    <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/20 text-primary mb-4">
+      <i class="pi pi-shield text-2xl"></i>
+    </div>
+    <h2 class="text-2xl font-bold text-text-primary">Verify your email</h2>
+    <p class="text-text-muted text-sm mt-2">We sent a 6-digit code to <span class="font-bold text-text-primary">{{ email }}</span>.</p>
+  </div>
+
+  <form [formGroup]="otpForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-6">
+    
+    <div formArrayName="digits" class="flex justify-between gap-2 sm:gap-3" (paste)="onPaste($event)">
+      <input *ngFor="let ctrl of digitsArr.controls; let i = index" 
+             #otpInput
+             [formControlName]="i"
+             type="text" 
+             maxlength="1"
+             class="w-10 h-12 sm:w-12 sm:h-14 text-center text-xl font-bold bg-surface border border-surface-border rounded-lg outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-text-primary"
+             autocomplete="one-time-code"
+             (input)="onInput($event, i)"
+             (keydown)="onKeyDown($event, i)" />
+    </div>
+
+    <button pButton type="submit" label="Verify Code" class="w-full" [loading]="loading" [disabled]="otpForm.invalid"></button>
+    
+  </form>
+
+  <div class="text-center text-sm mt-8 border-t border-surface-border pt-6">
+    <p class="text-text-muted mb-2">Didn't receive the code?</p>
+    <button (click)="resendOtp()" 
+            [disabled]="cooldown > 0"
+            class="font-semibold transition-colors flex items-center justify-center gap-2 mx-auto"
+            [ngClass]="cooldown > 0 ? 'text-text-muted cursor-not-allowed' : 'text-primary hover:underline'">
+      <i class="pi" [ngClass]="cooldown > 0 ? 'pi-clock' : 'pi-refresh'"></i>
+      {{ cooldown > 0 ? 'Resend in ' + cooldown + 's' : 'Resend Code' }}
+    </button>
+  </div>
+</div>

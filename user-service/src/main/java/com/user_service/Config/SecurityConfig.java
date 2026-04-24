@@ -36,8 +36,8 @@ public class SecurityConfig {
                     "/actuator/**"
                 ).permitAll()
                 .requestMatchers(HttpMethod.POST, "/users").permitAll()
+                .requestMatchers(HttpMethod.GET, "/users/*").permitAll()
                 .requestMatchers(HttpMethod.GET, "/users").authenticated()
-                .requestMatchers(HttpMethod.GET, "/users/*").authenticated()
                 .anyRequest().authenticated()
             );
 

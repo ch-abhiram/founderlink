@@ -1,0 +1,181 @@
+<div *ngIf="loading" class="max-w-5xl mx-auto">
+  <div class="h-40 bg-surface-card rounded-xl animate-pulse mb-6"></div>
+  <div class="h-96 bg-surface-card rounded-xl animate-pulse"></div>
+</div>
+
+<div *ngIf="!loading && startup" class="max-w-5xl mx-auto flex flex-col gap-6">
+  
+  <!-- Header Card -->
+  <div class="bg-surface-card border border-surface-border rounded-xl p-6 md:p-8 relative">
+    <div class="flex flex-col md:flex-row justify-between items-start gap-6">
+      
+      <div class="flex-1">
+        <div class="flex items-center gap-4 mb-2">
+          <h1 class="text-3xl md:text-4xl font-bold text-text-primary">{{ startup.name }}</h1>
+          <p-tag severity="success" value="OPEN" [rounded]="true"></p-tag>
+        </div>
+        <p class="text-lg text-text-muted mb-4">{{ startup.tagline || startup.description }}</p>
+        
+        <div class="flex flex-wrap items-center gap-4 text-sm text-text-muted">
+          <div class="flex items-center gap-1"><i class="pi pi-map-marker"></i> {{ startup.location || 'Remote' }}</div>
+          <div class="flex items-center gap-1"><i class="pi pi-tags"></i> {{ startup.category }}</div>
+          <div class="flex items-center gap-1"><i class="pi pi-building"></i> Founded {{ startup.foundedYear }}</div>
+          <div class="flex items-center gap-1"><i class="pi pi-users"></i> {{ startup.teamSize || 1 }}-10 employees</div>
+        </div>
+      </div>
+      
+      <div class="flex flex-col gap-3 min-w-[200px]">
+        <button *ngIf="isAuthenticated" pButton [label]="isFollowing ? 'Following' : 'Follow'" 
+                [icon]="isFollowing ? 'pi pi-check' : 'pi pi-plus'" 
+                [outlined]="!isFollowing" 
+                class="w-full" (click)="toggleFollow()"></button>
+        
+        <button *ngIf="isInvestor" pButton label="Invest Now" icon="pi pi-bolt" 
+                class="w-full p-button-success" 
+                (click)="initiateInvestment()"></button>
+                
+        <p class="text-center text-sm text-text-muted mt-2"><i class="pi pi-heart mr-1"></i> {{ startup.followersCount }} followers</p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    
+    <!-- Main Content -->
+    <div class="lg:col-span-2 flex flex-col gap-6">
+      
+      <!-- Funding Progress -->
+      <div class="bg-surface-card border border-surface-border rounded-xl p-6">
+        <h2 class="text-xl font-bold mb-4">Funding Progress</h2>
+        <div class="flex justify-between items-end mb-2">
+           <div class="text-emerald-500 font-bold text-2xl">{{ startup.currentFunding | currencyFormat }}</div>
+           <div class="text-text-muted text-sm border border-surface-border bg-surface px-2 py-1 rounded-md">Goal: {{ startup.fundingGoal | currencyFormat }}</div>
+        </div>
+        <div class="w-full bg-surface rounded-full h-3 mb-2 overflow-hidden shadow-inner">
+          <div class="bg-gradient-to-r from-emerald-400 to-emerald-600 h-3 rounded-full" [style.width.%]="(startup.currentFunding / startup.fundingGoal * 100)"></div>
+        </div>
+        <div class="flex justify-between text-xs text-text-muted">
+           <span>{{ (startup.currentFunding / startup.fundingGoal * 100) | number:'1.0-0' }}% Raised</span>
+           <span>Round: {{ startup.currentRound || 'Seed' }}</span>
+        </div>
+      </div>
+      
+      <!-- Tab View -->
+      <div class="bg-surface-card border border-surface-border rounded-xl overflow-hidden">
+        <p-tabView styleClass="p-0">
+          <p-tabPanel header="About">
+            <div class="p-4 prose prose-invert max-w-none text-text-primary whitespace-pre-wrap leading-relaxed">
+              {{ startup.description }}
+            </div>
+          </p-tabPanel>
+          
+          <p-tabPanel header="Updates" [badge]="updates.length.toString()">
+            <div class="p-4 flex flex-col gap-4">
+              <div *ngIf="updates.length === 0" class="text-text-muted text-center py-8">
+                No updates posted yet.
+              </div>
+              <div *ngFor="let u of updates" class="border border-surface-border rounded-lg p-5">
+                <h3 class="font-bold text-lg mb-1 text-primary">{{ u.title }}</h3>
+                <p class="text-xs text-text-muted mb-4">{{ u.createdAt | timeAgo }}</p>
+                <div class="whitespace-pre-wrap">{{ u.content }}</div>
+              </div>
+            </div>
+          </p-tabPanel>
+          
+          <p-tabPanel header="Documents" [badge]="documents.length.toString()">
+            <div class="p-4 flex flex-col gap-3">
+              <div *ngIf="documents.length === 0" class="text-text-muted text-center py-8">
+                No documents available.
+              </div>
+              <a *ngFor="let d of documents" [href]="d.url" target="_blank" 
+                 class="flex items-center gap-4 p-4 border border-surface-border rounded-lg hover:bg-surface hover:border-primary/50 transition-colors group">
+                 <div class="bg-primary/20 text-primary p-3 rounded-lg group-hover:scale-105 transition-transform">
+                   <i class="pi pi-file-pdf text-2xl"></i>
+                 </div>
+                 <div>
+                   <p class="font-bold group-hover:text-primary transition-colors">{{ d.name }}</p>
+                   <p class="text-xs text-text-muted">{{ d.docType }} • {{ d.createdAt | timeAgo }}</p>
+                 </div>
+                 <i class="pi pi-external-link ml-auto text-text-muted group-hover:text-primary"></i>
+              </a>
+            </div>
+          </p-tabPanel>
+        </p-tabView>
+      </div>
+
+    </div>
+    
+    <!-- Sidebar / Team Panel -->
+    <div class="flex flex-col gap-6">
+      <div class="bg-surface-card border border-surface-border rounded-xl p-6">
+        <h2 class="text-xl font-bold mb-4">Core Team</h2>
+        <div class="flex flex-col gap-4">
+          
+          <!-- Founder -->
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-info flex items-center justify-center text-white font-bold">
+              {{ startup.founderEmail.charAt(0).toUpperCase() }}
+            </div>
+            <div>
+               <p class="font-bold text-sm">{{ startup.founderEmail }}</p>
+               <p class="text-xs text-primary font-semibold">Founder & CEO</p>
+            </div>
+          </div>
+          
+          <!-- Other Members -->
+          <div *ngFor="let m of team" class="flex items-center gap-3 border-t border-surface-border/50 pt-4">
+            <div class="w-10 h-10 rounded-full bg-surface-border flex items-center justify-center text-text-muted font-bold">
+              {{ m.userEmail.charAt(0).toUpperCase() }}
+            </div>
+            <div class="flex-1 overflow-hidden">
+               <p class="font-bold text-sm truncate">{{ m.userEmail }}</p>
+               <p class="text-xs text-text-muted">{{ m.role }}</p>
+            </div>
+          </div>
+          
+        </div>
+      </div>
+      
+      <!-- Founder Controls -->
+      <div *ngIf="isFounder" class="bg-surface-card border border-primary/50 rounded-xl p-6 shadow-[0_0_15px_-3px_rgba(99,102,241,0.2)]">
+        <h2 class="text-lg font-bold mb-4 flex items-center gap-2"><i class="pi pi-cog"></i> Manage Startup</h2>
+        <div class="flex flex-col gap-2">
+           <button pButton label="Edit Profile" icon="pi pi-pencil" [outlined]="true" [routerLink]="['/founder/startups', startup.id, 'edit']"></button>
+           <button pButton label="Manage Team" icon="pi pi-users" [outlined]="true" [routerLink]="['/founder/startups', startup.id, 'team']"></button>
+           <button pButton label="View Investments" icon="pi pi-chart-pie" [outlined]="true" [routerLink]="['/founder/startups', startup.id, 'investments']"></button>
+           <button pButton label="Post Update" icon="pi pi-megaphone" [outlined]="true" [routerLink]="['/founder/startups', startup.id, 'updates']"></button>
+           <button pButton label="Add Document" icon="pi pi-file" [outlined]="true" [routerLink]="['/founder/startups', startup.id, 'documents']"></button>
+        </div>
+      </div>
+    
+    </div>
+    
+  </div>
+
+</div>
+
+<!-- Invest Modal -->
+<p-dialog header="Commit Capital" [(visible)]="showInvestModal" [modal]="true" [style]="{width: '450px'}" [draggable]="false" [resizable]="false">
+  <div class="mb-6 text-sm text-text-muted">
+     You are initiating a direct investment into <span class="font-bold text-text-primary">{{ startup?.name }}</span> securely via Razorpay.
+  </div>
+  
+  <form [formGroup]="investForm" (ngSubmit)="proceedWithInvestment()" class="flex flex-col gap-5">
+    
+    <div class="flex flex-col gap-2">
+       <label class="text-sm font-semibold text-text-muted">Commitment Amount (USD) *</label>
+       <p-inputNumber formControlName="amount" mode="currency" currency="USD" locale="en-US" [min]="1000" styleClass="w-full"></p-inputNumber>
+       <small class="text-text-muted text-xs">Minimum investment is $1,000</small>
+    </div>
+    
+    <div class="flex flex-col gap-2">
+       <label class="text-sm font-semibold text-text-muted">Investing Entity / Firm Name (Optional)</label>
+       <input pInputText formControlName="investorFirm" class="w-full" placeholder="e.g. Acme Ventures" />
+    </div>
+
+    <div class="flex justify-end mt-4 gap-3 pt-4 border-t border-surface-border">
+       <button pButton type="button" label="Cancel" class="p-button-text" (click)="showInvestModal = false"></button>
+       <button pButton type="submit" label="Proceed to Payment" icon="pi pi-lock" [loading]="investing" [disabled]="investForm.invalid" class="p-button-success"></button>
+    </div>
+  </form>
+</p-dialog>

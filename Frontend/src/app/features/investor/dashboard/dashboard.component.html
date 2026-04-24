@@ -1,0 +1,118 @@
+<div class="flex flex-col gap-6">
+  
+  <div>
+    <h1 class="text-3xl font-bold text-text-primary">Investor Dashboard</h1>
+    <p class="text-text-muted mt-1">Track your portfolio performance and find new opportunities.</p>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div class="bg-surface-card border border-surface-border rounded-xl p-5 hover:-translate-y-1 transition-transform">
+      <div class="flex justify-between items-start mb-4">
+         <h3 class="font-semibold text-text-muted text-sm">Capital Deployed</h3>
+         <i class="pi pi-dollar text-emerald-500 text-xl bg-emerald-500/10 p-2 rounded-lg"></i>
+      </div>
+      <p class="text-3xl font-bold text-emerald-500">{{ totalCapitalDeployed | currencyFormat }}</p>
+    </div>
+    
+    <div class="bg-surface-card border border-surface-border rounded-xl p-5 hover:-translate-y-1 transition-transform">
+      <div class="flex justify-between items-start mb-4">
+         <h3 class="font-semibold text-text-muted text-sm">Portfolio Size</h3>
+         <i class="pi pi-briefcase text-primary text-xl bg-primary/10 p-2 rounded-lg"></i>
+      </div>
+      <p class="text-3xl font-bold">{{ activePortfolios }}</p>
+    </div>
+    
+    <div class="bg-surface-card border border-surface-border rounded-xl p-5 hover:-translate-y-1 transition-transform">
+      <div class="flex justify-between items-start mb-4">
+         <h3 class="font-semibold text-text-muted text-sm">Avg. IRR</h3>
+         <i class="pi pi-chart-line text-info text-xl bg-info/10 p-2 rounded-lg"></i>
+      </div>
+      <p class="text-3xl font-bold">24.5%</p>
+    </div>
+
+    <div class="bg-surface-card border border-surface-border rounded-xl p-5 hover:-translate-y-1 transition-transform">
+      <div class="flex justify-between items-start mb-4">
+         <h3 class="font-semibold text-text-muted text-sm">Find Startups</h3>
+         <i class="pi pi-search text-warning text-xl bg-warning/10 p-2 rounded-lg"></i>
+      </div>
+      <button class="text-warning font-semibold hover:underline mt-1" routerLink="/startups">Browse Deals &rarr;</button>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    
+    <!-- Portfolio Allocation Chart -->
+    <div class="bg-surface-card border border-surface-border rounded-xl p-6">
+      <h2 class="text-lg font-bold mb-4">Portfolio Allocation</h2>
+      <div echarts [options]="chartOptions" class="w-full h-[300px]"></div>
+      <div *ngIf="activePortfolios === 0" class="h-[300px] flex items-center justify-center text-text-muted absolute top-12 left-0 w-full bg-surface-card">
+        No investments yet.
+      </div>
+    </div>
+    
+    <!-- Trend Line -->
+    <div class="lg:col-span-2 bg-surface-card border border-surface-border rounded-xl p-6">
+      <h2 class="text-lg font-bold mb-4">Estimated Return Value (Projected)</h2>
+      <div echarts [options]="trendOptions" class="w-full h-[300px]"></div>
+    </div>
+    
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+     <!-- My Investments (Recent) -->
+     <div class="lg:col-span-2 bg-surface-card border border-surface-border rounded-xl overflow-hidden">
+       <div class="p-6 border-b border-surface-border flex justify-between items-center">
+          <h2 class="text-lg font-bold">Recent Commitments</h2>
+          <a routerLink="/investor/my-investments" class="text-sm font-semibold text-primary hover:underline">View All</a>
+       </div>
+       <div class="overflow-x-auto">
+         <table class="w-full text-left text-sm text-text-primary">
+           <thead class="bg-surface text-text-muted uppercase text-xs">
+             <tr>
+               <th class="px-6 py-3">Startup</th>
+               <th class="px-6 py-3">Amount</th>
+               <th class="px-6 py-3">Status</th>
+             </tr>
+           </thead>
+           <tbody class="divide-y divide-surface-border">
+             <tr *ngFor="let i of investments.slice(0, 4)" class="hover:bg-surface/50 transition-colors">
+               <td class="px-6 py-4 font-medium"><a [routerLink]="['/startups', i.startupId]" class="hover:underline">{{ i.startupName || 'Startup #' + i.startupId }}</a></td>
+               <td class="px-6 py-4 font-bold">{{ i.amount | currencyFormat }}</td>
+               <td class="px-6 py-4">
+                  <span class="px-2 py-1 text-[10px] rounded border"
+                        [ngClass]="{
+                          'text-warning bg-warning/10 border-warning/50': i.status === 'PENDING',
+                          'text-emerald-500 bg-emerald-500/10 border-emerald-500/50': i.status === 'COMPLETED' || i.status === 'SUCCESS' || i.status === 'APPROVED',
+                          'text-danger bg-danger/10 border-danger/50': i.status === 'REJECTED' || i.status === 'FAILED'
+                        }">
+                    {{ i.status }}
+                  </span>
+               </td>
+             </tr>
+             <tr *ngIf="investments.length === 0">
+               <td colspan="3" class="px-6 py-8 text-center text-text-muted border-dashed border-t border-surface-border">No investments made. Make your first commitment!</td>
+             </tr>
+           </tbody>
+         </table>
+       </div>
+     </div>
+
+     <!-- Notifications -->
+     <div class="bg-surface-card border border-surface-border rounded-xl p-6">
+       <h2 class="text-lg font-bold mb-4">Alerts & Updates</h2>
+       <div class="flex flex-col gap-4">
+         <div *ngFor="let n of notifications" class="flex gap-3">
+            <div class="mt-1">
+              <i class="pi text-primary" [ngClass]="{'pi-info-circle': n.type === 'SYSTEM', 'pi-users': n.type === 'TEAM', 'pi-dollar': n.type === 'INVESTMENT'}"></i>
+            </div>
+            <div>
+              <p class="text-sm font-medium">{{ n.title }}</p>
+              <p class="text-xs text-text-muted mt-1">{{ n.createdAt | timeAgo }}</p>
+            </div>
+         </div>
+         <div *ngIf="notifications.length === 0" class="text-sm text-text-muted py-6 text-center border border-dashed border-surface-border rounded-lg">No alerts. You're all caught up!</div>
+       </div>
+     </div>
+  </div>
+
+</div>

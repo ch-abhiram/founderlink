@@ -1,0 +1,1197 @@
+
+> frontend@0.0.0 build
+> ng build
+
+- Building...
+
+Application bundle generation failed. [7.746 seconds]
+
+X [ERROR] TS2307: Cannot find module '../../../../core/services/startup.service' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/admin/pending-startups/pending-startups.component.ts:3:31:
+      3 │ ... StartupService } from '../../../../core/services/startup.service';
+        ╵                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../../core/models/startup.model' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/admin/pending-startups/pending-startups.component.ts:4:24:
+      4 │ import { Startup } from '../../../../core/models/startup.model';
+        ╵                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] Could not resolve "../../../../shared/pipes/currency-format.pipe"
+
+    src/app/features/admin/pending-startups/pending-startups.component.ts:4:35:
+      4 │ ...yFormatPipe } from '../../../../shared/pipes/currency-format.pipe';
+        ╵                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] Could not resolve "../../../../shared/pipes/time-ago.pipe"
+
+    src/app/features/admin/pending-startups/pending-startups.component.ts:5:28:
+      5 │ import { TimeAgoPipe } from '../../../../shared/pipes/time-ago.pipe';
+        ╵                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../../shared/pipes/currency-format.pipe' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/admin/pending-startups/pending-startups.component.ts:5:35:
+      5 │ ...yFormatPipe } from '../../../../shared/pipes/currency-format.pipe';
+        ╵                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../../shared/pipes/time-ago.pipe' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/admin/pending-startups/pending-startups.component.ts:6:28:
+      6 │ import { TimeAgoPipe } from '../../../../shared/pipes/time-ago.pipe';
+        ╵                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS-992003: No suitable injection token for parameter 'startupService' of class 'PendingStartupsComponent'.
+  Consider using the @Inject decorator to specify an injection token. [plugin angular-compiler]
+
+    src/app/features/admin/pending-startups/pending-startups.component.ts:22:12:
+      22 │     private startupService: StartupService,
+         ╵             ~~~~~~~~~~~~~~
+
+  This type does not have a value, so it cannot be used as injection token.
+
+    src/app/features/admin/pending-startups/pending-startups.component.ts:22:28:
+      22 │     private startupService: StartupService,
+         ╵                             ~~~~~~~~~~~~~~
+
+
+X [ERROR] TS7006: Parameter 'res' implicitly has an 'any' type. [plugin angular-compiler]
+
+    src/app/features/admin/pending-startups/pending-startups.component.ts:33:13:
+      33 │       next: (res) => {
+         ╵              ~~~
+
+
+X [ERROR] TS7006: Parameter 's' implicitly has an 'any' type. [plugin angular-compiler]
+
+    src/app/features/admin/pending-startups/pending-startups.component.ts:34:43:
+      34 │ ....startups = res.content.filter(s => s.status === 'PENDING').sor...
+         ╵                                   ^
+
+
+X [ERROR] TS7006: Parameter 'a' implicitly has an 'any' type. [plugin angular-compiler]
+
+    src/app/features/admin/pending-startups/pending-startups.component.ts:34:78:
+      34 │ ... s.status === 'PENDING').sort((a,b) => new Date(b.createdAt).ge...
+         ╵                                   ^
+
+
+X [ERROR] TS7006: Parameter 'b' implicitly has an 'any' type. [plugin angular-compiler]
+
+    src/app/features/admin/pending-startups/pending-startups.component.ts:34:80:
+      34 │ ....status === 'PENDING').sort((a,b) => new Date(b.createdAt).getT...
+         ╵                                   ^
+
+
+X [ERROR] TS2307: Cannot find module '../../../../core/services/auth.service' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/auth/login/login.component.ts:5:28:
+      5 │ import { AuthService } from '../../../../core/services/auth.service';
+        ╵                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS-992003: No suitable injection token for parameter 'authService' of class 'LoginComponent'.
+  Consider using the @Inject decorator to specify an injection token. [plugin angular-compiler]
+
+    src/app/features/auth/login/login.component.ts:24:12:
+      24 │     private authService: AuthService,
+         ╵             ~~~~~~~~~~~
+
+  This type does not have a value, so it cannot be used as injection token.
+
+    src/app/features/auth/login/login.component.ts:24:25:
+      24 │     private authService: AuthService,
+         ╵                          ~~~~~~~~~~~
+
+
+X [ERROR] TS7006: Parameter 'res' implicitly has an 'any' type. [plugin angular-compiler]
+
+    src/app/features/auth/login/login.component.ts:39:13:
+      39 │       next: (res) => {
+         ╵              ~~~
+
+
+X [ERROR] TS7006: Parameter 'err' implicitly has an 'any' type. [plugin angular-compiler]
+
+    src/app/features/auth/login/login.component.ts:46:14:
+      46 │       error: (err) => {
+         ╵               ~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../../core/services/auth.service' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/auth/register/register.component.ts:5:28:
+      5 │ import { AuthService } from '../../../../core/services/auth.service';
+        ╵                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS-992003: No suitable injection token for parameter 'authService' of class 'RegisterComponent'.
+  Consider using the @Inject decorator to specify an injection token. [plugin angular-compiler]
+
+    src/app/features/auth/register/register.component.ts:30:12:
+      30 │     private authService: AuthService,
+         ╵             ~~~~~~~~~~~
+
+  This type does not have a value, so it cannot be used as injection token.
+
+    src/app/features/auth/register/register.component.ts:30:25:
+      30 │     private authService: AuthService,
+         ╵                          ~~~~~~~~~~~
+
+
+X [ERROR] TS7006: Parameter 'res' implicitly has an 'any' type. [plugin angular-compiler]
+
+    src/app/features/auth/register/register.component.ts:72:13:
+      72 │       next: (res) => {
+         ╵              ~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../../core/services/auth.service' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/auth/verify-otp/verify-otp.component.ts:5:28:
+      5 │ import { AuthService } from '../../../../core/services/auth.service';
+        ╵                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS-992003: No suitable injection token for parameter 'authService' of class 'VerifyOtpComponent'.
+  Consider using the @Inject decorator to specify an injection token. [plugin angular-compiler]
+
+    src/app/features/auth/verify-otp/verify-otp.component.ts:29:12:
+      29 │     private authService: AuthService,
+         ╵             ~~~~~~~~~~~
+
+  This type does not have a value, so it cannot be used as injection token.
+
+    src/app/features/auth/verify-otp/verify-otp.component.ts:29:25:
+      29 │     private authService: AuthService,
+         ╵                          ~~~~~~~~~~~
+
+
+X [ERROR] TS7006: Parameter 'err' implicitly has an 'any' type. [plugin angular-compiler]
+
+    src/app/features/auth/verify-otp/verify-otp.component.ts:77:14:
+      77 │       error: (err) => {
+         ╵               ~~~
+
+
+X [ERROR] TS7006: Parameter 'err' implicitly has an 'any' type. [plugin angular-compiler]
+
+    src/app/features/auth/verify-otp/verify-otp.component.ts:124:14:
+      124 │       error: (err) => {
+          ╵               ~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../../core/services/startup.service' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/founder/dashboard/dashboard.component.ts:4:31:
+      4 │ ... StartupService } from '../../../../core/services/startup.service';
+        ╵                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../../core/services/team.service' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/founder/dashboard/dashboard.component.ts:5:28:
+      5 │ import { TeamService } from '../../../../core/services/team.service';
+        ╵                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] Could not resolve "../../../../shared/pipes/currency-format.pipe"
+
+    src/app/features/founder/dashboard/dashboard.component.ts:5:35:
+      5 │ ...yFormatPipe } from '../../../../shared/pipes/currency-format.pipe';
+        ╵                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] Could not resolve "../../../../shared/pipes/time-ago.pipe"
+
+    src/app/features/founder/dashboard/dashboard.component.ts:6:28:
+      6 │ import { TimeAgoPipe } from '../../../../shared/pipes/time-ago.pipe';
+        ╵                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../../core/services/investment.service' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/founder/dashboard/dashboard.component.ts:6:34:
+      6 │ ...tmentService } from '../../../../core/services/investment.service';
+        ╵                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../../core/services/notification.service' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/founder/dashboard/dashboard.component.ts:7:36:
+      7 │ ...ionService } from '../../../../core/services/notification.service';
+        ╵                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../../core/services/auth.service' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/founder/dashboard/dashboard.component.ts:8:28:
+      8 │ import { AuthService } from '../../../../core/services/auth.service';
+        ╵                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../../core/models/startup.model' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/founder/dashboard/dashboard.component.ts:9:24:
+      9 │ import { Startup } from '../../../../core/models/startup.model';
+        ╵                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../../core/models/investment.model' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/founder/dashboard/dashboard.component.ts:10:27:
+      10 │ ...rt { Investment } from '../../../../core/models/investment.model';
+         ╵                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../../core/models/notification.model' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/founder/dashboard/dashboard.component.ts:11:29:
+      11 │ ... Notification } from '../../../../core/models/notification.model';
+         ╵                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../../shared/pipes/currency-format.pipe' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/founder/dashboard/dashboard.component.ts:12:35:
+      12 │ ...FormatPipe } from '../../../../shared/pipes/currency-format.pipe';
+         ╵                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../../shared/pipes/time-ago.pipe' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/founder/dashboard/dashboard.component.ts:13:28:
+      13 │ import { TimeAgoPipe } from '../../../../shared/pipes/time-ago.pipe';
+         ╵                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS-992003: No suitable injection token for parameter 'startupService' of class 'DashboardComponent'.
+  Consider using the @Inject decorator to specify an injection token. [plugin angular-compiler]
+
+    src/app/features/founder/dashboard/dashboard.component.ts:48:12:
+      48 │     private startupService: StartupService,
+         ╵             ~~~~~~~~~~~~~~
+
+  This type does not have a value, so it cannot be used as injection token.
+
+    src/app/features/founder/dashboard/dashboard.component.ts:48:28:
+      48 │     private startupService: StartupService,
+         ╵                             ~~~~~~~~~~~~~~
+
+
+X [ERROR] TS7006: Parameter 'res' implicitly has an 'any' type. [plugin angular-compiler]
+
+    src/app/features/founder/dashboard/dashboard.component.ts:63:53:
+      63 │     this.startupService.search({}, 0, 100).subscribe(res => {
+         ╵                                                      ~~~
+
+
+X [ERROR] TS7006: Parameter 's' implicitly has an 'any' type. [plugin angular-compiler]
+
+    src/app/features/founder/dashboard/dashboard.component.ts:64:41:
+      64 │ ...this.startups = res.content.filter(s => s.founderEmail === email);
+         ╵                                       ^
+
+
+X [ERROR] TS7006: Parameter 'n' implicitly has an 'any' type. [plugin angular-compiler]
+
+    src/app/features/founder/dashboard/dashboard.component.ts:69:51:
+      69 │     this.notifService.getNotifications().subscribe(n => {
+         ╵                                                    ^
+
+
+X [ERROR] TS7006: Parameter 'invs' implicitly has an 'any' type. [plugin angular-compiler]
+
+    src/app/features/founder/dashboard/dashboard.component.ts:78:63:
+      78 │ ...this.invService.getInvestmentsForStartup(s.id).subscribe(invs => {
+         ╵                                                             ~~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../../core/services/startup.service' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/founder/documents/documents.component.ts:5:31:
+      5 │ ... StartupService } from '../../../../core/services/startup.service';
+        ╵                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../../core/models/startup.model' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/founder/documents/documents.component.ts:6:32:
+      6 │ ...t { StartupDocument } from '../../../../core/models/startup.model';
+        ╵                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] Could not resolve "../../../../shared/pipes/time-ago.pipe"
+
+    src/app/features/founder/documents/documents.component.ts:9:28:
+      9 │ import { TimeAgoPipe } from '../../../../shared/pipes/time-ago.pipe';
+        ╵                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../../shared/pipes/time-ago.pipe' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/founder/documents/documents.component.ts:11:28:
+      11 │ import { TimeAgoPipe } from '../../../../shared/pipes/time-ago.pipe';
+         ╵                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS-992003: No suitable injection token for parameter 'startupService' of class 'DocumentsComponent'.
+  Consider using the @Inject decorator to specify an injection token. [plugin angular-compiler]
+
+    src/app/features/founder/documents/documents.component.ts:36:12:
+      36 │     private startupService: StartupService,
+         ╵             ~~~~~~~~~~~~~~
+
+  This type does not have a value, so it cannot be used as injection token.
+
+    src/app/features/founder/documents/documents.component.ts:36:28:
+      36 │     private startupService: StartupService,
+         ╵                             ~~~~~~~~~~~~~~
+
+
+X [ERROR] TS7006: Parameter 'res' implicitly has an 'any' type. [plugin angular-compiler]
+
+    src/app/features/founder/documents/documents.component.ts:57:13:
+      57 │       next: (res) => {
+         ╵              ~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../../core/services/investment.service' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/founder/investments-received/investments-received.component.ts:4:34:
+      4 │ ...tmentService } from '../../../../core/services/investment.service';
+        ╵                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../../core/models/investment.model' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/founder/investments-received/investments-received.component.ts:5:27:
+      5 │ import { Investment } from '../../../../core/models/investment.model';
+        ╵                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] Could not resolve "../../../../shared/pipes/currency-format.pipe"
+
+    src/app/features/founder/investments-received/investments-received.component.ts:5:35:
+      5 │ ...yFormatPipe } from '../../../../shared/pipes/currency-format.pipe';
+        ╵                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] Could not resolve "../../../../shared/pipes/time-ago.pipe"
+
+    src/app/features/founder/investments-received/investments-received.component.ts:6:28:
+      6 │ import { TimeAgoPipe } from '../../../../shared/pipes/time-ago.pipe';
+        ╵                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../../shared/pipes/currency-format.pipe' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/founder/investments-received/investments-received.component.ts:7:35:
+      7 │ ...yFormatPipe } from '../../../../shared/pipes/currency-format.pipe';
+        ╵                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../../shared/pipes/time-ago.pipe' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/founder/investments-received/investments-received.component.ts:8:28:
+      8 │ import { TimeAgoPipe } from '../../../../shared/pipes/time-ago.pipe';
+        ╵                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS-992003: No suitable injection token for parameter 'invService' of class 'InvestmentsReceivedComponent'.
+  Consider using the @Inject decorator to specify an injection token. [plugin angular-compiler]
+
+    src/app/features/founder/investments-received/investments-received.component.ts:25:12:
+      25 │     private invService: InvestmentService,
+         ╵             ~~~~~~~~~~
+
+  This type does not have a value, so it cannot be used as injection token.
+
+    src/app/features/founder/investments-received/investments-received.component.ts:25:24:
+      25 │     private invService: InvestmentService,
+         ╵                         ~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS7006: Parameter 'res' implicitly has an 'any' type. [plugin angular-compiler]
+
+    src/app/features/founder/investments-received/investments-received.component.ts:39:13:
+      39 │       next: (res) => {
+         ╵              ~~~
+
+
+X [ERROR] TS7006: Parameter 'a' implicitly has an 'any' type. [plugin angular-compiler]
+
+    src/app/features/founder/investments-received/investments-received.component.ts:40:37:
+      40 │ ...  this.investments = res.sort((a,b) => new Date(b.createdAt).ge...
+         ╵                                   ^
+
+
+X [ERROR] TS7006: Parameter 'b' implicitly has an 'any' type. [plugin angular-compiler]
+
+    src/app/features/founder/investments-received/investments-received.component.ts:40:39:
+      40 │ ...this.investments = res.sort((a,b) => new Date(b.createdAt).getT...
+         ╵                                   ^
+
+
+X [ERROR] TS2307: Cannot find module '../../../../core/services/startup.service' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/founder/my-startups/my-startups.component.ts:4:31:
+      4 │ ... StartupService } from '../../../../core/services/startup.service';
+        ╵                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../../core/services/auth.service' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/founder/my-startups/my-startups.component.ts:5:28:
+      5 │ import { AuthService } from '../../../../core/services/auth.service';
+        ╵                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../../core/models/startup.model' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/founder/my-startups/my-startups.component.ts:6:24:
+      6 │ import { Startup } from '../../../../core/models/startup.model';
+        ╵                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] Could not resolve "../../../../shared/pipes/currency-format.pipe"
+
+    src/app/features/founder/my-startups/my-startups.component.ts:7:35:
+      7 │ ...yFormatPipe } from '../../../../shared/pipes/currency-format.pipe';
+        ╵                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../../shared/pipes/currency-format.pipe' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/founder/my-startups/my-startups.component.ts:9:35:
+      9 │ ...yFormatPipe } from '../../../../shared/pipes/currency-format.pipe';
+        ╵                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS-992003: No suitable injection token for parameter 'startupService' of class 'MyStartupsComponent'.
+  Consider using the @Inject decorator to specify an injection token. [plugin angular-compiler]
+
+    src/app/features/founder/my-startups/my-startups.component.ts:26:12:
+      26 │     private startupService: StartupService,
+         ╵             ~~~~~~~~~~~~~~
+
+  This type does not have a value, so it cannot be used as injection token.
+
+    src/app/features/founder/my-startups/my-startups.component.ts:26:28:
+      26 │     private startupService: StartupService,
+         ╵                             ~~~~~~~~~~~~~~
+
+
+X [ERROR] TS7006: Parameter 'res' implicitly has an 'any' type. [plugin angular-compiler]
+
+    src/app/features/founder/my-startups/my-startups.component.ts:41:13:
+      41 │       next: (res) => {
+         ╵              ~~~
+
+
+X [ERROR] TS7006: Parameter 's' implicitly has an 'any' type. [plugin angular-compiler]
+
+    src/app/features/founder/my-startups/my-startups.component.ts:42:43:
+      42 │ ...this.startups = res.content.filter(s => s.founderEmail === email);
+         ╵                                       ^
+
+
+X [ERROR] TS2307: Cannot find module '../../../../core/services/startup.service' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/founder/startup-manage/startup-manage.component.ts:5:31:
+      5 │ ... StartupService } from '../../../../core/services/startup.service';
+        ╵                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS-992003: No suitable injection token for parameter 'startupService' of class 'StartupManageComponent'.
+  Consider using the @Inject decorator to specify an injection token. [plugin angular-compiler]
+
+    src/app/features/founder/startup-manage/startup-manage.component.ts:32:12:
+      32 │     private startupService: StartupService,
+         ╵             ~~~~~~~~~~~~~~
+
+  This type does not have a value, so it cannot be used as injection token.
+
+    src/app/features/founder/startup-manage/startup-manage.component.ts:32:28:
+      32 │     private startupService: StartupService,
+         ╵                             ~~~~~~~~~~~~~~
+
+
+X [ERROR] TS7006: Parameter 'res' implicitly has an 'any' type. [plugin angular-compiler]
+
+    src/app/features/founder/startup-manage/startup-manage.component.ts:65:46:
+      65 │     this.startupService.getById(id).subscribe(res => {
+         ╵                                               ~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../../core/services/team.service' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/founder/team-manage/team-manage.component.ts:5:28:
+      5 │ import { TeamService } from '../../../../core/services/team.service';
+        ╵                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../../core/models/team.model' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/founder/team-manage/team-manage.component.ts:6:27:
+      6 │ import { TeamMember } from '../../../../core/models/team.model';
+        ╵                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS-992003: No suitable injection token for parameter 'teamService' of class 'TeamManageComponent'.
+  Consider using the @Inject decorator to specify an injection token. [plugin angular-compiler]
+
+    src/app/features/founder/team-manage/team-manage.component.ts:38:12:
+      38 │     private teamService: TeamService,
+         ╵             ~~~~~~~~~~~
+
+  This type does not have a value, so it cannot be used as injection token.
+
+    src/app/features/founder/team-manage/team-manage.component.ts:38:25:
+      38 │     private teamService: TeamService,
+         ╵                          ~~~~~~~~~~~
+
+
+X [ERROR] TS7006: Parameter 'res' implicitly has an 'any' type. [plugin angular-compiler]
+
+    src/app/features/founder/team-manage/team-manage.component.ts:61:13:
+      61 │       next: (res) => { this.team = res; this.loading = false; },
+         ╵              ~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../../core/services/startup.service' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/founder/updates/updates.component.ts:5:31:
+      5 │ ... StartupService } from '../../../../core/services/startup.service';
+        ╵                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../../core/models/startup.model' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/founder/updates/updates.component.ts:6:30:
+      6 │ import { StartupUpdate } from '../../../../core/models/startup.model';
+        ╵                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] Could not resolve "../../../../shared/pipes/time-ago.pipe"
+
+    src/app/features/founder/updates/updates.component.ts:9:28:
+      9 │ import { TimeAgoPipe } from '../../../../shared/pipes/time-ago.pipe';
+        ╵                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../../shared/pipes/time-ago.pipe' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/founder/updates/updates.component.ts:11:28:
+      11 │ import { TimeAgoPipe } from '../../../../shared/pipes/time-ago.pipe';
+         ╵                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS-992003: No suitable injection token for parameter 'startupService' of class 'UpdatesComponent'.
+  Consider using the @Inject decorator to specify an injection token. [plugin angular-compiler]
+
+    src/app/features/founder/updates/updates.component.ts:29:12:
+      29 │     private startupService: StartupService,
+         ╵             ~~~~~~~~~~~~~~
+
+  This type does not have a value, so it cannot be used as injection token.
+
+    src/app/features/founder/updates/updates.component.ts:29:28:
+      29 │     private startupService: StartupService,
+         ╵                             ~~~~~~~~~~~~~~
+
+
+X [ERROR] TS7006: Parameter 'res' implicitly has an 'any' type. [plugin angular-compiler]
+
+    src/app/features/founder/updates/updates.component.ts:49:13:
+      49 │       next: (res) => {
+         ╵              ~~~
+
+
+X [ERROR] TS7006: Parameter 'a' implicitly has an 'any' type. [plugin angular-compiler]
+
+    src/app/features/founder/updates/updates.component.ts:50:33:
+      50 │         this.updates = res.sort((a,b) => new Date(b.createdAt).get...
+         ╵                                  ^
+
+
+X [ERROR] TS7006: Parameter 'b' implicitly has an 'any' type. [plugin angular-compiler]
+
+    src/app/features/founder/updates/updates.component.ts:50:35:
+      50 │ ...    this.updates = res.sort((a,b) => new Date(b.createdAt).getT...
+         ╵                                   ^
+
+
+X [ERROR] TS2307: Cannot find module '../../../../core/services/investment.service' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/investor/dashboard/dashboard.component.ts:4:34:
+      4 │ ...tmentService } from '../../../../core/services/investment.service';
+        ╵                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] Could not resolve "../../../../shared/pipes/currency-format.pipe"
+
+    src/app/features/investor/dashboard/dashboard.component.ts:5:35:
+      5 │ ...yFormatPipe } from '../../../../shared/pipes/currency-format.pipe';
+        ╵                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../../core/services/notification.service' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/investor/dashboard/dashboard.component.ts:5:36:
+      5 │ ...ionService } from '../../../../core/services/notification.service';
+        ╵                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] Could not resolve "../../../../shared/pipes/time-ago.pipe"
+
+    src/app/features/investor/dashboard/dashboard.component.ts:6:28:
+      6 │ import { TimeAgoPipe } from '../../../../shared/pipes/time-ago.pipe';
+        ╵                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../../core/services/auth.service' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/investor/dashboard/dashboard.component.ts:6:28:
+      6 │ import { AuthService } from '../../../../core/services/auth.service';
+        ╵                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../../core/models/investment.model' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/investor/dashboard/dashboard.component.ts:7:27:
+      7 │ import { Investment } from '../../../../core/models/investment.model';
+        ╵                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../../core/models/notification.model' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/investor/dashboard/dashboard.component.ts:8:29:
+      8 │ ...{ Notification } from '../../../../core/models/notification.model';
+        ╵                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../../shared/pipes/currency-format.pipe' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/investor/dashboard/dashboard.component.ts:9:35:
+      9 │ ...yFormatPipe } from '../../../../shared/pipes/currency-format.pipe';
+        ╵                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../../shared/pipes/time-ago.pipe' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/investor/dashboard/dashboard.component.ts:10:28:
+      10 │ import { TimeAgoPipe } from '../../../../shared/pipes/time-ago.pipe';
+         ╵                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS-992003: No suitable injection token for parameter 'invService' of class 'DashboardComponent'.
+  Consider using the @Inject decorator to specify an injection token. [plugin angular-compiler]
+
+    src/app/features/investor/dashboard/dashboard.component.ts:45:12:
+      45 │     private invService: InvestmentService,
+         ╵             ~~~~~~~~~~
+
+  This type does not have a value, so it cannot be used as injection token.
+
+    src/app/features/investor/dashboard/dashboard.component.ts:45:24:
+      45 │     private invService: InvestmentService,
+         ╵                         ~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS7006: Parameter 'res' implicitly has an 'any' type. [plugin angular-compiler]
+
+    src/app/features/investor/dashboard/dashboard.component.ts:58:49:
+      58 │     this.invService.getMyInvestments().subscribe(res => {
+         ╵                                                  ~~~
+
+
+X [ERROR] TS7006: Parameter 'a' implicitly has an 'any' type. [plugin angular-compiler]
+
+    src/app/features/investor/dashboard/dashboard.component.ts:59:35:
+      59 │ ...  this.investments = res.sort((a,b) => new Date(b.createdAt).ge...
+         ╵                                   ^
+
+
+X [ERROR] TS7006: Parameter 'b' implicitly has an 'any' type. [plugin angular-compiler]
+
+    src/app/features/investor/dashboard/dashboard.component.ts:59:37:
+      59 │ ...this.investments = res.sort((a,b) => new Date(b.createdAt).getT...
+         ╵                                   ^
+
+
+X [ERROR] TS7006: Parameter 'n' implicitly has an 'any' type. [plugin angular-compiler]
+
+    src/app/features/investor/dashboard/dashboard.component.ts:62:53:
+      62 │       this.notifService.getNotifications().subscribe(n => {
+         ╵                                                      ^
+
+
+X [ERROR] TS2307: Cannot find module '../../../../core/services/investment.service' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/investor/my-investments/my-investments.component.ts:4:34:
+      4 │ ...tmentService } from '../../../../core/services/investment.service';
+        ╵                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../../core/models/investment.model' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/investor/my-investments/my-investments.component.ts:5:27:
+      5 │ import { Investment } from '../../../../core/models/investment.model';
+        ╵                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] Could not resolve "../../../../shared/pipes/currency-format.pipe"
+
+    src/app/features/investor/my-investments/my-investments.component.ts:5:35:
+      5 │ ...yFormatPipe } from '../../../../shared/pipes/currency-format.pipe';
+        ╵                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] Could not resolve "../../../../shared/pipes/time-ago.pipe"
+
+    src/app/features/investor/my-investments/my-investments.component.ts:6:28:
+      6 │ import { TimeAgoPipe } from '../../../../shared/pipes/time-ago.pipe';
+        ╵                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../../shared/pipes/currency-format.pipe' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/investor/my-investments/my-investments.component.ts:6:35:
+      6 │ ...yFormatPipe } from '../../../../shared/pipes/currency-format.pipe';
+        ╵                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../../shared/pipes/time-ago.pipe' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/investor/my-investments/my-investments.component.ts:7:28:
+      7 │ import { TimeAgoPipe } from '../../../../shared/pipes/time-ago.pipe';
+        ╵                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS-992003: No suitable injection token for parameter 'invService' of class 'MyInvestmentsComponent'.
+  Consider using the @Inject decorator to specify an injection token. [plugin angular-compiler]
+
+    src/app/features/investor/my-investments/my-investments.component.ts:23:12:
+      23 │     private invService: InvestmentService
+         ╵             ~~~~~~~~~~
+
+  This type does not have a value, so it cannot be used as injection token.
+
+    src/app/features/investor/my-investments/my-investments.component.ts:23:24:
+      23 │     private invService: InvestmentService
+         ╵                         ~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS7006: Parameter 'res' implicitly has an 'any' type. [plugin angular-compiler]
+
+    src/app/features/investor/my-investments/my-investments.component.ts:28:13:
+      28 │       next: (res) => {
+         ╵              ~~~
+
+
+X [ERROR] TS7006: Parameter 'a' implicitly has an 'any' type. [plugin angular-compiler]
+
+    src/app/features/investor/my-investments/my-investments.component.ts:29:37:
+      29 │ ...  this.investments = res.sort((a,b) => new Date(b.createdAt).ge...
+         ╵                                   ^
+
+
+X [ERROR] TS7006: Parameter 'b' implicitly has an 'any' type. [plugin angular-compiler]
+
+    src/app/features/investor/my-investments/my-investments.component.ts:29:39:
+      29 │ ...this.investments = res.sort((a,b) => new Date(b.createdAt).getT...
+         ╵                                   ^
+
+
+X [ERROR] TS2307: Cannot find module '../../../core/services/startup.service' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/landing/landing.component.ts:4:31:
+      4 │ ...t { StartupService } from '../../../core/services/startup.service';
+        ╵                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../core/models/startup.model' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/landing/landing.component.ts:5:24:
+      5 │ import { Startup } from '../../../core/models/startup.model';
+        ╵                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] Could not resolve "../../../shared/pipes/currency-format.pipe"
+
+    src/app/features/landing/landing.component.ts:5:35:
+      5 │ ...encyFormatPipe } from '../../../shared/pipes/currency-format.pipe';
+        ╵                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../shared/pipes/currency-format.pipe' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/landing/landing.component.ts:6:35:
+      6 │ ...encyFormatPipe } from '../../../shared/pipes/currency-format.pipe';
+        ╵                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS-992003: No suitable injection token for parameter 'startupService' of class 'LandingComponent'.
+  Consider using the @Inject decorator to specify an injection token. [plugin angular-compiler]
+
+    src/app/features/landing/landing.component.ts:20:22:
+      20 │   constructor(private startupService: StartupService) {}
+         ╵                       ~~~~~~~~~~~~~~
+
+  This type does not have a value, so it cannot be used as injection token.
+
+    src/app/features/landing/landing.component.ts:20:38:
+      20 │   constructor(private startupService: StartupService) {}
+         ╵                                       ~~~~~~~~~~~~~~
+
+
+X [ERROR] TS7006: Parameter 'res' implicitly has an 'any' type. [plugin angular-compiler]
+
+    src/app/features/landing/landing.component.ts:24:13:
+      24 │       next: (res) => {
+         ╵              ~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../../core/services/messaging.service' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/messaging/inbox/inbox.component.ts:4:33:
+      4 │ ...sagingService } from '../../../../core/services/messaging.service';
+        ╵                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] Could not resolve "../../../../shared/pipes/time-ago.pipe"
+
+    src/app/features/messaging/inbox/inbox.component.ts:5:28:
+      5 │ import { TimeAgoPipe } from '../../../../shared/pipes/time-ago.pipe';
+        ╵                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../../core/services/auth.service' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/messaging/inbox/inbox.component.ts:5:28:
+      5 │ import { AuthService } from '../../../../core/services/auth.service';
+        ╵                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../../core/models/messaging.model' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/messaging/inbox/inbox.component.ts:6:38:
+      6 │ ...ersation, Message } from '../../../../core/models/messaging.model';
+        ╵                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../../shared/pipes/time-ago.pipe' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/messaging/inbox/inbox.component.ts:7:28:
+      7 │ import { TimeAgoPipe } from '../../../../shared/pipes/time-ago.pipe';
+        ╵                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS-992003: No suitable injection token for parameter 'msgService' of class 'InboxComponent'.
+  Consider using the @Inject decorator to specify an injection token. [plugin angular-compiler]
+
+    src/app/features/messaging/inbox/inbox.component.ts:31:12:
+      31 │     private msgService: MessagingService,
+         ╵             ~~~~~~~~~~
+
+  This type does not have a value, so it cannot be used as injection token.
+
+    src/app/features/messaging/inbox/inbox.component.ts:31:24:
+      31 │     private msgService: MessagingService,
+         ╵                         ~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS7006: Parameter 'res' implicitly has an 'any' type. [plugin angular-compiler]
+
+    src/app/features/messaging/inbox/inbox.component.ts:56:51:
+      56 │     this.msgService.getMyConversations().subscribe(res => {
+         ╵                                                    ~~~
+
+
+X [ERROR] TS7006: Parameter 'a' implicitly has an 'any' type. [plugin angular-compiler]
+
+    src/app/features/messaging/inbox/inbox.component.ts:57:37:
+      57 │ ...this.conversations = res.sort((a,b) => new Date(b.updatedAt).ge...
+         ╵                                   ^
+
+
+X [ERROR] TS7006: Parameter 'b' implicitly has an 'any' type. [plugin angular-compiler]
+
+    src/app/features/messaging/inbox/inbox.component.ts:57:39:
+      57 │ ...is.conversations = res.sort((a,b) => new Date(b.updatedAt).getT...
+         ╵                                   ^
+
+
+X [ERROR] TS7006: Parameter 'res' implicitly has an 'any' type. [plugin angular-compiler]
+
+    src/app/features/messaging/inbox/inbox.component.ts:66:60:
+      66 │     this.msgService.getConversationMessages(c.id).subscribe(res => {
+         ╵                                                             ~~~
+
+
+X [ERROR] TS7006: Parameter 'a' implicitly has an 'any' type. [plugin angular-compiler]
+
+    src/app/features/messaging/inbox/inbox.component.ts:67:32:
+      67 │       this.messages = res.sort((a,b) => new Date(a.createdAt).getT...
+         ╵                                 ^
+
+
+X [ERROR] TS7006: Parameter 'b' implicitly has an 'any' type. [plugin angular-compiler]
+
+    src/app/features/messaging/inbox/inbox.component.ts:67:34:
+      67 │       this.messages = res.sort((a,b) => new Date(a.createdAt).getT...
+         ╵                                   ^
+
+
+X [ERROR] TS7006: Parameter 'res' implicitly has an 'any' type. [plugin angular-compiler]
+
+    src/app/features/messaging/inbox/inbox.component.ts:74:62:
+      74 │ ...this.msgService.getConversationMessages(convId).subscribe(res => {
+         ╵                                                              ~~~
+
+
+X [ERROR] TS7006: Parameter 'a' implicitly has an 'any' type. [plugin angular-compiler]
+
+    src/app/features/messaging/inbox/inbox.component.ts:75:31:
+      75 │       const sorted = res.sort((a,b) => new Date(a.createdAt).getTi...
+         ╵                                ^
+
+
+X [ERROR] TS7006: Parameter 'b' implicitly has an 'any' type. [plugin angular-compiler]
+
+    src/app/features/messaging/inbox/inbox.component.ts:75:33:
+      75 │       const sorted = res.sort((a,b) => new Date(a.createdAt).getTi...
+         ╵                                  ^
+
+
+X [ERROR] NG9: Property 'read' does not exist on type 'Notification'. [plugin angular-compiler]
+
+    src/app/features/notifications/notifications.component.html:25:22:
+      25 │          [ngClass]="n.read ? 'bg-surface-card border-transparent h...
+         ╵                       ~~~~
+
+  Error occurs in the template of component NotificationsComponent.
+
+    src/app/features/notifications/notifications.component.ts:12:15:
+      12 │   templateUrl: './notifications.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../core/services/auth.service' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/profile/profile.component.ts:4:28:
+      4 │ import { AuthService } from '../../../core/services/auth.service';
+        ╵                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../core/services/user.service' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/profile/profile.component.ts:5:28:
+      5 │ import { UserService } from '../../../core/services/user.service';
+        ╵                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS-992003: No suitable injection token for parameter 'authService' of class 'ProfileComponent'.
+  Consider using the @Inject decorator to specify an injection token. [plugin angular-compiler]
+
+    src/app/features/profile/profile.component.ts:45:12:
+      45 │     private authService: AuthService,
+         ╵             ~~~~~~~~~~~
+
+  This type does not have a value, so it cannot be used as injection token.
+
+    src/app/features/profile/profile.component.ts:45:25:
+      45 │     private authService: AuthService,
+         ╵                          ~~~~~~~~~~~
+
+
+X [ERROR] TS7006: Parameter 'res' implicitly has an 'any' type. [plugin angular-compiler]
+
+    src/app/features/profile/profile.component.ts:82:58:
+      82 │     this.userService.getUserProfile(this.email).subscribe(res => {
+         ╵                                                           ~~~
+
+
+X [ERROR] TS7006: Parameter 'res' implicitly has an 'any' type. [plugin angular-compiler]
+
+    src/app/features/profile/profile.component.ts:85:58:
+      85 │     this.userService.getPreferences(this.email).subscribe(res => {
+         ╵                                                           ~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../../core/services/startup.service' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/startups/detail/detail.component.ts:4:31:
+      4 │ ... StartupService } from '../../../../core/services/startup.service';
+        ╵                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../../core/services/team.service' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/startups/detail/detail.component.ts:5:28:
+      5 │ import { TeamService } from '../../../../core/services/team.service';
+        ╵                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] Could not resolve "../../../../shared/pipes/currency-format.pipe"
+
+    src/app/features/startups/detail/detail.component.ts:5:35:
+      5 │ ...yFormatPipe } from '../../../../shared/pipes/currency-format.pipe';
+        ╵                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] Could not resolve "../../../../shared/pipes/time-ago.pipe"
+
+    src/app/features/startups/detail/detail.component.ts:6:28:
+      6 │ import { TimeAgoPipe } from '../../../../shared/pipes/time-ago.pipe';
+        ╵                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../../core/services/auth.service' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/startups/detail/detail.component.ts:6:28:
+      6 │ import { AuthService } from '../../../../core/services/auth.service';
+        ╵                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../../core/models/startup.model' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/startups/detail/detail.component.ts:7:56:
+      7 │ ...te, StartupDocument } from '../../../../core/models/startup.model';
+        ╵                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../../core/models/team.model' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/startups/detail/detail.component.ts:8:27:
+      8 │ import { TeamMember } from '../../../../core/models/team.model';
+        ╵                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../../shared/pipes/currency-format.pipe' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/startups/detail/detail.component.ts:9:35:
+      9 │ ...yFormatPipe } from '../../../../shared/pipes/currency-format.pipe';
+        ╵                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../../shared/pipes/time-ago.pipe' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/startups/detail/detail.component.ts:10:28:
+      10 │ import { TimeAgoPipe } from '../../../../shared/pipes/time-ago.pipe';
+         ╵                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS-992003: No suitable injection token for parameter 'startupService' of class 'DetailComponent'.
+  Consider using the @Inject decorator to specify an injection token. [plugin angular-compiler]
+
+    src/app/features/startups/detail/detail.component.ts:49:12:
+      49 │     private startupService: StartupService,
+         ╵             ~~~~~~~~~~~~~~
+
+  This type does not have a value, so it cannot be used as injection token.
+
+    src/app/features/startups/detail/detail.component.ts:49:28:
+      49 │     private startupService: StartupService,
+         ╵                             ~~~~~~~~~~~~~~
+
+
+X [ERROR] TS7006: Parameter 'res' implicitly has an 'any' type. [plugin angular-compiler]
+
+    src/app/features/startups/detail/detail.component.ts:75:13:
+      75 │       next: (res) => {
+         ╵              ~~~
+
+
+X [ERROR] TS7006: Parameter 'followers' implicitly has an 'any' type. [plugin angular-compiler]
+
+    src/app/features/startups/detail/detail.component.ts:97:64:
+      97 │ ...rtupService.getFollowers(this.startup.id).subscribe(followers => {
+         ╵                                                        ~~~~~~~~~
+
+
+X [ERROR] TS7006: Parameter 't' implicitly has an 'any' type. [plugin angular-compiler]
+
+    src/app/features/startups/detail/detail.component.ts:103:53:
+      103 │ ...etTeamForStartup(id).subscribe(t => this.team = t.filter(x => ...
+          ╵                                   ^
+
+
+X [ERROR] TS7006: Parameter 'x' implicitly has an 'any' type. [plugin angular-compiler]
+
+    src/app/features/startups/detail/detail.component.ts:103:79:
+      103 │ ...bscribe(t => this.team = t.filter(x => x.status === 'ACCEPTED'));
+          ╵                                      ^
+
+
+X [ERROR] TS7006: Parameter 'u' implicitly has an 'any' type. [plugin angular-compiler]
+
+    src/app/features/startups/detail/detail.component.ts:104:49:
+      104 │ ...s.startupService.getUpdates(id).subscribe(u => this.updates = u);
+          ╵                                              ^
+
+
+X [ERROR] TS7006: Parameter 'd' implicitly has an 'any' type. [plugin angular-compiler]
+
+    src/app/features/startups/detail/detail.component.ts:105:51:
+      105 │ ...artupService.getDocuments(id).subscribe(d => this.documents = d);
+          ╵                                            ^
+
+
+X [ERROR] TS2307: Cannot find module '../../../../core/services/startup.service' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/startups/discovery/discovery.component.ts:5:31:
+      5 │ ... StartupService } from '../../../../core/services/startup.service';
+        ╵                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../../core/models/startup.model' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/startups/discovery/discovery.component.ts:6:24:
+      6 │ import { Startup } from '../../../../core/models/startup.model';
+        ╵                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] Could not resolve "../../../../shared/pipes/currency-format.pipe"
+
+    src/app/features/startups/discovery/discovery.component.ts:6:35:
+      6 │ ...yFormatPipe } from '../../../../shared/pipes/currency-format.pipe';
+        ╵                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2307: Cannot find module '../../../../shared/pipes/currency-format.pipe' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/features/startups/discovery/discovery.component.ts:7:35:
+      7 │ ...yFormatPipe } from '../../../../shared/pipes/currency-format.pipe';
+        ╵                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS-992003: No suitable injection token for parameter 'startupService' of class 'DiscoveryComponent'.
+  Consider using the @Inject decorator to specify an injection token. [plugin angular-compiler]
+
+    src/app/features/startups/discovery/discovery.component.ts:60:22:
+      60 │   constructor(private startupService: StartupService) {}
+         ╵                       ~~~~~~~~~~~~~~
+
+  This type does not have a value, so it cannot be used as injection token.
+
+    src/app/features/startups/discovery/discovery.component.ts:60:38:
+      60 │   constructor(private startupService: StartupService) {}
+         ╵                                       ~~~~~~~~~~~~~~
+
+
+X [ERROR] TS7006: Parameter 'res' implicitly has an 'any' type. [plugin angular-compiler]
+
+    src/app/features/startups/discovery/discovery.component.ts:69:13:
+      69 │       next: (res) => {
+         ╵              ~~~
+
+

@@ -1,0 +1,113 @@
+<div class="flex flex-col gap-6">
+  
+  <div>
+    <h1 class="text-3xl font-bold text-text-primary">Founder Dashboard</h1>
+    <p class="text-text-muted mt-1">Overview of your startups and their funding progress.</p>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div class="bg-surface-card border border-surface-border rounded-xl p-5 hover:-translate-y-1 transition-transform">
+      <div class="flex justify-between items-start mb-4">
+         <h3 class="font-semibold text-text-muted text-sm">My Startups</h3>
+         <i class="pi pi-briefcase text-primary text-xl bg-primary/10 p-2 rounded-lg"></i>
+      </div>
+      <p class="text-3xl font-bold">{{ startups.length }}</p>
+    </div>
+    
+    <div class="bg-surface-card border border-surface-border rounded-xl p-5 hover:-translate-y-1 transition-transform">
+      <div class="flex justify-between items-start mb-4">
+         <h3 class="font-semibold text-text-muted text-sm">Total Raised</h3>
+         <i class="pi pi-dollar text-emerald-500 text-xl bg-emerald-500/10 p-2 rounded-lg"></i>
+      </div>
+      <p class="text-3xl font-bold text-emerald-500">{{ totalInvestmentReceived | currencyFormat }}</p>
+    </div>
+    
+    <div class="bg-surface-card border border-surface-border rounded-xl p-5 hover:-translate-y-1 transition-transform">
+      <div class="flex justify-between items-start mb-4">
+         <h3 class="font-semibold text-text-muted text-sm">Pending Requests</h3>
+         <i class="pi pi-clock text-warning text-xl bg-warning/10 p-2 rounded-lg"></i>
+      </div>
+      <p class="text-3xl font-bold text-warning">{{ pendingInvestmentRequests }}</p>
+    </div>
+    
+    <div class="bg-surface-card border border-surface-border rounded-xl p-5 hover:-translate-y-1 transition-transform">
+      <div class="flex justify-between items-start mb-4">
+         <h3 class="font-semibold text-text-muted text-sm">Team Members</h3>
+         <i class="pi pi-users text-info text-xl bg-info/10 p-2 rounded-lg"></i>
+      </div>
+      <p class="text-3xl font-bold">N/A</p>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    
+    <!-- Chart -->
+    <div class="lg:col-span-2 bg-surface-card border border-surface-border rounded-xl p-6">
+      <h2 class="text-lg font-bold mb-4">Funding Progress by Startup</h2>
+      <div *ngIf="startups.length > 0" echarts [options]="chartOptions" class="w-full h-[300px]"></div>
+      <div *ngIf="startups.length === 0" class="h-[300px] flex items-center justify-center text-text-muted">
+        Create a startup to see funding data.
+      </div>
+    </div>
+    
+    <!-- Notifications -->
+    <div class="bg-surface-card border border-surface-border rounded-xl p-6">
+      <h2 class="text-lg font-bold mb-4">Recent Actvity</h2>
+      <div class="flex flex-col gap-4">
+        <div *ngFor="let n of notifications" class="flex gap-3">
+           <div class="mt-1">
+             <i class="pi text-primary" [ngClass]="{'pi-info-circle': n.type === 'SYSTEM', 'pi-users': n.type === 'TEAM', 'pi-dollar': n.type === 'INVESTMENT'}"></i>
+           </div>
+           <div>
+             <p class="text-sm font-medium">{{ n.title }}</p>
+             <p class="text-xs text-text-muted mt-1">{{ n.createdAt | timeAgo }}</p>
+           </div>
+        </div>
+        <div *ngIf="notifications.length === 0" class="text-text-muted text-sm">No recent activity.</div>
+      </div>
+    </div>
+    
+  </div>
+
+  <!-- Recent Investments Table -->
+  <div class="bg-surface-card border border-surface-border rounded-xl overflow-hidden">
+    <div class="p-6 border-b border-surface-border">
+       <h2 class="text-lg font-bold">Recent Investments</h2>
+    </div>
+    
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-sm text-text-primary">
+        <thead class="bg-surface text-text-muted uppercase text-xs">
+          <tr>
+            <th class="px-6 py-3">Investor</th>
+            <th class="px-6 py-3">Amount</th>
+            <th class="px-6 py-3">Status</th>
+            <th class="px-6 py-3">Date</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-surface-border">
+          <tr *ngFor="let i of investments.slice(0, 5)" class="hover:bg-surface/50 transition-colors">
+            <td class="px-6 py-4 font-medium">{{ i.investorFirm || i.investorEmail }}</td>
+            <td class="px-6 py-4">{{ i.amount | currencyFormat }}</td>
+            <td class="px-6 py-4">
+               <span class="px-2 py-1 text-[10px] rounded p-tag bg-surface"
+                     [ngClass]="{
+                       'text-warning border border-warning/50': i.status === 'PENDING',
+                       'text-emerald-500 border border-emerald-500/50': i.status === 'COMPLETED' || i.status === 'SUCCESS' || i.status === 'APPROVED',
+                       'text-danger border border-danger/50': i.status === 'REJECTED' || i.status === 'FAILED'
+                     }">
+                 {{ i.status }}
+               </span>
+            </td>
+            <td class="px-6 py-4 text-text-muted whitespace-nowrap">{{ i.createdAt | timeAgo }}</td>
+          </tr>
+          <tr *ngIf="investments.length === 0">
+            <td colspan="4" class="px-6 py-8 text-center text-text-muted">No investments received yet.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>

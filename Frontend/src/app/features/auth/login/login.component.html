@@ -1,0 +1,42 @@
+<div class="w-full max-w-md bg-surface-card border border-surface-border p-8 rounded-2xl shadow-xl">
+  <div class="text-center mb-8">
+    <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/20 text-primary mb-4">
+      <i class="pi pi-bolt text-2xl"></i>
+    </div>
+    <h2 class="text-2xl font-bold text-text-primary">Welcome back</h2>
+    <p class="text-text-muted text-sm mt-2">Enter your credentials to access your account.</p>
+  </div>
+
+  <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-5">
+    
+    <div class="flex flex-col gap-2">
+      <label class="text-sm font-semibold text-text-muted">Email address</label>
+      <input type="email" pInputText formControlName="email" class="w-full p-3" placeholder="alex@startup.com" autocomplete="email" />
+      <small 
+        class="text-danger" 
+        *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
+        Valid email is required
+      </small>
+    </div>
+
+    <div class="flex flex-col gap-2">
+      <div class="flex justify-between items-center">
+        <label class="text-sm font-semibold text-text-muted">Password</label>
+        <a href="#" class="text-xs text-primary hover:underline">Forgot password?</a>
+      </div>
+      <p-password formControlName="password" [toggleMask]="true" [feedback]="false" styleClass="w-full" inputStyleClass="w-full p-3" autocomplete="current-password"></p-password>
+      <small 
+        class="text-danger" 
+        *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
+        Password is required
+      </small>
+    </div>
+
+    <button pButton type="submit" label="Sign in" class="w-full mt-2" [loading]="loading" [disabled]="loginForm.invalid"></button>
+    
+  </form>
+
+  <p class="text-center text-sm text-text-muted mt-8">
+    Don't have an account? <a routerLink="/register" class="text-primary hover:underline font-semibold">Sign up</a>
+  </p>
+</div>

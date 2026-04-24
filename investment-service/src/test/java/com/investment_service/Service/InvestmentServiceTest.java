@@ -168,14 +168,29 @@ class InvestmentServiceTest {
     }
 
     @Test
-    void testUpdateStatus_Forbidden_Investor() {
+    void testUpdateStatus_Success_InvestorCompletesOwnInvestment() {
+        setupSecurityContext("investor@test.com", "INVESTOR");
+
+        when(repository.findById(1L)).thenReturn(Optional.of(investment));
+        when(startupClient.getStartup(10L)).thenReturn(startupDto);
+        when(repository.save(any(Investment.class))).thenAnswer(i -> i.getArgument(0));
+
+        Investment result = investmentService.updateStatus(1L, "COMPLETED");
+
+        assertEquals("COMPLETED", result.getStatus());
+        verify(repository, times(1)).save(any(Investment.class));
+        verify(rabbitTemplate, times(1)).convertAndSend(eq(RabbitConfig.EXCHANGE), eq("investment.status"), any(Map.class));
+    }
+
+    @Test
+    void testUpdateStatus_Forbidden_InvestorRejects() {
         setupSecurityContext("investor@test.com", "INVESTOR");
 
         when(repository.findById(1L)).thenReturn(Optional.of(investment));
         when(startupClient.getStartup(10L)).thenReturn(startupDto);
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
-            investmentService.updateStatus(1L, "COMPLETED");
+            investmentService.updateStatus(1L, "REJECTED");
         });
 
         assertEquals(HttpStatus.FORBIDDEN, exception.getStatusCode());

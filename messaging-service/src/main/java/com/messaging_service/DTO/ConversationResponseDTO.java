@@ -8,6 +8,7 @@ public class ConversationResponseDTO {
     private Long id;
     private Long startupId;
     private String participantEmail;
+    private String founderEmail;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

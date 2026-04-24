@@ -1,0 +1,40 @@
+<div class="relative">
+  <button class="relative p-2 text-text-muted hover:text-text-primary transition-colors" (click)="op.toggle($event)">
+    <i class="pi pi-bell text-xl"></i>
+    <p-badge *ngIf="unreadCount > 0" [value]="unreadCount.toString()" severity="danger" styleClass="absolute top-0 right-0 -mt-1 -mr-1 scale-75"></p-badge>
+  </button>
+
+  <p-overlayPanel #op [style]="{'width': '350px'}">
+    <div class="flex flex-col max-h-[400px]">
+      <div class="flex justify-between items-center p-3 border-b border-surface-border">
+        <h3 class="font-semibold">Notifications</h3>
+        <button *ngIf="unreadCount > 0" (click)="markAllAsRead(op)" class="text-xs text-primary hover:underline">Mark all read</button>
+      </div>
+      
+      <div class="overflow-y-auto w-full">
+        <div *ngIf="notifications.length === 0" class="p-4 text-center text-text-muted text-sm">
+          No unread notifications
+        </div>
+        
+        <div *ngFor="let notif of notifications.slice(0,5)" 
+             class="p-3 border-b border-surface-border hover:bg-surface cursor-pointer"
+             (click)="markAsRead(notif, op)">
+          <div class="flex items-start gap-3">
+             <div class="mt-1">
+               <i class="pi text-primary" [ngClass]="{'pi-info-circle': notif.type === 'SYSTEM', 'pi-users': notif.type === 'TEAM', 'pi-dollar': notif.type === 'INVESTMENT'}"></i>
+             </div>
+             <div>
+               <p class="text-sm font-medium">{{ notif.title }}</p>
+               <p class="text-xs text-text-muted mt-1">{{ notif.message }}</p>
+               <p class="text-[10px] text-text-muted mt-2">{{ notif.createdAt | timeAgo }}</p>
+             </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="p-2 text-center border-t border-surface-border bg-surface-card">
+        <a class="text-sm text-primary hover:underline" (click)="op.hide()" routerLink="/notifications">View all</a>
+      </div>
+    </div>
+  </p-overlayPanel>
+</div>

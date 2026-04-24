@@ -164,6 +164,7 @@ class MessagingServiceTest {
         when(conversationRepository.findByParticipantEmail("user@test.com")).thenReturn(List.of(conversation));
         when(messageRepository.findBySenderEmailOrderByCreatedAtDesc("user@test.com")).thenReturn(List.of(sentMessage));
         when(conversationRepository.findAllById(any())).thenReturn(List.of(conversation));
+        when(startupClient.getStartup(1L)).thenReturn(startupDto);
 
         var result = messagingService.getMyConversations();
 

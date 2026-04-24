@@ -30,7 +30,7 @@ public class InvestmentService {
     private final StartupClient startupClient;
     private final RabbitTemplate rabbitTemplate;
 
-public Investment invest(CreateInvestmentRequest request, String email) {
+    public Investment invest(CreateInvestmentRequest request, String email) {
 
         StartupDto startup;
         try {
@@ -80,6 +80,15 @@ public Investment invest(CreateInvestmentRequest request, String email) {
         return repository.findByInvestorEmail(email);
     }
 
+    public List<Investment> getAllInvestments() {
+        boolean isAdmin = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        if (!isAdmin) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only admins can view all investments");
+        }
+        return repository.findAll();
+    }
+
     public List<Investment> getStartupInvestments(Long startupId) {
         StartupDto startup;
         try {
@@ -118,13 +127,26 @@ public Investment invest(CreateInvestmentRequest request, String email) {
         boolean isAdmin = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
 
+        boolean isInvestorOwner = investment.getInvestorEmail().equals(currentUser);
+        if (isInvestorOwner && "COMPLETED".equalsIgnoreCase(status)) {
+            investment.setStatus(normalizeStatus(status));
+            Investment saved = repository.save(investment);
+            publishStatusEvent(saved);
+            return saved;
+        }
+
         if (!startup.getFounderEmail().equals(currentUser) && !isAdmin) {
-             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only founder or admin can update investment status");
+             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the investor, founder, or an admin can update investment status");
         }
 
         investment.setStatus(normalizeStatus(status));
         Investment saved = repository.save(investment);
+        publishStatusEvent(saved);
 
+        return saved;
+    }
+
+    private void publishStatusEvent(Investment saved) {
         Map<String, Object> event = new HashMap<>();
         event.put("investmentId", saved.getId());
         event.put("startupId", saved.getStartupId());
@@ -137,8 +159,6 @@ public Investment invest(CreateInvestmentRequest request, String email) {
                 "investment.status",
                 event
         );
-
-        return saved;
     }
 
     private String normalizeStatus(String status) {

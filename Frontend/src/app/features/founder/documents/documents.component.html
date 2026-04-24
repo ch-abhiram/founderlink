@@ -1,0 +1,69 @@
+<div class="max-w-4xl mx-auto flex flex-col gap-6">
+  
+  <div class="flex items-center gap-4 border-b border-surface-border pb-6">
+    <a routerLink="/founder/my-startups" class="w-10 h-10 rounded-full bg-surface-card border border-surface-border flex items-center justify-center text-text-muted hover:text-text-primary transition-colors">
+      <i class="pi pi-arrow-left"></i>
+    </a>
+    <div>
+      <h1 class="text-3xl font-bold text-text-primary">Startup Documents</h1>
+      <p class="text-text-muted mt-1">Upload public links to pitch decks and financials.</p>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-5 gap-8">
+    
+    <!-- Upload Document Form -->
+    <div class="md:col-span-2 bg-surface-card border border-surface-border rounded-xl p-6 h-fit sticky top-20">
+      <h2 class="text-xl font-bold border-b border-surface-border pb-4 mb-6">Add Document Link</h2>
+      <form [formGroup]="docForm" (ngSubmit)="addDocument()" class="flex flex-col gap-5">
+         
+         <div class="flex flex-col gap-2">
+           <label class="text-sm font-semibold text-text-muted">Document Name *</label>
+           <input pInputText formControlName="name" class="w-full" placeholder="e.g. Q4 Pitch Deck" />
+         </div>
+
+         <div class="flex flex-col gap-2">
+           <label class="text-sm font-semibold text-text-muted">Public URL *</label>
+           <input pInputText formControlName="url" class="w-full" placeholder="https://docs.google.com/..." />
+         </div>
+
+         <div class="flex flex-col gap-2">
+           <label class="text-sm font-semibold text-text-muted">Type</label>
+           <p-dropdown [options]="docTypes" formControlName="docType" styleClass="w-full"></p-dropdown>
+         </div>
+
+         <div class="flex justify-end mt-2">
+           <button pButton type="submit" label="Add Link" icon="pi pi-cloud-upload" [loading]="adding" [disabled]="docForm.invalid" class="w-full"></button>
+         </div>
+      </form>
+    </div>
+
+    <!-- Feed -->
+    <div class="md:col-span-3 flex flex-col gap-4">
+       <h2 class="text-xl font-bold px-2 mb-2">Available Documents</h2>
+       
+       <div *ngIf="loading" class="animate-pulse flex flex-col gap-4">
+         <div class="h-20 bg-surface-card rounded-xl"></div>
+         <div class="h-20 bg-surface-card rounded-xl"></div>
+       </div>
+
+       <div *ngIf="!loading && documents.length === 0" class="text-center py-12 text-text-muted border border-dashed border-surface-border rounded-xl">
+         No documents attached.
+       </div>
+
+       <a *ngFor="let d of documents" [href]="d.url" target="_blank" 
+          class="flex items-center gap-5 p-5 bg-surface-card border border-surface-border rounded-xl hover:-translate-y-1 hover:border-primary/50 transition-all group">
+          <div class="w-14 h-14 bg-surface border border-surface-border flex items-center justify-center rounded-lg group-hover:bg-primary/20 group-hover:text-primary transition-colors text-text-muted">
+            <i class="pi pi-file-pdf text-2xl" [ngClass]="{'pi-file-excel': d.docType === 'FINANCIALS', 'pi-shield': d.docType === 'LEGAL', 'pi-file': d.docType === 'OTHER'}"></i>
+          </div>
+          <div class="flex-1">
+            <h3 class="font-bold text-lg text-text-primary group-hover:text-primary transition-colors">{{ d.name }}</h3>
+            <p class="text-xs font-semibold text-text-muted mt-1 uppercase tracking-wider">{{ d.docType }} • {{ d.createdAt | timeAgo }}</p>
+          </div>
+          <i class="pi pi-chevron-right text-text-muted opacity-50 group-hover:opacity-100 group-hover:text-primary transform transition-all group-hover:translate-x-1"></i>
+       </a>
+    </div>
+    
+  </div>
+
+</div>

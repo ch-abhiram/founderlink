@@ -1,0 +1,13 @@
+﻿src/app/features/admin/pending-startups/pending-startups.component.ts(42,25): error TS2339: Property 'updateStatus' does not exist on type 'StartupService'.
+src/app/features/admin/pending-startups/pending-startups.component.ts(49,25): error TS2339: Property 'updateStatus' does not exist on type 'StartupService'.
+src/app/features/investor/dashboard/dashboard.component.ts(74,16): error TS2339: Property 'startupName' does not exist on type 'Investment'.
+src/app/features/investor/dashboard/dashboard.component.ts(74,72): error TS2339: Property 'startupName' does not exist on type 'Investment'.
+src/app/features/messaging/inbox/inbox.component.ts(90,40): error TS2339: Property 'founderEmail' does not exist on type 'Conversation'.
+src/app/features/messaging/inbox/inbox.component.ts(90,99): error TS2339: Property 'investorEmail' does not exist on type 'Conversation'.
+src/app/features/messaging/inbox/inbox.component.ts(90,133): error TS2339: Property 'founderEmail' does not exist on type 'Conversation'.
+src/app/features/messaging/inbox/inbox.component.ts(107,14): error TS2339: Property 'founderEmail' does not exist on type 'Conversation'.
+src/app/features/messaging/inbox/inbox.component.ts(107,57): error TS2339: Property 'investorEmail' does not exist on type 'Conversation'.
+src/app/features/messaging/inbox/inbox.component.ts(107,75): error TS2339: Property 'founderEmail' does not exist on type 'Conversation'.
+src/app/features/profile/profile.component.ts(4,29): error TS2307: Cannot find module '../../../core/services/auth.service' or its corresponding type declarations.
+src/app/features/profile/profile.component.ts(5,29): error TS2307: Cannot find module '../../../core/services/user.service' or its corresponding type declarations.
+src/app/features/startups/detail/detail.component.ts(155,32): error TS2339: Property 'logoUrl' does not exist on type 'Startup'.

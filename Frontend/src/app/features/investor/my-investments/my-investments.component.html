@@ -1,0 +1,72 @@
+<div class="max-w-6xl mx-auto flex flex-col gap-6">
+
+  <div class="flex justify-between items-end border-b border-surface-border pb-6">
+    <div>
+      <h1 class="text-3xl font-bold text-text-primary">My Investments</h1>
+      <p class="text-text-muted mt-1">Complete history of your capital allocations.</p>
+    </div>
+    <button pButton label="Discover Startups" severity="secondary" icon="pi pi-compass" routerLink="/startups"></button>
+  </div>
+
+  <div class="bg-surface-card border border-surface-border rounded-xl overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-sm text-text-primary">
+        <thead class="bg-surface text-text-muted uppercase text-xs">
+          <tr>
+            <th class="px-6 py-4">Transaction ID</th>
+            <th class="px-6 py-4">Startup</th>
+            <th class="px-6 py-4">Amount invested</th>
+            <th class="px-6 py-4">Date</th>
+            <th class="px-6 py-4">Status</th>
+            <th class="px-6 py-4 text-right">Receipt</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-surface-border">
+          <tr *ngFor="let i of investments" class="hover:bg-surface/50 transition-colors">
+            <td class="px-6 py-4 text-xs font-mono text-text-muted">#INV-{{ i.id.toString().padStart(6, '0') }}</td>
+            <td class="px-6 py-4 font-bold text-primary hover:underline">
+               <a [routerLink]="['/startups', i.startupId]">{{ i.startupName || 'Startup ' + i.startupId }}</a>
+            </td>
+            <td class="px-6 py-4 font-bold text-emerald-500">{{ i.amount | currencyFormat }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-text-muted">{{ i.createdAt | timeAgo }}</td>
+            <td class="px-6 py-4">
+               <span class="px-2 py-1 text-[10px] rounded border uppercase"
+                     [ngClass]="{
+                       'text-warning bg-warning/10 border-warning/50': i.status === 'PENDING',
+                       'text-emerald-500 bg-emerald-500/10 border-emerald-500/50': i.status === 'COMPLETED' || i.status === 'SUCCESS' || i.status === 'APPROVED',
+                       'text-danger bg-danger/10 border-danger/50': i.status === 'REJECTED' || i.status === 'FAILED'
+                     }">
+                 {{ i.status }}
+               </span>
+            </td>
+            <td class="px-6 py-4 flex justify-end">
+               <button pButton icon="pi pi-download" class="p-button-text p-button-sm p-button-secondary" [disabled]="i.status !== 'SUCCESS' && i.status !== 'COMPLETED' && i.status !== 'APPROVED'" (click)="downloadReceipt(i)"></button>
+            </td>
+          </tr>
+          
+          <tr *ngIf="investments.length === 0 && !loading">
+            <td colspan="6" class="px-6 py-16 text-center">
+              <div class="inline-flex justify-center items-center w-16 h-16 rounded-full bg-surface-card border border-surface-border text-text-muted mb-4">
+                 <i class="pi pi-wallet text-2xl"></i>
+              </div>
+              <h3 class="text-lg font-bold mb-2">No investments found</h3>
+              <p class="text-text-muted max-w-sm mx-auto">You haven't committed any capital yet. Browse the discovery platform to find your next unicorn.</p>
+            </td>
+          </tr>
+          
+          <tr *ngIf="loading">
+             <td colspan="6" class="px-6 py-8">
+                <div class="animate-pulse space-y-4">
+                  <div class="h-10 bg-surface rounded w-full"></div>
+                  <div class="h-10 bg-surface rounded w-full"></div>
+                  <div class="h-10 bg-surface rounded w-full"></div>
+                </div>
+             </td>
+          </tr>
+          
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>

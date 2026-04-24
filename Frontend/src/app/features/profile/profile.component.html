@@ -1,0 +1,111 @@
+<div class="max-w-4xl mx-auto flex flex-col gap-8">
+  <div>
+    <h1 class="text-3xl font-bold text-text-primary">Profile Settings</h1>
+    <p class="text-text-muted mt-1">Manage your public presence and specific preferences.</p>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+    
+    <div class="md:col-span-1 hidden md:block">
+       <div class="sticky top-20 flex flex-col gap-2">
+         <a href="#profile" class="p-3 bg-primary/10 text-primary rounded-lg font-medium border-l-4 border-primary">General Profile</a>
+         <a href="#preferences" class="p-3 hover:bg-surface text-text-muted hover:text-text-primary rounded-lg font-medium">Preferences</a>
+         <a href="#security" class="p-3 hover:bg-surface text-text-muted hover:text-text-primary rounded-lg font-medium">Security</a>
+       </div>
+    </div>
+
+    <div class="md:col-span-2 flex flex-col gap-8">
+      
+      <!-- Profile Setings -->
+      <div id="profile" class="bg-surface-card border border-surface-border rounded-xl p-6">
+        <h2 class="text-xl font-bold border-b border-surface-border pb-4 mb-6">General Profile</h2>
+        <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="flex flex-col gap-5">
+           
+           <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+             <div class="flex flex-col gap-2">
+               <label class="text-sm font-semibold text-text-muted">Display Name *</label>
+               <input pInputText formControlName="name" class="w-full" />
+             </div>
+             <div class="flex flex-col gap-2">
+               <label class="text-sm font-semibold text-text-muted">Headline (e.g. CEO at ABC)</label>
+               <input pInputText formControlName="headline" class="w-full" />
+             </div>
+           </div>
+
+           <div class="flex flex-col gap-2">
+             <label class="text-sm font-semibold text-text-muted">Bio</label>
+             <textarea pInputTextarea formControlName="bio" rows="4" class="w-full"></textarea>
+           </div>
+           
+           <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+             <div class="flex flex-col gap-2">
+               <label class="text-sm font-semibold text-text-muted">Location</label>
+               <input pInputText formControlName="location" class="w-full" />
+             </div>
+             <div class="flex flex-col gap-2">
+               <label class="text-sm font-semibold text-text-muted">Avatar URL</label>
+               <input pInputText formControlName="avatarUrl" class="w-full" />
+             </div>
+           </div>
+
+           <div class="flex flex-col gap-2">
+             <label class="text-sm font-semibold text-text-muted">Skills</label>
+             <p-chips formControlName="skills" styleClass="w-full" placeholder="Hit enter to add"></p-chips>
+           </div>
+
+           <div class="flex justify-end mt-2">
+             <button pButton type="submit" label="Save Profile" [loading]="loadingProfile"></button>
+           </div>
+        </form>
+      </div>
+
+      <!-- Preferences -->
+      <div id="preferences" class="bg-surface-card border border-surface-border rounded-xl p-6">
+        <h2 class="text-xl font-bold border-b border-surface-border pb-4 mb-6">Preferences</h2>
+        <form [formGroup]="prefForm" (ngSubmit)="savePreferences()" class="flex flex-col gap-5">
+           
+           <div class="flex flex-col gap-2">
+             <label class="text-sm font-semibold text-text-muted">Target Industries</label>
+             <p-multiSelect [options]="industryOptions" formControlName="industries" styleClass="w-full" [filter]="false" placeholder="Select industries"></p-multiSelect>
+           </div>
+           
+           <div class="flex flex-col gap-2">
+             <label class="text-sm font-semibold text-text-muted">Preferred Stages</label>
+             <p-multiSelect [options]="stageOptions" formControlName="stages" styleClass="w-full" [filter]="false" placeholder="Select stages"></p-multiSelect>
+           </div>
+           
+           <div class="flex flex-col gap-2">
+             <label class="text-sm font-semibold text-text-muted">LinkedIn URL</label>
+             <input pInputText formControlName="linkedinUrl" class="w-full" />
+           </div>
+
+           <div class="flex justify-end mt-2">
+             <button pButton type="submit" label="Save Preferences" [loading]="loadingPref"></button>
+           </div>
+        </form>
+      </div>
+      
+      <!-- Security -->
+      <div id="security" class="bg-surface-card border border-surface-border rounded-xl p-6">
+        <h2 class="text-xl font-bold border-b border-surface-border pb-4 mb-6">Security</h2>
+        <form [formGroup]="passwordForm" (ngSubmit)="changePassword()" class="flex flex-col gap-5">
+           
+           <div class="flex flex-col gap-2">
+             <label class="text-sm font-semibold text-text-muted">Current Password</label>
+             <input type="password" pInputText formControlName="currentPassword" class="w-full" />
+           </div>
+           
+           <div class="flex flex-col gap-2">
+             <label class="text-sm font-semibold text-text-muted">New Password</label>
+             <input type="password" pInputText formControlName="newPassword" class="w-full" />
+           </div>
+
+           <div class="flex justify-end mt-2">
+             <button pButton type="submit" label="Change Password" severity="danger" [outlined]="true" [loading]="loadingPass"></button>
+           </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</div>

@@ -1,0 +1,94 @@
+<div class="max-w-5xl mx-auto flex flex-col gap-6">
+  
+  <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 border-b border-surface-border pb-6">
+    <div class="flex items-center gap-4">
+      <a routerLink="/founder/my-startups" class="w-10 h-10 rounded-full bg-surface-card border border-surface-border flex items-center justify-center text-text-muted hover:text-text-primary transition-colors">
+        <i class="pi pi-arrow-left"></i>
+      </a>
+      <div>
+        <h1 class="text-3xl font-bold text-text-primary">Team Management</h1>
+        <p class="text-text-muted mt-1">Manage invites, roles, and equity splits.</p>
+      </div>
+    </div>
+    <button pButton label="Invite Member" icon="pi pi-user-plus" (click)="showInviteModal = true"></button>
+  </div>
+  
+  <p-confirmDialog [style]="{width: '50vw'}"></p-confirmDialog>
+
+  <div class="bg-surface-card border border-surface-border rounded-xl overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-sm text-text-primary">
+        <thead class="bg-surface text-text-muted uppercase text-xs">
+          <tr>
+            <th class="px-6 py-4">Email</th>
+            <th class="px-6 py-4">Role</th>
+            <th class="px-6 py-4">Equity</th>
+            <th class="px-6 py-4">Status</th>
+            <th class="px-6 py-4">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-surface-border">
+          <tr *ngFor="let member of team" class="hover:bg-surface/50 transition-colors">
+            <td class="px-6 py-4 font-medium">{{ member.userEmail }}</td>
+            <td class="px-6 py-4">
+               <div>{{ member.role }}</div>
+               <div class="text-[10px] text-text-muted uppercase mt-0.5">{{ member.permissionLevel }}</div>
+            </td>
+            <td class="px-6 py-4">{{ member.equityPercentage }}%</td>
+             <td class="px-6 py-4">
+                <p-tag [value]="member.status" 
+                       [severity]="member.status === 'ACCEPTED' ? 'success' : member.status === 'REJECTED' ? 'danger' : 'warning'"
+                       [rounded]="true">
+                </p-tag>
+               <div *ngIf="member.status === 'PENDING'" class="text-[11px] text-text-muted mt-2">
+                 Awaiting member response
+               </div>
+             </td>
+             <td class="px-6 py-4 flex gap-2">
+               <button pButton icon="pi pi-trash" class="p-button-rounded p-button-danger p-button-text p-button-sm" (click)="removeMember(member.id, $event)"></button>
+             </td>
+          </tr>
+          <tr *ngIf="team.length === 0 && !loading">
+            <td colspan="5" class="px-6 py-12 text-center text-text-muted border-dashed border-t border-surface-border">No team members joined yet. Invite someone!</td>
+          </tr>
+          <tr *ngIf="loading">
+            <td colspan="5" class="px-6 py-12 text-center text-text-muted">Loading...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- Invite Modal -->
+<p-dialog header="Invite Team Member" [(visible)]="showInviteModal" [modal]="true" [style]="{width: '500px'}" [draggable]="false" [resizable]="false" styleClass="p-dialog-custom">
+  <form [formGroup]="inviteForm" (ngSubmit)="sendInvite()" class="flex flex-col gap-5 pt-2">
+    
+    <div class="flex flex-col gap-2">
+       <label class="text-sm font-semibold text-text-muted">User Email *</label>
+       <input pInputText formControlName="userEmail" class="w-full" placeholder="coworker@example.com" />
+    </div>
+    
+    <div class="grid grid-cols-2 gap-4">
+      <div class="flex flex-col gap-2">
+         <label class="text-sm font-semibold text-text-muted">Role</label>
+         <p-dropdown [options]="roles" formControlName="role" styleClass="w-full" appendTo="body"></p-dropdown>
+      </div>
+      <div class="flex flex-col gap-2">
+         <label class="text-sm font-semibold text-text-muted">Permission</label>
+         <p-dropdown [options]="perms" formControlName="permissionLevel" styleClass="w-full" appendTo="body"></p-dropdown>
+      </div>
+    </div>
+    
+    <div class="flex flex-col gap-2">
+       <label class="text-sm font-semibold text-text-muted">Equity Percentage (%)</label>
+       <p-inputNumber formControlName="equityPercentage" [min]="0" [max]="100" styleClass="w-full"></p-inputNumber>
+    </div>
+
+    <div class="flex justify-end mt-4 gap-3">
+       <button pButton type="button" label="Cancel" class="p-button-text" (click)="showInviteModal = false"></button>
+       <button pButton type="submit" label="Send Invite" [loading]="inviting" [disabled]="inviteForm.invalid"></button>
+    </div>
+  </form>
+</p-dialog>

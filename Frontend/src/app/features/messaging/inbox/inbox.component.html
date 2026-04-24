@@ -1,0 +1,93 @@
+<div class="h-[calc(100vh-140px)] bg-surface-card border border-surface-border rounded-xl flex overflow-hidden">
+  
+  <!-- Sidebar Contacts -->
+  <div class="w-1/3 min-w-[300px] border-r border-surface-border flex flex-col h-full bg-surface-card/50">
+    <div class="p-5 border-b border-surface-border">
+      <h2 class="text-xl font-bold">Messages</h2>
+      <p class="text-xs text-text-muted mt-1">Connect with founders and investors</p>
+    </div>
+    
+    <div class="flex-1 overflow-y-auto">
+      <div *ngIf="loading" class="p-4 space-y-4">
+        <div *ngFor="let _ of [1,2,3]" class="flex gap-3">
+          <div class="w-12 h-12 rounded-full bg-surface animate-pulse"></div>
+          <div class="flex-1 space-y-2">
+            <div class="h-4 bg-surface rounded w-2/3"></div>
+            <div class="h-3 bg-surface rounded w-1/2"></div>
+          </div>
+        </div>
+      </div>
+      
+      <div *ngIf="!loading && conversations.length === 0" class="p-8 text-center text-text-muted text-sm border-b border-surface-border border-dashed m-4 rounded-xl">
+        No active conversations. Reach out to a startup to get started!
+      </div>
+
+      <div *ngFor="let c of conversations" 
+           class="p-4 border-b border-surface-border cursor-pointer hover:bg-surface/50 transition-colors flex items-center gap-4"
+           [ngClass]="{'bg-primary/5': selectedConv?.id === c.id}"
+           (click)="selectConversation(c)">
+        <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-surface-border to-surface flex items-center justify-center text-text-primary border border-surface-border font-bold">
+           {{ getOtherParty(c).charAt(0).toUpperCase() }}
+        </div>
+        <div class="flex-1 overflow-hidden">
+           <div class="flex items-center justify-between">
+              <h3 class="font-bold text-sm truncate text-text-primary" [ngClass]="{'text-primary': selectedConv?.id === c.id}">{{ getOtherParty(c) }}</h3>
+              <span class="text-[10px] text-text-muted whitespace-nowrap ml-2">{{ c.updatedAt | timeAgo }}</span>
+           </div>
+           <p class="text-xs text-text-muted mt-1">Startup #{{ c.startupId }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chat Area -->
+  <div class="flex-1 flex flex-col h-full bg-surface-card">
+    
+    <ng-container *ngIf="!selectedConv">
+      <div class="flex-1 flex flex-col items-center justify-center text-text-muted opacity-50 p-6 text-center">
+        <i class="pi pi-comments text-5xl mb-4"></i>
+        <h3 class="text-xl font-bold">Select a conversation</h3>
+        <p class="text-sm mt-2 max-w-xs">Click on a contact from the sidebar to view their messages or start a new thread.</p>
+      </div>
+    </ng-container>
+
+    <ng-container *ngIf="selectedConv">
+      <!-- Chat Header -->
+      <div class="py-4 px-6 border-b border-surface-border flex justify-between items-center bg-surface-card/50">
+         <div class="flex items-center gap-3">
+           <div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">
+             {{ getOtherParty(selectedConv).charAt(0).toUpperCase() }}
+           </div>
+           <div>
+             <h3 class="font-bold text-text-primary">{{ getOtherParty(selectedConv) }}</h3>
+             <a [routerLink]="['/startups', selectedConv.startupId]" class="text-xs text-text-muted hover:text-primary hover:underline transition-colors flex items-center gap-1"><i class="pi pi-external-link text-[10px]"></i> View Startup</a>
+           </div>
+         </div>
+      </div>
+
+      <!-- Messages Stream -->
+      <div id="chatContainer" class="flex-1 overflow-y-auto p-6 flex flex-col gap-4">
+         <div *ngIf="loadingMsgs" class="flex justify-center p-4">
+           <i class="pi pi-spin pi-spinner text-primary text-2xl"></i>
+         </div>
+
+         <div *ngFor="let m of messages" class="flex w-full" [ngClass]="{'justify-end': m.senderEmail === currentUserEmail, 'justify-start': m.senderEmail !== currentUserEmail}">
+            <div class="max-w-[70%] rounded-2xl px-5 py-3 shadow-md"
+                 [ngClass]="m.senderEmail === currentUserEmail ? 'bg-primary text-white rounded-tr-sm' : 'bg-surface border border-surface-border text-text-primary rounded-tl-sm'">
+               <p class="text-sm whitespace-pre-wrap">{{ m.content }}</p>
+               <span class="text-[10px] mt-1 block opacity-70" [ngClass]="m.senderEmail === currentUserEmail ? 'text-right text-indigo-200' : 'text-left text-text-muted'">{{ m.createdAt | timeAgo }}</span>
+            </div>
+         </div>
+      </div>
+
+      <!-- Input Area -->
+      <div class="p-4 bg-surface border-t border-surface-border shrink-0">
+         <form [formGroup]="messageForm" (ngSubmit)="sendMessage()" class="flex gap-3 max-w-4xl mx-auto items-center">
+            <input pInputText formControlName="content" class="flex-1 p-3 rounded-full bg-surface-card border-surface-border" placeholder="Type your message..." autocomplete="off">
+            <button pButton type="submit" icon="pi pi-send" class="p-button-rounded" [disabled]="messageForm.invalid"></button>
+         </form>
+      </div>
+    </ng-container>
+
+  </div>
+</div>

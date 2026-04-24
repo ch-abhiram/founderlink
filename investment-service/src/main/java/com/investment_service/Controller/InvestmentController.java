@@ -42,6 +42,12 @@ public class InvestmentController {
         return ResponseEntity.ok(service.getUserInvestments(email).stream().map(this::toDto).collect(Collectors.toList()));
     }
 
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<InvestmentResponseDTO>> allInvestments() {
+        return ResponseEntity.ok(service.getAllInvestments().stream().map(this::toDto).collect(Collectors.toList()));
+    }
+
     @GetMapping("/startup/{startupId}")
     public ResponseEntity<List<InvestmentResponseDTO>> startupInvestments(@PathVariable Long startupId) {
         return ResponseEntity.ok(service.getStartupInvestments(startupId).stream().map(this::toDto).collect(Collectors.toList()));

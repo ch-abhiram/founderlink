@@ -23,6 +23,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -170,5 +171,22 @@ class MessagingServiceTest {
 
         assertEquals(1, result.size());
         assertEquals(10L, result.get(0).getId());
+    }
+
+    @Test
+    void testGetMyConversationsIncludesFounderInboxConversationsBeforeReply() {
+        setupSecurityContext("founder@test.com");
+
+        when(conversationRepository.findByParticipantEmail("founder@test.com")).thenReturn(List.of());
+        when(messageRepository.findBySenderEmailOrderByCreatedAtDesc("founder@test.com")).thenReturn(List.of());
+        when(conversationRepository.findAll()).thenReturn(List.of(conversation));
+        when(startupClient.getStartup(1L)).thenReturn(startupDto);
+
+        var result = messagingService.getMyConversations();
+
+        assertEquals(1, result.size());
+        assertEquals(10L, result.get(0).getId());
+        assertEquals("user@test.com", result.get(0).getParticipantEmail());
+        verify(conversationRepository, never()).findAllById(any(Set.class));
     }
 }

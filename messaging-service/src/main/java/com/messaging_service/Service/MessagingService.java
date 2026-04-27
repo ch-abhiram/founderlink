@@ -138,10 +138,14 @@ public class MessagingService {
         List<Conversation> bySender = sentConversationIds.isEmpty()
                 ? List.of()
                 : conversationRepository.findAllById(sentConversationIds);
+        List<Conversation> byFounder = conversationRepository.findAll().stream()
+                .filter(conversation -> isFounderConversation(conversation, currentUser))
+                .toList();
 
         Map<Long, Conversation> merged = new LinkedHashMap<>();
         byParticipant.forEach(c -> merged.put(c.getId(), c));
         bySender.forEach(c -> merged.put(c.getId(), c));
+        byFounder.forEach(c -> merged.put(c.getId(), c));
 
         return merged.values().stream()
                 .sorted(Comparator.comparing(Conversation::getUpdatedAt, Comparator.nullsLast(Comparator.reverseOrder())))
@@ -153,7 +157,7 @@ public class MessagingService {
         if (conversation.getParticipantEmail().equals(currentUser)) {
             return;
         }
-        
+
         StartupDto startup;
         try {
             startup = startupClient.getStartup(conversation.getStartupId());
@@ -165,6 +169,17 @@ public class MessagingService {
         
         if (!startup.getFounderEmail().equals(currentUser)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have access to this conversation");
+        }
+    }
+
+    private boolean isFounderConversation(Conversation conversation, String currentUser) {
+        try {
+            StartupDto startup = startupClient.getStartup(conversation.getStartupId());
+            return currentUser.equals(startup.getFounderEmail());
+        } catch (FeignException.NotFound e) {
+            return false;
+        } catch (FeignException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Unable to load startup details");
         }
     }
 

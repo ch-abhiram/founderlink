@@ -23,6 +23,10 @@ export interface Startup {
 export interface StartupDocument {
   id?: number;
   startupId?: number;
+  name?: string;
+  url?: string;
+  docType?: string;
+  createdAt?: string;
   title?: string;
   documentUrl?: string;
   documentType?: string;
@@ -34,5 +38,6 @@ export interface StartupUpdate {
   startupId?: number;
   title?: string;
   content?: string;
+  createdAt?: string;
   postedAt?: string;
 }

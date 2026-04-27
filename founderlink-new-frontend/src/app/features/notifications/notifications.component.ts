@@ -11,7 +11,7 @@ import { Notification } from '../../core/models/notification.model';
 <div class="page-container">
   <div class="page-header animate-fade-up">
     <div><h1 class="section-title">Notifications</h1><p class="section-subtitle">Stay updated on what matters.</p></div>
-    <button class="btn-secondary" (click)="markAllRead()" *ngIf="unread > 0"><i class="pi pi-check-square"></i> Mark all read</button>
+    <button class="btn-secondary" (click)="markAllAsRead()" *ngIf="unread > 0"><i class="pi pi-check-square"></i> Mark all read</button>
   </div>
   <div *ngIf="loading" class="stack">
     <div class="skeleton" style="height:72px;border-radius:14px" *ngFor="let i of [1,2,3,4,5]"></div>
@@ -65,8 +65,8 @@ export class NotificationsComponent implements OnInit {
     this.notifSvc.markAsRead(n.id).subscribe({ next: () => n.read = true, error: () => {} });
   }
 
-  markAllRead() {
-    this.notifSvc.markAllRead().subscribe({ next: () => this.notifications.forEach(n => n.read = true), error: () => {} });
+  markAllAsRead() {
+    this.notifSvc.markAllAsRead().subscribe({ next: () => this.notifications.forEach(n => n.read = true), error: () => {} });
   }
 
   iconFor(type: string): string {

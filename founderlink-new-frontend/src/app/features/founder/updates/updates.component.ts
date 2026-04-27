@@ -47,7 +47,7 @@ export class UpdatesComponent implements OnInit {
     this.loading = true;
     this.startupService.getUpdates(this.startupId).subscribe({
       next: (res) => {
-        this.updates = res.sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        this.updates = [...res].sort((a, b) => new Date(b.createdAt ?? '').getTime() - new Date(a.createdAt ?? '').getTime());
         this.loading = false;
       },
       error: () => this.loading = false

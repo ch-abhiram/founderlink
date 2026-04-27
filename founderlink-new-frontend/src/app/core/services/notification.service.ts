@@ -28,11 +28,7 @@ export class NotificationService {
     return this.http.put<any>(`${this.baseUrl}/${id}/read`, {}).pipe(map(n => this.toFrontendNotification(n)));
   }
 
-  markAllRead(): Observable<any> {
-    return this.http.put(`${this.baseUrl}/read-all`, {});
-  }
-
   markAllAsRead(): Observable<any> {
-    return this.markAllRead();
+    return this.http.put(`${this.baseUrl}/read-all`, {});
   }
 }

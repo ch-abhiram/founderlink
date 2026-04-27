@@ -64,14 +64,14 @@ export class DetailComponent implements OnInit {
   }
 
   loadExtras(id: number) {
-    this.startupSvc.getUpdates(id).pipe(catchError(()=>of([]))).subscribe(u => this.updates = u);
-    this.startupSvc.getDocuments(id).pipe(catchError(()=>of([]))).subscribe(d => this.documents = d);
-    this.teamSvc.getTeamForStartup(id).pipe(catchError(()=>of([]))).subscribe(t => this.teamMembers = t);
+    this.startupSvc.getUpdates(id).pipe(catchError(() => of([]))).subscribe(u => this.updates = u);
+    this.startupSvc.getDocuments(id).pipe(catchError(() => of([]))).subscribe(d => this.documents = d);
+    this.teamSvc.getTeamForStartup(id).pipe(catchError(() => of([]))).subscribe(t => this.teamMembers = t);
   }
 
   checkFollowing(id: number) {
-    this.startupSvc.getFollowers(id).pipe(catchError(()=>of([]))).subscribe(f => {
-      this.isFollowing = (f as string[]).includes(this.currentEmail);
+    this.startupSvc.getFollowers(id).pipe(catchError(() => of([] as string[]))).subscribe(f => {
+      this.isFollowing = f.includes(this.currentEmail);
     });
   }
 

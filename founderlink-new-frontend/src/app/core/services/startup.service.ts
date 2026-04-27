@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { Startup } from '../models/startup.model';
+import { Startup, StartupDocument, StartupUpdate } from '../models/startup.model';
 
 @Injectable({ providedIn: 'root' })
 export class StartupService {
@@ -87,19 +87,19 @@ export class StartupService {
     return this.http.get<string[]>(`${this.baseUrl}/${id}/followers`);
   }
 
-  getUpdates(id: number): Observable<any[]> {
-    return this.http.get<any[]>(`${this.baseUrl}/${id}/updates`);
+  getUpdates(id: number): Observable<StartupUpdate[]> {
+    return this.http.get<StartupUpdate[]>(`${this.baseUrl}/${id}/updates`);
   }
 
-  getDocuments(id: number): Observable<any[]> {
-    return this.http.get<any[]>(`${this.baseUrl}/${id}/documents`);
+  getDocuments(id: number): Observable<StartupDocument[]> {
+    return this.http.get<StartupDocument[]>(`${this.baseUrl}/${id}/documents`);
   }
 
-  addDocument(id: number, data: any): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}/${id}/documents`, data);
+  addDocument(id: number, data: any): Observable<StartupDocument> {
+    return this.http.post<StartupDocument>(`${this.baseUrl}/${id}/documents`, data);
   }
 
-  postUpdate(id: number, data: any): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}/${id}/updates`, data);
+  postUpdate(id: number, data: any): Observable<StartupUpdate> {
+    return this.http.post<StartupUpdate>(`${this.baseUrl}/${id}/updates`, data);
   }
 }

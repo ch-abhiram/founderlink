@@ -1,0 +1,17 @@
+.page-header { display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px }
+.count-badge { padding:6px 14px;border-radius:999px;background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.25);color:var(--accent-gold);font-size:0.85rem;font-weight:700 }
+.stack { display:flex;flex-direction:column;gap:12px }
+.approval-list { display:flex;flex-direction:column;gap:12px }
+.approval-card { display:flex;align-items:flex-start;justify-content:space-between;gap:20px;padding:22px }
+.card-left { display:flex;gap:16px;flex:1 }
+.s-logo { width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700;color:#fff;font-size:1.2rem;flex-shrink:0 }
+.s-info { flex:1 }
+.s-name { font-weight:700;font-size:1.05rem;margin-bottom:3px }
+.s-meta { font-size:0.78rem;color:var(--text-muted);margin-bottom:6px }
+.s-desc { font-size:0.85rem;color:var(--text-secondary);line-height:1.55;margin-bottom:10px }
+.s-stats { display:flex;gap:14px;flex-wrap:wrap }
+.sstat { font-size:0.78rem;color:var(--text-secondary);display:flex;align-items:center;gap:5px;i{color:var(--accent-primary)} }
+.card-actions { display:flex;flex-direction:column;gap:8px;flex-shrink:0;min-width:110px }
+.btn-approve { display:flex;align-items:center;gap:6px;justify-content:center;padding:9px 16px;border-radius:var(--radius-md);background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.3);color:var(--accent-green);font-family:var(--font-body);font-size:0.85rem;font-weight:600;cursor:pointer;transition:all var(--transition-fast);&:hover{background:rgba(16,185,129,0.22)};&:disabled{opacity:0.6;cursor:not-allowed} }
+.btn-reject { display:flex;align-items:center;gap:6px;justify-content:center;padding:9px 16px;border-radius:var(--radius-md);background:rgba(244,63,94,0.08);border:1px solid rgba(244,63,94,0.2);color:var(--accent-rose);font-family:var(--font-body);font-size:0.85rem;font-weight:600;cursor:pointer;transition:all var(--transition-fast);&:hover{background:rgba(244,63,94,0.18)};&:disabled{opacity:0.6;cursor:not-allowed} }
+.spinner-sm { width:12px;height:12px;border-radius:50%;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;animation:spin 0.7s linear infinite;display:inline-block }

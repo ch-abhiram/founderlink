@@ -61,6 +61,7 @@ class InvestmentServiceTest {
         startupDto.setId(10L);
         startupDto.setName("NewCo");
         startupDto.setFounderEmail("founder@test.com");
+        startupDto.setStatus("OPEN");
 
         investment = new Investment();
         investment.setId(1L);
@@ -155,31 +156,32 @@ class InvestmentServiceTest {
 
     @Test
     void testUpdateStatus_Success_Founder() {
-        setupSecurityContext("founder@test.com", "FOUNDER");
+        setupSecurityContext("admin@test.com", "ADMIN");
         
         when(repository.findById(1L)).thenReturn(Optional.of(investment));
         when(startupClient.getStartup(10L)).thenReturn(startupDto);
         when(repository.save(any(Investment.class))).thenAnswer(i -> i.getArgument(0));
 
-        Investment result = investmentService.updateStatus(1L, "COMPLETED");
+        Investment result = investmentService.updateStatus(1L, "APPROVED");
 
-        assertEquals("COMPLETED", result.getStatus());
+        assertEquals("APPROVED", result.getStatus());
         verify(rabbitTemplate, times(1)).convertAndSend(eq(RabbitConfig.EXCHANGE), eq("investment.status"), any(Map.class));
     }
 
     @Test
-    void testUpdateStatus_Success_InvestorCompletesOwnInvestment() {
+    void testUpdateStatus_Forbidden_InvestorCompletesOwnInvestment() {
         setupSecurityContext("investor@test.com", "INVESTOR");
 
         when(repository.findById(1L)).thenReturn(Optional.of(investment));
         when(startupClient.getStartup(10L)).thenReturn(startupDto);
-        when(repository.save(any(Investment.class))).thenAnswer(i -> i.getArgument(0));
 
-        Investment result = investmentService.updateStatus(1L, "COMPLETED");
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
+            investmentService.updateStatus(1L, "COMPLETED");
+        });
 
-        assertEquals("COMPLETED", result.getStatus());
-        verify(repository, times(1)).save(any(Investment.class));
-        verify(rabbitTemplate, times(1)).convertAndSend(eq(RabbitConfig.EXCHANGE), eq("investment.status"), any(Map.class));
+        assertEquals(HttpStatus.FORBIDDEN, exception.getStatusCode());
+        verify(repository, never()).save(any());
+        verify(rabbitTemplate, never()).convertAndSend(eq(RabbitConfig.EXCHANGE), eq("investment.status"), any(Map.class));
     }
 
     @Test
@@ -199,7 +201,7 @@ class InvestmentServiceTest {
 
     @Test
     void testUpdateStatus_StartupServiceUnavailable() {
-        setupSecurityContext("founder@test.com", "FOUNDER");
+        setupSecurityContext("admin@test.com", "ADMIN");
 
         FeignException upstreamError = mock(FeignException.class);
         when(repository.findById(1L)).thenReturn(Optional.of(investment));

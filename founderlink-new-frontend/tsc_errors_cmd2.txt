@@ -1,0 +1,8 @@
+src/app/app.component.spec.ts(20,16): error TS2339: Property 'title' does not exist on type 'AppComponent'.
+src/app/features/founder/documents/documents.component.ts(6,10): error TS2305: Module '"../../../core/models/startup.model"' has no exported member 'StartupDocument'.
+src/app/features/founder/documents/documents.component.ts(69,25): error TS2339: Property 'addDocument' does not exist on type 'StartupService'.
+src/app/features/founder/investments-received/investments-received.component.ts(38,21): error TS2339: Property 'getInvestmentsForStartup' does not exist on type 'InvestmentService'.
+src/app/features/founder/updates/updates.component.ts(6,10): error TS2305: Module '"../../../core/models/startup.model"' has no exported member 'StartupUpdate'.
+src/app/features/founder/updates/updates.component.ts(61,25): error TS2339: Property 'postUpdate' does not exist on type 'StartupService'.
+src/app/features/startups/detail/detail.component.ts(76,37): error TS2345: Argument of type 'string' is not assignable to parameter of type 'never'.
+src/app/shared/components/notification-bell/notification-bell.component.ts(56,23): error TS2551: Property 'markAllAsRead' does not exist on type 'NotificationService'. Did you mean 'markAllRead'?

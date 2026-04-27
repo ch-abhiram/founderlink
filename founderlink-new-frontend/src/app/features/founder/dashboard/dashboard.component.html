@@ -1,0 +1,111 @@
+<div class="page-container">
+  <!-- Greeting -->
+  <div class="page-header animate-fade-up">
+    <div>
+      <p class="greeting-label">Good day</p>
+      <h1 class="greeting-name display">{{ firstName }} <span class="wave">👋</span></h1>
+      <p class="greeting-sub">Here's what's happening with your startups today.</p>
+    </div>
+    <a routerLink="/founder/startups/new" class="btn-primary">
+      <i class="pi pi-plus"></i> New Startup
+    </a>
+  </div>
+
+  <!-- Skeleton -->
+  <div *ngIf="loading" class="stats-row stagger">
+    <div class="skeleton" style="height:120px;border-radius:18px;" *ngFor="let i of [1,2,3,4]"></div>
+  </div>
+
+  <!-- Stats -->
+  <div *ngIf="!loading" class="stats-row stagger">
+    <div class="stat-card accent-indigo animate-fade-up">
+      <div class="stat-icon"><i class="pi pi-briefcase"></i></div>
+      <div class="stat-val">{{ startups.length }}</div>
+      <div class="stat-lbl">Total Startups</div>
+    </div>
+    <div class="stat-card accent-green animate-fade-up">
+      <div class="stat-icon"><i class="pi pi-dollar"></i></div>
+      <div class="stat-val">{{ formatCurrency(totalRaised) }}</div>
+      <div class="stat-lbl">Capital Raised</div>
+    </div>
+    <div class="stat-card accent-gold animate-fade-up">
+      <div class="stat-icon"><i class="pi pi-clock"></i></div>
+      <div class="stat-val">{{ pendingCount }}</div>
+      <div class="stat-lbl">Pending Investments</div>
+    </div>
+    <div class="stat-card accent-cyan animate-fade-up">
+      <div class="stat-icon"><i class="pi pi-heart"></i></div>
+      <div class="stat-val">{{ followerCount }}</div>
+      <div class="stat-lbl">Total Followers</div>
+    </div>
+  </div>
+
+  <!-- Startups list -->
+  <div class="section animate-fade-up" *ngIf="!loading">
+    <div class="section-head">
+      <div>
+        <div class="section-title">Your Startups</div>
+        <div class="section-subtitle">Manage your listed companies</div>
+      </div>
+      <a routerLink="/founder/my-startups" class="btn-ghost">View all <i class="pi pi-arrow-right"></i></a>
+    </div>
+
+    <div class="empty-state" *ngIf="startups.length === 0">
+      <div class="empty-icon"><i class="pi pi-briefcase"></i></div>
+      <h3>No startups yet</h3>
+      <p>List your first startup to start attracting investors.</p>
+      <a routerLink="/founder/startups/new" class="btn-primary" style="margin-top:16px">Create Startup</a>
+    </div>
+
+    <div class="startup-cards stagger" *ngIf="startups.length > 0">
+      <a class="startup-row fl-card animate-fade-up" *ngFor="let s of startups | slice:0:4"
+         [routerLink]="['/startups', s.id]">
+        <div class="startup-logo">{{ (s.name || 'S').charAt(0) }}</div>
+        <div class="startup-info">
+          <div class="startup-name">{{ s.name }}</div>
+          <div class="startup-meta">{{ s.category }} · {{ s.currentRound }}</div>
+        </div>
+        <div class="startup-right">
+          <span class="badge" [ngClass]="{
+            'badge-open': s.status === 'OPEN',
+            'badge-pending': s.status === 'PENDING',
+            'badge-closed': s.status === 'CLOSED',
+            'badge-rejected': s.status === 'REJECTED'
+          }">{{ s.status }}</span>
+          <i class="pi pi-chevron-right" style="color:var(--text-muted);font-size:0.75rem"></i>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <!-- Recent investments -->
+  <div class="section animate-fade-up" *ngIf="!loading && investments.length > 0">
+    <div class="section-head">
+      <div>
+        <div class="section-title">Recent Investments</div>
+        <div class="section-subtitle">Latest investor activity on your startups</div>
+      </div>
+    </div>
+    <div class="table-card glass">
+      <table class="fl-table">
+        <thead>
+          <tr><th>Investor</th><th>Amount</th><th>Status</th><th>Date</th></tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let inv of investments | slice:0:5">
+            <td><div class="inv-email">{{ inv.investorEmail }}</div></td>
+            <td><div class="inv-amount">{{ formatCurrency(inv.amount) }}</div></td>
+            <td>
+              <span class="badge" [ngClass]="{
+                'badge-success': inv.status === 'APPROVED' || inv.status === 'COMPLETED',
+                'badge-pending': inv.status === 'PENDING',
+                'badge-rejected': inv.status === 'REJECTED' || inv.status === 'FAILED'
+              }">{{ inv.status }}</span>
+            </td>
+            <td>{{ inv.createdAt | date:'mediumDate' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

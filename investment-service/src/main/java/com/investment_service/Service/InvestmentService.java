@@ -25,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 public class InvestmentService {
 
     private static final List<String> ALLOWED_STATUSES = List.of("PENDING", "COMPLETED", "APPROVED", "REJECTED");
+    private static final List<String> FOUNDER_VISIBLE_STATUSES = List.of("APPROVED", "COMPLETED");
 
     private final InvestmentRepository repository;
     private final StartupClient startupClient;
@@ -43,6 +44,10 @@ public class InvestmentService {
 
         if (startup.getFounderEmail().equals(email)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Founders cannot invest in their own startup");
+        }
+
+        if (!"OPEN".equalsIgnoreCase(startup.getStatus())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Startup must be approved by admin before investments can be submitted");
         }
 
         boolean alreadyInvested = repository.findByInvestorEmailAndStartupId(email, request.getStartupId()).isPresent();
@@ -107,7 +112,11 @@ public class InvestmentService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the founder can view startup investors");
         }
 
-        return repository.findByStartupId(startupId);
+        if (isAdmin) {
+            return repository.findByStartupId(startupId);
+        }
+
+        return repository.findByStartupIdAndStatusIn(startupId, FOUNDER_VISIBLE_STATUSES);
     }
 
     public Investment updateStatus(Long id, String status) {
@@ -127,16 +136,8 @@ public class InvestmentService {
         boolean isAdmin = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
 
-        boolean isInvestorOwner = investment.getInvestorEmail().equals(currentUser);
-        if (isInvestorOwner && "COMPLETED".equalsIgnoreCase(status)) {
-            investment.setStatus(normalizeStatus(status));
-            Investment saved = repository.save(investment);
-            publishStatusEvent(saved);
-            return saved;
-        }
-
-        if (!startup.getFounderEmail().equals(currentUser) && !isAdmin) {
-             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the investor, founder, or an admin can update investment status");
+        if (!isAdmin) {
+             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only admins can approve or reject investment requests");
         }
 
         investment.setStatus(normalizeStatus(status));

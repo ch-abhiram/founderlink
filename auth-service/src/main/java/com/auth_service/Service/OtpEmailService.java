@@ -45,7 +45,7 @@ public class OtpEmailService {
             mailSender.send(message);
             log.info("OTP email sent to email={}", toEmail);
         } catch (Exception ex) {
-            log.error("Failed to send OTP email to email={}: {}", toEmail, ex.getMessage());
+            log.error("Failed to send OTP email to email={}: {}. [DEV FALLBACK] OTP is: {}", toEmail, ex.getMessage(), otp);
         }
     }
 

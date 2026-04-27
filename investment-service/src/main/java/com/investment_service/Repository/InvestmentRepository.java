@@ -13,5 +13,7 @@ public interface InvestmentRepository extends JpaRepository<Investment, Long> {
 
     List<Investment> findByStartupId(Long startupId);
 
+    List<Investment> findByStartupIdAndStatusIn(Long startupId, List<String> statuses);
+
     Optional<Investment> findByInvestorEmailAndStartupId(String email, Long startupId);
 }

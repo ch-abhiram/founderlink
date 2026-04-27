@@ -7,6 +7,7 @@ import java.security.SecureRandom;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.auth_service.Exception.ConflictException;
 import com.auth_service.Exception.ForbiddenOperationException;
@@ -75,6 +76,7 @@ public class AuthService {
         );
     }
 
+    @Transactional
     public LoginResponse login(String email, String password) {
         String normalizedEmail = normalizeEmail(email);
         User user = userRepository.findByEmail(normalizedEmail)
@@ -112,6 +114,7 @@ public class AuthService {
         return token;
     }
 
+    @Transactional
     public LoginResponse refreshToken(String refreshToken) {
         RefreshToken token = refreshTokenRepository.findByToken(refreshToken)
                 .orElseThrow(() -> new UnauthorizedException("Invalid refresh token"));

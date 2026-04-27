@@ -1,9 +1,0 @@
-<div class="min-h-screen flex flex-col bg-surface text-text-primary overflow-hidden">
-  <app-navbar class="flex-shrink-0 z-20"></app-navbar>
-  <div class="flex flex-1 overflow-hidden">
-    <app-sidebar *ngIf="authService.isAuthenticated()" class="hidden md:block w-64 flex-shrink-0 bg-surface-card border-r border-surface-border z-10"></app-sidebar>
-    <main class="flex-1 overflow-y-auto p-4 md:p-8 bg-surface">
-      <router-outlet></router-outlet>
-    </main>
-  </div>
-</div>

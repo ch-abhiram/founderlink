@@ -1,0 +1,20 @@
+src/app/features/startups/detail/detail.component.ts(118,79): error TS1005: ',' expected.
+src/app/features/startups/detail/detail.component.ts(118,81): error TS1005: ',' expected.
+src/app/features/startups/detail/detail.component.ts(118,92): error TS1005: ',' expected.
+src/app/features/startups/detail/detail.component.ts(118,100): error TS1005: ',' expected.
+src/app/features/startups/detail/detail.component.ts(118,108): error TS1005: ',' expected.
+src/app/features/startups/detail/detail.component.ts(118,124): error TS1002: Unterminated string literal.
+src/app/features/startups/detail/detail.component.ts(119,7): error TS1005: ':' expected.
+src/app/features/startups/detail/detail.component.ts(119,11): error TS1005: ',' expected.
+src/app/features/startups/detail/detail.component.ts(119,13): error TS1136: Property assignment expected.
+src/app/features/startups/detail/detail.component.ts(119,16): error TS1005: ',' expected.
+src/app/features/startups/detail/detail.component.ts(120,12): error TS1005: ',' expected.
+src/app/features/startups/detail/detail.component.ts(121,5): error TS1005: ',' expected.
+src/app/features/startups/detail/detail.component.ts(121,6): error TS1068: Unexpected token. A constructor, method, accessor, or property was expected.
+src/app/features/startups/detail/detail.component.ts(124,3): error TS1434: Unexpected keyword or identifier.
+src/app/features/startups/detail/detail.component.ts(124,20): error TS1005: ';' expected.
+src/app/features/startups/detail/detail.component.ts(124,22): error TS1434: Unexpected keyword or identifier.
+src/app/features/startups/detail/detail.component.ts(129,17): error TS1005: ',' expected.
+src/app/features/startups/detail/detail.component.ts(129,26): error TS1005: ';' expected.
+src/app/features/startups/detail/detail.component.ts(129,28): error TS1434: Unexpected keyword or identifier.
+src/app/features/startups/detail/detail.component.ts(135,1): error TS1128: Declaration or statement expected.

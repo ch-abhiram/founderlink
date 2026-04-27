@@ -1,0 +1,53 @@
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+<div class="page-container">
+  <div class="page-header animate-fade-up">
+    <div>
+      <h1 class="section-title">My Startups</h1>
+      <p class="section-subtitle">All your listed companies in one place.</p>
+    </div>
+    <a routerLink="/founder/startups/new" class="btn-primary"><i class="pi pi-plus"></i> New Startup</a>
+  </div>
+
+  <div *ngIf="loading" class="cards-grid stagger">
+    <div class="skeleton" style="height:220px;border-radius:18px" *ngFor="let i of [1,2,3]"></div>
+  </div>
+
+  <div class="empty-state" *ngIf="!loading && startups.length === 0">
+    <div class="empty-icon"><i class="pi pi-briefcase"></i></div>
+    <h3>No startups listed yet</h3>
+    <p>Create your first startup to start attracting investors and co-founders.</p>
+    <a routerLink="/founder/startups/new" class="btn-primary" style="margin-top:16px"><i class="pi pi-plus"></i> Create Startup</a>
+  </div>
+
+  <div class="cards-grid stagger" *ngIf="!loading && startups.length > 0">
+    <div class="startup-card fl-card animate-fade-up" *ngFor="let s of startups">
+      <div class="card-top">
+        <div class="startup-avatar">{{ (s.name||'S').charAt(0) }}</div>
+        <div class="card-info">
+          <div class="card-name">{{ s.name }}</div>
+          <div class="card-meta">{{ s.category }} · {{ s.currentRound || 'No round' }}</div>
+        </div>
+        <span class="badge" [ngClass]="{
+          'badge-open': s.status==='OPEN', 'badge-pending': s.status==='PENDING',
+          'badge-closed': s.status==='CLOSED', 'badge-rejected': s.status==='REJECTED'
+        }">{{ s.status }}</span>
+      </div>
+
+      <p class="card-tagline">{{ s.tagline || s.description | slice:0:90 }}{{ (s.description?.length||0) > 90 ? '…' : '' }}</p>
+
+      <div class="card-stats">
+        <div class="cstat"><div class="cstat-val">{{ formatAmount(s.targetAmount||0) }}</div><div class="cstat-lbl">Target</div></div>
+        <div class="cstat"><div class="cstat-val">{{ formatAmount(s.raisedAmount||0) }}</div><div class="cstat-lbl">Raised</div></div>
+        <div class="cstat"><div class="cstat-val">{{ s.equityOffered || 0 }}%</div><div class="cstat-lbl">Equity</div></div>
+      </div>
+
+      <div class="card-actions">
+        <a [routerLink]="['/startups', s.id]" class="btn-ghost"><i class="pi pi-eye"></i> View</a>
+        <a [routerLink]="['/founder/startups', s.id, 'edit']" class="btn-ghost"><i class="pi pi-pencil"></i> Edit</a>
+        <a [routerLink]="['/founder/startups', s.id, 'team']" class="btn-ghost"><i class="pi pi-users"></i> Team</a>
+        <button class="btn-danger-sm" (click)="deleteStartup(s)"><i class="pi pi-trash"></i></button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,161 @@
+<p-toast></p-toast>
+<div class="page-container" *ngIf="!loading && startup">
+  <!-- Back + Actions -->
+  <div class="top-bar animate-fade-up">
+    <a routerLink="/startups" class="btn-ghost"><i class="pi pi-arrow-left"></i> Discover</a>
+    <div class="top-actions">
+      <button class="btn-secondary" (click)="toggleFollow()">
+        <i class="pi" [class.pi-heart]="!isFollowing" [class.pi-heart-fill]="isFollowing" [style.color]="isFollowing ? 'var(--accent-rose)' : ''"></i>
+        {{ isFollowing ? 'Following' : 'Follow' }}
+      </button>
+      <a *ngIf="isFounder" [routerLink]="['/founder/startups', startup.id, 'edit']" class="btn-secondary"><i class="pi pi-pencil"></i> Edit</a>
+      <button *ngIf="isInvestor" class="btn-primary" (click)="openInvestModal()"><i class="pi pi-dollar"></i> Invest Now</button>
+      <button *ngIf="isInvestor" class="btn-secondary" (click)="messageFounder()"><i class="pi pi-envelope"></i> Message Founder</button>
+    </div>
+  </div>
+
+  <!-- Hero -->
+  <div class="startup-hero fl-card animate-fade-up">
+    <div class="hero-left">
+      <div class="s-logo-lg">{{ (startup.name||'S').charAt(0) }}</div>
+      <div class="hero-info">
+        <div class="hero-badges">
+          <span class="badge" [ngClass]="{ 'badge-open': startup.status==='OPEN', 'badge-pending': startup.status==='PENDING', 'badge-closed': startup.status==='CLOSED', 'badge-rejected': startup.status==='REJECTED' }">{{ startup.status }}</span>
+          <span class="cat-pill">{{ startup.category }}</span>
+          <span class="round-pill" *ngIf="startup.currentRound">{{ startup.currentRound }}</span>
+        </div>
+        <h1 class="s-name display">{{ startup.name }}</h1>
+        <p class="s-tagline" *ngIf="startup.tagline">{{ startup.tagline }}</p>
+        <p class="s-founder">by <strong>{{ startup.founderEmail }}</strong></p>
+        <div class="social-links">
+          <a *ngIf="startup.websiteUrl" [href]="startup.websiteUrl" target="_blank" class="social-link"><i class="pi pi-globe"></i></a>
+          <a *ngIf="startup.linkedinUrl" [href]="startup.linkedinUrl" target="_blank" class="social-link"><i class="pi pi-linkedin"></i></a>
+          <a *ngIf="startup.twitterUrl" [href]="startup.twitterUrl" target="_blank" class="social-link"><i class="pi pi-twitter"></i></a>
+        </div>
+      </div>
+    </div>
+    <div class="hero-right">
+      <div class="fund-widget">
+        <div class="fw-main">{{ formatAmount(startup.raisedAmount||0) }}</div>
+        <div class="fw-sub">raised of {{ formatAmount(startup.targetAmount||0) }} target</div>
+        <div class="fund-bar"><div class="fund-fill" [style.width.%]="progressPct"></div></div>
+        <div class="fw-pct">{{ progressPct }}% funded</div>
+        <div class="fw-stats">
+          <div class="fw-stat"><div class="fw-val">{{ startup.equityOffered || 0 }}%</div><div class="fw-lbl">Equity</div></div>
+          <div class="fw-stat"><div class="fw-val">{{ startup.stage || '—' }}</div><div class="fw-lbl">Stage</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs animate-fade-up">
+    <button class="tab" [class.active]="activeTab==='overview'" (click)="activeTab='overview'">Overview</button>
+    <button class="tab" [class.active]="activeTab==='team'" (click)="activeTab='team'">Team ({{ teamMembers.length }})</button>
+    <button class="tab" [class.active]="activeTab==='updates'" (click)="activeTab='updates'">Updates ({{ updates.length }})</button>
+    <button class="tab" [class.active]="activeTab==='documents'" (click)="activeTab='documents'">Documents ({{ documents.length }})</button>
+  </div>
+
+  <!-- Tab: Overview -->
+  <div *ngIf="activeTab==='overview'" class="tab-content animate-fade-in">
+    <div class="fl-card section-card">
+      <h3>About</h3>
+      <p class="about-text">{{ startup.description || 'No description provided.' }}</p>
+    </div>
+  </div>
+
+  <!-- Tab: Team -->
+  <div *ngIf="activeTab==='team'" class="tab-content animate-fade-in">
+    <div class="fl-card section-card">
+      <div class="section-card-header">
+        <h3>Team Members</h3>
+        <a *ngIf="isFounder" [routerLink]="['/founder/startups', startup.id, 'team']" class="btn-ghost"><i class="pi pi-plus"></i> Manage Team</a>
+      </div>
+      <div class="empty-state" *ngIf="teamMembers.length === 0">
+        <div class="empty-icon"><i class="pi pi-users"></i></div>
+        <h3>No team members yet</h3>
+        <p>The founder hasn't added any co-founders or team members.</p>
+      </div>
+      <div class="team-list" *ngIf="teamMembers.length > 0">
+        <div class="team-row" *ngFor="let m of teamMembers">
+          <div class="member-avatar">{{ m.memberEmail?.charAt(0)?.toUpperCase() }}</div>
+          <div class="member-info">
+            <div class="member-email">{{ m.memberEmail }}</div>
+            <div class="member-role">{{ m.role }} · {{ m.equityShare }}% equity</div>
+          </div>
+          <span class="badge" [ngClass]="{'badge-success':m.status==='ACCEPTED','badge-pending':m.status==='PENDING','badge-rejected':m.status==='REJECTED'}">{{ m.status }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab: Updates -->
+  <div *ngIf="activeTab==='updates'" class="tab-content animate-fade-in">
+    <div class="fl-card section-card">
+      <h3>Startup Updates</h3>
+      <div class="empty-state" *ngIf="updates.length === 0"><div class="empty-icon"><i class="pi pi-bell"></i></div><h3>No updates yet</h3><p>The founder hasn't posted any updates.</p></div>
+      <div class="updates-list" *ngIf="updates.length > 0">
+        <div class="update-item" *ngFor="let u of updates">
+          <div class="update-dot"></div>
+          <div class="update-body">
+            <div class="update-title">{{ u.title }}</div>
+            <div class="update-date">{{ u.createdAt | date:'mediumDate' }}</div>
+            <div class="update-content">{{ u.content }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab: Documents -->
+  <div *ngIf="activeTab==='documents'" class="tab-content animate-fade-in">
+    <div class="fl-card section-card">
+      <h3>Documents</h3>
+      <div class="empty-state" *ngIf="documents.length === 0"><div class="empty-icon"><i class="pi pi-file"></i></div><h3>No documents</h3><p>No pitch decks or documents uploaded yet.</p></div>
+      <div class="docs-list" *ngIf="documents.length > 0">
+        <a class="doc-row" *ngFor="let d of documents" [href]="d.url || d.fileUrl" target="_blank">
+          <i class="pi pi-file-pdf doc-icon"></i>
+          <div class="doc-info"><div class="doc-name">{{ d.name || d.url || d.fileUrl }}</div><div class="doc-type">{{ d.docType || d.documentType }}</div></div>
+          <i class="pi pi-download" style="color:var(--text-muted)"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Loading -->
+<div class="page-container" *ngIf="loading">
+  <div class="skeleton" style="height:60px;border-radius:12px;margin-bottom:24px"></div>
+  <div class="skeleton" style="height:220px;border-radius:18px;margin-bottom:24px"></div>
+  <div class="skeleton" style="height:48px;border-radius:12px;margin-bottom:24px"></div>
+  <div class="skeleton" style="height:300px;border-radius:18px"></div>
+</div>
+
+<!-- Invest Modal -->
+<div class="modal-backdrop" *ngIf="showInvestModal" (click)="closeInvestModal()">
+  <div class="modal-card glass-strong animate-scale-in" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Invest in {{ startup?.name }}</h3>
+      <button class="btn-ghost modal-close" (click)="closeInvestModal()"><i class="pi pi-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <p class="modal-desc">Enter the amount you'd like to commit. An admin will verify the request before it appears to the founder.</p>
+      <div class="field">
+        <label class="fl-label">Investment Amount (USD)</label>
+        <input class="fl-input" type="number" [(ngModel)]="investAmount" placeholder="e.g. 25000" min="100" />
+      </div>
+      <div class="invest-info" *ngIf="startup">
+        <div class="info-row"><span>Equity offered</span><strong>{{ startup.equityOffered }}%</strong></div>
+        <div class="info-row"><span>Round</span><strong>{{ startup.currentRound || '—' }}</strong></div>
+        <div class="info-row"><span>Target</span><strong>{{ formatAmount(startup.targetAmount||0) }}</strong></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="closeInvestModal()">Cancel</button>
+      <button class="btn-primary" (click)="proceedWithInvestment()" [disabled]="investLoading">
+        <span class="spinner-sm" *ngIf="investLoading"></span>
+        <span *ngIf="!investLoading"><i class="pi pi-check"></i> Submit for Verification</span>
+      </button>
+    </div>
+  </div>
+</div>

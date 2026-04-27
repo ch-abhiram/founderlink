@@ -1,0 +1,69 @@
+<div class="auth-page">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <div class="auth-card glass-strong animate-scale-in reg-card">
+    <div class="auth-brand">
+      <div class="brand-icon"><i class="pi pi-link"></i></div>
+      <span class="brand-name display">FounderLink</span>
+    </div>
+    <h2 class="auth-title">Create your account</h2>
+    <p class="auth-sub">Join the platform where deals get done.</p>
+
+    <div class="error-msg" *ngIf="error"><i class="pi pi-exclamation-circle"></i> {{ error }}</div>
+
+    <form class="auth-form" (ngSubmit)="submit()">
+      <!-- Role selector -->
+      <div class="role-selector">
+        <label class="fl-label">I am a…</label>
+        <div class="role-cards">
+          <button type="button" class="role-card" *ngFor="let r of roles"
+            [class.selected]="form.role === r.value" (click)="selectRole(r.value)">
+            <i class="pi {{ r.icon }}"></i>
+            <span class="role-name">{{ r.label }}</span>
+            <span class="role-desc">{{ r.desc }}</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="field">
+          <label class="fl-label">First name</label>
+          <input class="fl-input" type="text" [(ngModel)]="form.firstName" name="firstName" placeholder="Jane" />
+        </div>
+        <div class="field">
+          <label class="fl-label">Last name</label>
+          <input class="fl-input" type="text" [(ngModel)]="form.lastName" name="lastName" placeholder="Doe" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="fl-label">Email address</label>
+        <input class="fl-input" type="email" [(ngModel)]="form.email" name="email" placeholder="you@example.com" />
+      </div>
+
+      <div class="field">
+        <label class="fl-label">Password</label>
+        <div class="pw-wrap">
+          <input class="fl-input" [type]="showPw ? 'text' : 'password'" [(ngModel)]="form.password" name="password" placeholder="Min. 8 characters" />
+          <button type="button" class="pw-toggle" (click)="showPw = !showPw">
+            <i class="pi" [class.pi-eye]="!showPw" [class.pi-eye-slash]="showPw"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="fl-label">Confirm password</label>
+        <input class="fl-input" [type]="showPw ? 'text' : 'password'" [(ngModel)]="form.confirmPassword" name="confirmPassword" placeholder="Repeat your password" />
+      </div>
+
+      <button type="submit" class="btn-primary submit-btn" [disabled]="loading">
+        <span class="spinner" *ngIf="loading"></span>
+        <span *ngIf="!loading"><i class="pi pi-check"></i> Create Account</span>
+        <span *ngIf="loading">Creating account…</span>
+      </button>
+    </form>
+
+    <p class="auth-switch">Already have an account? <a routerLink="/login">Sign in</a></p>
+  </div>
+</div>

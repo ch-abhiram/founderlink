@@ -1,0 +1,44 @@
+<aside class="sidebar" [class.collapsed]="collapsed" [class.mobile-open]="mobileOpen">
+  <!-- Logo -->
+  <div class="sidebar-logo">
+    <div class="logo-icon">
+      <i class="pi pi-link"></i>
+    </div>
+    <span class="logo-text">FounderLink</span>
+  </div>
+
+  <!-- Role label -->
+  <div class="role-pill" *ngIf="!collapsed">
+    <span class="role-dot"></span>
+    {{ roleLabel }}
+  </div>
+
+  <!-- Nav -->
+  <nav class="sidebar-nav">
+    <a *ngFor="let item of navItems"
+       [routerLink]="item.route"
+       routerLinkActive="active"
+       class="nav-item"
+       [title]="collapsed ? item.label : ''">
+      <i class="pi {{ item.icon }} nav-icon"></i>
+      <span class="nav-label" *ngIf="!collapsed">{{ item.label }}</span>
+      <span class="nav-badge" *ngIf="item.badge && !collapsed">{{ item.badge }}</span>
+    </a>
+  </nav>
+
+  <!-- Footer -->
+  <div class="sidebar-footer">
+    <div class="user-info" *ngIf="!collapsed">
+      <div class="user-avatar">{{ avatarInitials }}</div>
+      <div class="user-meta">
+        <div class="user-email">{{ email }}</div>
+        <div class="user-role">{{ roleLabel }}</div>
+      </div>
+    </div>
+    <div class="user-avatar avatar-only" *ngIf="collapsed" title="{{ email }}">{{ avatarInitials }}</div>
+    <button class="logout-btn" (click)="logout()" [title]="collapsed ? 'Logout' : ''">
+      <i class="pi pi-sign-out"></i>
+      <span *ngIf="!collapsed">Logout</span>
+    </button>
+  </div>
+</aside>

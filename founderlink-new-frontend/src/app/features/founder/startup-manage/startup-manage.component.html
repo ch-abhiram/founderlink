@@ -1,0 +1,113 @@
+<p-toast></p-toast>
+<div class="page-container">
+  <div class="page-top animate-fade-up">
+    <button class="btn-ghost" (click)="cancel()"><i class="pi pi-arrow-left"></i> Back</button>
+    <h1 class="section-title">{{ isEdit ? 'Edit Startup' : 'List a New Startup' }}</h1>
+    <p class="section-subtitle">{{ isEdit ? 'Update your startup details.' : 'Fill in the details to submit your startup for review.' }}</p>
+  </div>
+
+  <div *ngIf="loading" class="skeleton" style="height:500px;border-radius:18px"></div>
+
+  <form *ngIf="!loading" class="form-grid animate-fade-up" (ngSubmit)="submit()">
+    <!-- Basic Info -->
+    <div class="form-section fl-card">
+      <div class="form-section-head"><i class="pi pi-info-circle"></i> Basic Information</div>
+      <div class="field-group">
+        <div class="field">
+          <label class="fl-label">Startup Name *</label>
+          <input class="fl-input" type="text" [(ngModel)]="form.name" name="name" placeholder="NovaSynth AI" />
+        </div>
+        <div class="field">
+          <label class="fl-label">Tagline</label>
+          <input class="fl-input" type="text" [(ngModel)]="form.tagline" name="tagline" placeholder="One sentence that explains everything" />
+        </div>
+      </div>
+      <div class="field">
+        <label class="fl-label">Description</label>
+        <textarea class="fl-textarea" [(ngModel)]="form.description" name="description" placeholder="Describe your startup, the problem it solves, and your unique approach…" rows="5"></textarea>
+      </div>
+    </div>
+
+    <!-- Classification -->
+    <div class="form-section fl-card">
+      <div class="form-section-head"><i class="pi pi-tag"></i> Classification</div>
+      <div class="field-group three">
+        <div class="field">
+          <label class="fl-label">Category *</label>
+          <select class="fl-select" [(ngModel)]="form.category" name="category">
+            <option value="">Select category</option>
+            <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="fl-label">Funding Round</label>
+          <select class="fl-select" [(ngModel)]="form.currentRound" name="currentRound">
+            <option value="">Select round</option>
+            <option *ngFor="let r of rounds" [value]="r">{{ r }}</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="fl-label">Stage</label>
+          <select class="fl-select" [(ngModel)]="form.stage" name="stage">
+            <option value="">Select stage</option>
+            <option *ngFor="let s of stages" [value]="s">{{ s }}</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Financials -->
+    <div class="form-section fl-card">
+      <div class="form-section-head"><i class="pi pi-dollar"></i> Financials</div>
+      <div class="field-group three">
+        <div class="field">
+          <label class="fl-label">Target Amount ($)</label>
+          <input class="fl-input" type="number" [(ngModel)]="form.targetAmount" name="targetAmount" placeholder="5000000" />
+        </div>
+        <div class="field">
+          <label class="fl-label">Raised So Far ($)</label>
+          <input class="fl-input" type="number" [(ngModel)]="form.raisedAmount" name="raisedAmount" placeholder="0" />
+        </div>
+        <div class="field">
+          <label class="fl-label">Equity Offered (%)</label>
+          <input class="fl-input" type="number" [(ngModel)]="form.equityOffered" name="equityOffered" placeholder="10" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Links -->
+    <div class="form-section fl-card">
+      <div class="form-section-head"><i class="pi pi-globe"></i> Links</div>
+      <div class="field-group">
+        <div class="field">
+          <label class="fl-label">Website URL</label>
+          <input class="fl-input" type="url" [(ngModel)]="form.websiteUrl" name="websiteUrl" placeholder="https://yoursite.com" />
+        </div>
+        <div class="field">
+          <label class="fl-label">Logo URL</label>
+          <input class="fl-input" type="url" [(ngModel)]="form.logoUrl" name="logoUrl" placeholder="https://cdn.yoursite.com/logo.png" />
+        </div>
+      </div>
+      <div class="field-group">
+        <div class="field">
+          <label class="fl-label">LinkedIn</label>
+          <input class="fl-input" type="url" [(ngModel)]="form.linkedinUrl" name="linkedinUrl" placeholder="https://linkedin.com/company/..." />
+        </div>
+        <div class="field">
+          <label class="fl-label">Twitter / X</label>
+          <input class="fl-input" type="url" [(ngModel)]="form.twitterUrl" name="twitterUrl" placeholder="https://x.com/..." />
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="form-actions">
+      <button type="button" class="btn-secondary" (click)="cancel()">Cancel</button>
+      <button type="submit" class="btn-primary" [disabled]="saving">
+        <span class="spinner" *ngIf="saving"></span>
+        <span *ngIf="!saving"><i class="pi pi-check"></i> {{ isEdit ? 'Save Changes' : 'Submit for Review' }}</span>
+        <span *ngIf="saving">Saving…</span>
+      </button>
+    </div>
+  </form>
+</div>

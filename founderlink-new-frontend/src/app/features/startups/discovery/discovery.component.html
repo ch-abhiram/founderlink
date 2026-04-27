@@ -1,0 +1,77 @@
+<div class="page-container">
+  <div class="page-header animate-fade-up">
+    <div>
+      <h1 class="section-title">Discover Startups</h1>
+      <p class="section-subtitle">{{ total }} startups across all sectors</p>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-bar glass animate-fade-up">
+    <input class="fl-input search-input" type="text" [(ngModel)]="filters.search" placeholder="Search by name or description…" (input)="applyFilters()" />
+    <select class="fl-select" [(ngModel)]="filters.category" (change)="applyFilters()">
+      <option value="">All Categories</option>
+      <option *ngFor="let c of categories.slice(1)" [value]="c">{{ c }}</option>
+    </select>
+    <select class="fl-select" [(ngModel)]="filters.currentRound" (change)="applyFilters()">
+      <option value="">All Rounds</option>
+      <option *ngFor="let r of rounds.slice(1)" [value]="r">{{ r }}</option>
+    </select>
+    <select class="fl-select" [(ngModel)]="filters.stage" (change)="applyFilters()">
+      <option value="">All Stages</option>
+      <option *ngFor="let s of stages.slice(1)" [value]="s">{{ s }}</option>
+    </select>
+    <button class="btn-ghost" (click)="clearFilters()"><i class="pi pi-times"></i> Clear</button>
+  </div>
+
+  <!-- Skeleton -->
+  <div class="startup-grid stagger" *ngIf="loading">
+    <div class="skeleton" style="height:260px;border-radius:18px" *ngFor="let i of [1,2,3,4,5,6]"></div>
+  </div>
+
+  <!-- Empty -->
+  <div class="empty-state" *ngIf="!loading && filtered.length === 0">
+    <div class="empty-icon"><i class="pi pi-search"></i></div>
+    <h3>No startups found</h3>
+    <p>Try adjusting your filters to see more results.</p>
+    <button class="btn-secondary" (click)="clearFilters()" style="margin-top:16px">Clear Filters</button>
+  </div>
+
+  <!-- Grid -->
+  <div class="startup-grid stagger" *ngIf="!loading && filtered.length > 0">
+    <a class="startup-card fl-card animate-fade-up" *ngFor="let s of filtered" [routerLink]="['/startups', s.id]">
+      <div class="card-header">
+        <div class="s-logo">{{ (s.name||'S').charAt(0) }}</div>
+        <div class="s-badges">
+          <span class="badge badge-open" *ngIf="s.status === 'OPEN'">{{ s.currentRound || 'Open' }}</span>
+          <span class="badge badge-closed" *ngIf="s.status !== 'OPEN'">{{ s.status }}</span>
+          <span class="cat-tag">{{ s.category }}</span>
+        </div>
+      </div>
+      <div class="s-name">{{ s.name }}</div>
+      <div class="s-desc">{{ s.description | slice:0:100 }}{{ (s.description?.length||0) > 100 ? '…' : '' }}</div>
+      <div class="s-stage">{{ s.stage }}</div>
+      <div class="fund-info">
+        <div class="fund-progress">
+          <div class="fund-bar"><div class="fund-fill" [style.width.%]="progressPct(s)"></div></div>
+          <div class="fund-nums">
+            <span>{{ formatAmount(s.raisedAmount||0) }}</span>
+            <span>{{ progressPct(s) }}%</span>
+          </div>
+        </div>
+        <div class="fund-target">of {{ formatAmount(s.targetAmount||0) }} target</div>
+      </div>
+      <div class="card-footer">
+        <span class="equity-tag"><i class="pi pi-percentage"></i> {{ s.equityOffered || 0 }}% equity</span>
+        <span class="view-link">View <i class="pi pi-arrow-right"></i></span>
+      </div>
+    </a>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination" *ngIf="totalPages > 1">
+    <button class="btn-ghost" (click)="prevPage()" [disabled]="page === 0"><i class="pi pi-chevron-left"></i></button>
+    <span class="page-info">Page {{ page+1 }} of {{ totalPages }}</span>
+    <button class="btn-ghost" (click)="nextPage()" [disabled]="page >= totalPages-1"><i class="pi pi-chevron-right"></i></button>
+  </div>
+</div>

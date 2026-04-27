@@ -1,0 +1,52 @@
+<div class="messaging-shell">
+  <!-- Sidebar -->
+  <div class="conv-list">
+    <div class="conv-header"><h2>Messages</h2></div>
+    <div *ngIf="loading" class="conv-skeleton">
+      <div class="skeleton" style="height:60px;border-radius:10px" *ngFor="let i of [1,2,3]"></div>
+    </div>
+    <div class="empty-state sm" *ngIf="!loading && conversations.length === 0">
+      <div class="empty-icon sm"><i class="pi pi-comments"></i></div>
+      <p>No conversations yet</p>
+    </div>
+    <div class="conv-items" *ngIf="!loading">
+      <div class="conv-item" *ngFor="let c of conversations" [class.active]="selectedConv?.id === c.id" (click)="selectConv(c)">
+        <div class="conv-avatar">{{ getOtherParty(c).charAt(0).toUpperCase() }}</div>
+        <div class="conv-meta">
+          <div class="conv-name">{{ getOtherParty(c) }}</div>
+          <div class="conv-startup">Startup #{{ c.startupId }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chat area -->
+  <div class="chat-area" *ngIf="selectedConv">
+    <div class="chat-header">
+      <div class="chat-avatar">{{ getOtherParty(selectedConv).charAt(0).toUpperCase() }}</div>
+      <div>
+        <div class="chat-name">{{ getOtherParty(selectedConv) }}</div>
+        <div class="chat-sub">Startup #{{ selectedConv.startupId }}</div>
+      </div>
+    </div>
+    <div class="messages-list">
+      <div class="message" *ngFor="let m of messages" [class.mine]="m.senderEmail === currentUserEmail">
+        <div class="msg-bubble">{{ m.content }}</div>
+        <div class="msg-time">{{ m.createdAt | date:'shortTime' }}</div>
+      </div>
+    </div>
+    <div class="chat-input-row">
+      <input class="fl-input chat-input" type="text" [(ngModel)]="newMessage" placeholder="Type a message…" (keyup.enter)="send()" />
+      <button class="btn-primary send-btn" (click)="send()" [disabled]="sending || !newMessage.trim()">
+        <i class="pi pi-send"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- No conv selected -->
+  <div class="chat-empty" *ngIf="!selectedConv && !loading">
+    <div class="empty-icon"><i class="pi pi-comments"></i></div>
+    <h3>Select a conversation</h3>
+    <p>Choose from the list on the left to start chatting.</p>
+  </div>
+</div>

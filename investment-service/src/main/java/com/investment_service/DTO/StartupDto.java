@@ -7,4 +7,5 @@ public class StartupDto {
     private Long id;
     private String name;
     private String founderEmail;
+    private String status;
 }

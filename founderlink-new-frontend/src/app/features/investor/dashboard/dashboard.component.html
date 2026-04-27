@@ -1,0 +1,84 @@
+<div class="page-container">
+  <div class="page-header animate-fade-up">
+    <div>
+      <p class="greeting-label">Investor Portal</p>
+      <h1 class="greeting-name display">{{ firstName }}</h1>
+      <p class="greeting-sub">Track your portfolio and discover new opportunities.</p>
+    </div>
+    <a routerLink="/startups" class="btn-primary"><i class="pi pi-compass"></i> Discover Deals</a>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row stagger" *ngIf="!loading">
+    <div class="stat-card accent-green animate-fade-up">
+      <div class="stat-icon"><i class="pi pi-dollar"></i></div>
+      <div class="stat-val">{{ formatAmount(totalDeployed) }}</div>
+      <div class="stat-lbl">Total Deployed</div>
+    </div>
+    <div class="stat-card accent-indigo animate-fade-up">
+      <div class="stat-icon"><i class="pi pi-briefcase"></i></div>
+      <div class="stat-val">{{ activeCount }}</div>
+      <div class="stat-lbl">Active Investments</div>
+    </div>
+    <div class="stat-card accent-gold animate-fade-up">
+      <div class="stat-icon"><i class="pi pi-clock"></i></div>
+      <div class="stat-val">{{ pendingCount }}</div>
+      <div class="stat-lbl">Pending</div>
+    </div>
+    <div class="stat-card accent-cyan animate-fade-up">
+      <div class="stat-icon"><i class="pi pi-chart-line"></i></div>
+      <div class="stat-val">{{ featured.length }}</div>
+      <div class="stat-lbl">Open Deals</div>
+    </div>
+  </div>
+
+  <div class="stats-row stagger" *ngIf="loading">
+    <div class="skeleton" style="height:120px;border-radius:18px" *ngFor="let i of [1,2,3,4]"></div>
+  </div>
+
+  <!-- Recent investments -->
+  <div class="section animate-fade-up" *ngIf="!loading">
+    <div class="section-head">
+      <div><div class="section-title">My Portfolio</div><div class="section-subtitle">Your investment history</div></div>
+      <a routerLink="/investor/my-investments" class="btn-ghost">View all <i class="pi pi-arrow-right"></i></a>
+    </div>
+    <div class="empty-state" *ngIf="investments.length === 0">
+      <div class="empty-icon"><i class="pi pi-chart-bar"></i></div>
+      <h3>No investments yet</h3>
+      <p>Browse startups and make your first investment.</p>
+      <a routerLink="/startups" class="btn-primary" style="margin-top:16px">Explore Startups</a>
+    </div>
+    <div class="table-card glass" *ngIf="investments.length > 0">
+      <table class="fl-table">
+        <thead><tr><th>Startup</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let inv of investments | slice:0:6">
+            <td><div class="inv-startup">{{ inv.startupName || 'Startup #' + inv.startupId }}</div></td>
+            <td><strong style="font-family:var(--font-display)">{{ formatAmount(inv.amount) }}</strong></td>
+            <td><span class="badge" [ngClass]="{'badge-success':inv.status==='APPROVED' || inv.status==='COMPLETED','badge-pending':inv.status==='PENDING','badge-rejected':inv.status==='REJECTED' || inv.status==='FAILED'}">{{ inv.status }}</span></td>
+            <td style="color:var(--text-muted);font-size:0.82rem">{{ inv.createdAt | date:'mediumDate' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Featured startups -->
+  <div class="section animate-fade-up" *ngIf="!loading && featured.length > 0">
+    <div class="section-head">
+      <div><div class="section-title">Open Deals</div><div class="section-subtitle">Startups actively raising</div></div>
+      <a routerLink="/startups" class="btn-ghost">See all <i class="pi pi-arrow-right"></i></a>
+    </div>
+    <div class="deal-cards stagger">
+      <a class="deal-card fl-card animate-fade-up" *ngFor="let s of featured" [routerLink]="['/startups', s.id]">
+        <div class="deal-top">
+          <div class="d-logo">{{ (s.name||'S').charAt(0) }}</div>
+          <div class="d-info"><div class="d-name">{{ s.name }}</div><div class="d-cat">{{ s.category }} · {{ s.currentRound }}</div></div>
+        </div>
+        <div class="fund-bar" style="margin-top:12px"><div class="fund-fill" [style.width.%]="progressPct(s)"></div></div>
+        <div class="deal-nums"><span>{{ formatAmount(s.raisedAmount||0) }} raised</span><span>{{ progressPct(s) }}%</span></div>
+        <div class="deal-footer"><span>{{ s.equityOffered||0 }}% equity</span><span class="view-link">Invest <i class="pi pi-arrow-right"></i></span></div>
+      </a>
+    </div>
+  </div>
+</div>

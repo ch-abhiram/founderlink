@@ -1,0 +1,9 @@
+.page-top { margin-bottom: 28px; }
+.form-grid { display: flex; flex-direction: column; gap: 20px; }
+.form-section { padding: 24px; }
+.form-section-head { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 0.95rem; color: var(--text-primary); margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid var(--border-subtle); i { color: var(--accent-primary); } }
+.field-group { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; &.three { grid-template-columns: 1fr 1fr 1fr; } &:last-child { margin-bottom: 0; } }
+.field { display: flex; flex-direction: column; }
+.form-actions { display: flex; justify-content: flex-end; gap: 12px; padding-top: 4px; }
+.spinner { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; }
+@media (max-width: 600px) { .field-group { grid-template-columns: 1fr; } .field-group.three { grid-template-columns: 1fr; } }

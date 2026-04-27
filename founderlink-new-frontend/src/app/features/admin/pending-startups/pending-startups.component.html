@@ -1,0 +1,48 @@
+<p-toast></p-toast>
+<div class="page-container">
+  <div class="page-header animate-fade-up">
+    <div>
+      <h1 class="section-title">Pending Approvals</h1>
+      <p class="section-subtitle">Review and approve startup submissions.</p>
+    </div>
+    <div class="count-badge" *ngIf="!loading">{{ startups.length }} pending</div>
+  </div>
+
+  <div *ngIf="loading" class="stack stagger">
+    <div class="skeleton" style="height:120px;border-radius:18px" *ngFor="let i of [1,2,3]"></div>
+  </div>
+
+  <div class="empty-state" *ngIf="!loading && startups.length === 0">
+    <div class="empty-icon"><i class="pi pi-check-circle"></i></div>
+    <h3>All clear!</h3>
+    <p>No startups pending review at the moment.</p>
+  </div>
+
+  <div class="approval-list stagger" *ngIf="!loading && startups.length > 0">
+    <div class="approval-card fl-card animate-fade-up" *ngFor="let s of startups">
+      <div class="card-left">
+        <div class="s-logo">{{ (s.name||'S').charAt(0) }}</div>
+        <div class="s-info">
+          <div class="s-name">{{ s.name }}</div>
+          <div class="s-meta">{{ s.category }} · {{ s.currentRound || 'No round' }} · by {{ s.founderEmail }}</div>
+          <div class="s-desc">{{ s.description | slice:0:120 }}{{ (s.description?.length||0) > 120 ? '…' : '' }}</div>
+          <div class="s-stats">
+            <span class="sstat"><i class="pi pi-dollar"></i> Target: {{ formatAmount(s.targetAmount||0) }}</span>
+            <span class="sstat"><i class="pi pi-percentage"></i> {{ s.equityOffered || 0 }}% equity</span>
+            <span class="sstat" *ngIf="s.stage"><i class="pi pi-chart-line"></i> {{ s.stage }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="card-actions">
+        <a [routerLink]="['/startups', s.id]" class="btn-ghost" style="font-size:0.82rem"><i class="pi pi-eye"></i> Preview</a>
+        <button class="btn-approve" (click)="approve(s)" [disabled]="processing[s.id!]">
+          <span class="spinner-sm" *ngIf="processing[s.id!]"></span>
+          <span *ngIf="!processing[s.id!]"><i class="pi pi-check"></i> Approve</span>
+        </button>
+        <button class="btn-reject" (click)="reject(s)" [disabled]="processing[s.id!]">
+          <i class="pi pi-times"></i> Reject
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

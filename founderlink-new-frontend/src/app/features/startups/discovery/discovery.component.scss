@@ -1,0 +1,24 @@
+.page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; }
+.filters-bar { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-radius: var(--radius-xl); margin-bottom: 24px; flex-wrap: wrap; }
+.search-input { flex: 1; min-width: 200px; }
+.fl-select { min-width: 130px; }
+
+.startup-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; }
+.startup-card { padding: 20px; text-decoration: none; display: flex; flex-direction: column; gap: 8px; }
+.card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+.s-logo { width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 700; color: #fff; font-size: 1.05rem; }
+.s-badges { display: flex; gap: 6px; align-items: center; }
+.cat-tag { font-size: 0.7rem; padding: 2px 8px; border-radius: 999px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-subtle); color: var(--text-muted); }
+.s-name { font-weight: 700; font-size: 1.05rem; color: var(--text-primary); }
+.s-desc { font-size: 0.82rem; color: var(--text-secondary); line-height: 1.55; flex: 1; }
+.s-stage { font-size: 0.75rem; color: var(--text-muted); }
+.fund-info { margin-top: 4px; }
+.fund-bar { height: 5px; background: var(--bg-hover); border-radius: 999px; overflow: hidden; margin-bottom: 4px; }
+.fund-fill { height: 100%; background: linear-gradient(90deg, var(--accent-primary), var(--accent-tertiary)); border-radius: 999px; transition: width 0.6s ease; }
+.fund-nums { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); }
+.fund-target { font-size: 0.72rem; color: var(--text-ghost); }
+.card-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 10px; border-top: 1px solid var(--border-subtle); margin-top: 4px; }
+.equity-tag { font-size: 0.75rem; color: var(--text-secondary); display: flex; align-items: center; gap: 4px; }
+.view-link { font-size: 0.78rem; font-weight: 600; color: var(--accent-primary); display: flex; align-items: center; gap: 4px; }
+.pagination { display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 32px; }
+.page-info { font-size: 0.85rem; color: var(--text-secondary); }

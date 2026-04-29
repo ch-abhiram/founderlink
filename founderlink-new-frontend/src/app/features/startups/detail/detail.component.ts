@@ -7,7 +7,7 @@ import { InvestmentService } from '../../../core/services/investment.service';
 import { TeamService } from '../../../core/services/team.service';
 import { MessagingService } from '../../../core/services/messaging.service';
 import { AuthService } from '../../../core/services/auth.service';
-import { Startup } from '../../../core/models/startup.model';
+import { Startup, StartupDocument } from '../../../core/models/startup.model';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { catchError, of } from 'rxjs';
@@ -27,6 +27,7 @@ export class DetailComponent implements OnInit {
   isFollowing = false;
   isFounder = false;
   isInvestor = false;
+  canManageStartup = false;
   currentEmail = '';
   role = '';
 
@@ -37,6 +38,7 @@ export class DetailComponent implements OnInit {
   teamMembers: any[] = [];
   documents: any[] = [];
   updates: any[] = [];
+  inviteActionId: number | null = null;
 
   constructor(
     private route: ActivatedRoute, private router: Router,
@@ -55,6 +57,7 @@ export class DetailComponent implements OnInit {
       next: s => {
         this.startup = s;
         this.isFounder = s.founderEmail === this.currentEmail;
+        this.canManageStartup = this.isFounder;
         this.loading = false;
         this.loadExtras(id);
         this.checkFollowing(id);
@@ -65,11 +68,26 @@ export class DetailComponent implements OnInit {
 
   loadExtras(id: number) {
     this.startupSvc.getUpdates(id).pipe(catchError(() => of([]))).subscribe(u => this.updates = u);
-    this.startupSvc.getDocuments(id).pipe(catchError(() => of([]))).subscribe(d => this.documents = d);
-    this.teamSvc.getTeamForStartup(id).pipe(catchError(() => of([]))).subscribe(t => this.teamMembers = t);
+    if (this.authSvc.isAuthenticated()) {
+      this.startupSvc.getDocuments(id).pipe(catchError(() => of([]))).subscribe(d => this.documents = d);
+    } else {
+      this.documents = [];
+    }
+    this.teamSvc.getTeamForStartup(id).pipe(catchError(() => of([]))).subscribe(t => {
+      this.teamMembers = t;
+      this.canManageStartup = this.isFounder || this.teamMembers.some(member =>
+        member.memberEmail === this.currentEmail &&
+        member.status === 'ACCEPTED' &&
+        ['OWNER', 'ADMIN'].includes((member.permissionLevel || '').toUpperCase())
+      );
+    });
   }
 
   checkFollowing(id: number) {
+    if (!this.authSvc.isAuthenticated()) {
+      this.isFollowing = false;
+      return;
+    }
     this.startupSvc.getFollowers(id).pipe(catchError(() => of([] as string[]))).subscribe(f => {
       this.isFollowing = f.includes(this.currentEmail);
     });
@@ -79,6 +97,44 @@ export class DetailComponent implements OnInit {
     if (!this.startup) return;
     const req$ = this.isFollowing ? this.startupSvc.unfollow(this.startup.id!) : this.startupSvc.follow(this.startup.id!);
     req$.subscribe({ next: () => { this.isFollowing = !this.isFollowing; }, error: () => {} });
+  }
+
+  canRespondToInvite(member: any): boolean {
+    return member?.memberEmail === this.currentEmail && member?.status === 'PENDING';
+  }
+
+  respondToInvite(member: any, status: 'ACCEPTED' | 'REJECTED') {
+    if (!member?.id || this.inviteActionId === member.id) return;
+    this.inviteActionId = member.id;
+    this.teamSvc.updateInviteStatus(member.id, status).subscribe({
+      next: updated => {
+        const finalize = () => {
+          this.inviteActionId = null;
+          this.teamMembers = this.teamMembers.map(item => item.id === updated.id ? updated : item);
+          this.canManageStartup = this.isFounder || this.teamMembers.some(item =>
+            item.memberEmail === this.currentEmail &&
+            item.status === 'ACCEPTED' &&
+            ['OWNER', 'ADMIN'].includes((item.permissionLevel || '').toUpperCase())
+          );
+          this.msg.add({
+            severity: 'success',
+            summary: status === 'ACCEPTED' ? 'Invite accepted' : 'Invite declined',
+            detail: status === 'ACCEPTED' ? 'You have joined the startup team.' : 'The invite has been declined.'
+          });
+        };
+
+        if (status === 'ACCEPTED' && updated.role === 'COFOUNDER') {
+          this.authSvc.refresh().subscribe({ next: finalize, error: finalize });
+          return;
+        }
+
+        finalize();
+      },
+      error: err => {
+        this.inviteActionId = null;
+        this.msg.add({severity:'error', summary:'Error', detail: err?.error?.message || 'Unable to update invite.'});
+      }
+    });
   }
 
   openInvestModal() { this.showInvestModal = true; this.investAmount = null; }
@@ -118,5 +174,30 @@ export class DetailComponent implements OnInit {
     if (n >= 1e6) return `$${(n/1e6).toFixed(1)}M`;
     if (n >= 1e3) return `$${(n/1e3).toFixed(0)}K`;
     return `$${n}`;
+  }
+
+  openDocument(document: StartupDocument) {
+    if (!document.url) return;
+    if (!this.startupSvc.isUploadedDocument(document)) {
+      window.open(document.url, '_blank');
+      return;
+    }
+
+    const viewer = window.open('', '_blank');
+    this.startupSvc.downloadDocument(document).subscribe({
+      next: blob => {
+        const blobUrl = URL.createObjectURL(blob);
+        if (viewer) {
+          viewer.location.href = blobUrl;
+        } else {
+          window.open(blobUrl, '_blank');
+        }
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+      },
+      error: () => {
+        viewer?.close();
+        this.msg.add({severity:'error', summary:'Document missing', detail:'The saved file was not found on the server. Please upload it again.'});
+      }
+    });
   }
 }

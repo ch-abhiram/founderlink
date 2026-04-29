@@ -16,11 +16,17 @@ import org.springframework.context.annotation.Configuration;
 public class RabbitConfig {
 
     public static final String EXCHANGE = "investment.exchange";
+    public static final String STARTUP_EXCHANGE = "startup.exchange";
     public static final String APPROVED_QUEUE = "startup.investment.approved";
 
     @Bean
     public DirectExchange exchange() {
         return new DirectExchange(EXCHANGE, true, false);
+    }
+
+    @Bean
+    public DirectExchange startupExchange() {
+        return new DirectExchange(STARTUP_EXCHANGE, true, false);
     }
 
     @Bean

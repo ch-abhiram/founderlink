@@ -3,6 +3,8 @@ package com.startup_service.Service;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.ArrayList;
+import java.util.Objects;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -16,7 +18,9 @@ import com.startup_service.DTO.UserDto;
 import com.startup_service.DTO.CreateStartupRequest;
 import com.startup_service.DTO.UpdateStartupRequest;
 import com.startup_service.Entity.Startup;
+import com.startup_service.Entity.StartupUpdate;
 import com.startup_service.Repository.StartupRepository;
+import com.startup_service.Repository.StartupUpdateRepository;
 import com.startup_service.Util.StartupSpecification;
 
 import lombok.RequiredArgsConstructor;
@@ -30,6 +34,8 @@ public class StartupService {
     private final StartupRepository repository;
     private final Wrapper wrapper;
     private final RabbitTemplate rabbitTemplate;
+    private final StartupPermissionService permissionService;
+    private final StartupUpdateRepository startupUpdateRepository;
 
     public Startup create(CreateStartupRequest request, String email) {
         UserDto user = wrapper.fetchUser(email);
@@ -55,6 +61,11 @@ public class StartupService {
         startup.setStage(request.getStage());
         startup.setCurrentRound(request.getCurrentRound());
         startup.setValuation(request.getValuation());
+        startup.setEquityOffered(request.getEquityOffered());
+        startup.setWebsiteUrl(request.getWebsiteUrl());
+        startup.setLogoUrl(request.getLogoUrl());
+        startup.setLinkedinUrl(request.getLinkedinUrl());
+        startup.setTwitterUrl(request.getTwitterUrl());
         startup.setFounderEmail(email);
 
         Startup saved = repository.save(startup);
@@ -70,8 +81,15 @@ public class StartupService {
         return saved;
     }
 
-    public Page<Startup> getAll(Pageable pageable) {
+    public Page<Startup> getAll(String founderEmail, Pageable pageable) {
+        if (founderEmail != null && !founderEmail.isBlank()) {
+            return repository.findAll(StartupSpecification.search(null, null, null, null, founderEmail), pageable);
+        }
         return repository.findAll(pageable);
+    }
+
+    public Page<Startup> getAll(Pageable pageable) {
+        return getAll(null, pageable);
     }
 
     public Startup getById(Long id) {
@@ -88,34 +106,38 @@ public class StartupService {
 
     public Startup update(Long id, UpdateStartupRequest request) {
         Startup existing = getById(id);
-        
-        String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
-        if(!existing.getFounderEmail().equals(currentUser)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not the founder");
-        }
 
-        if (request.getName() != null) existing.setName(request.getName());
-        if (request.getDescription() != null) existing.setDescription(request.getDescription());
-        if (request.getTagline() != null) existing.setTagline(request.getTagline());
-        if (request.getLocation() != null) existing.setLocation(request.getLocation());
-        if (request.getFoundedYear() != null) existing.setFoundedYear(request.getFoundedYear());
-        if (request.getTeamSize() != null) existing.setTeamSize(request.getTeamSize());
-        if (request.getMrr() != null) existing.setMrr(request.getMrr());
-        if (request.getFundingGoal() != null) existing.setFundingGoal(request.getFundingGoal());
-        if (request.getCategory() != null) existing.setCategory(request.getCategory());
-        if (request.getStage() != null) existing.setStage(request.getStage());
-        if (request.getCurrentRound() != null) existing.setCurrentRound(request.getCurrentRound());
-        if (request.getValuation() != null) existing.setValuation(request.getValuation());
+        permissionService.requireStartupManager(existing);
 
-        return repository.save(existing);
+        List<String> changedFields = new ArrayList<>();
+
+        if (applyIfChanged(existing.getName(), request.getName())) { existing.setName(request.getName()); changedFields.add("name"); }
+        if (applyIfChanged(existing.getDescription(), request.getDescription())) { existing.setDescription(request.getDescription()); changedFields.add("description"); }
+        if (applyIfChanged(existing.getTagline(), request.getTagline())) { existing.setTagline(request.getTagline()); changedFields.add("tagline"); }
+        if (applyIfChanged(existing.getLocation(), request.getLocation())) { existing.setLocation(request.getLocation()); changedFields.add("location"); }
+        if (applyIfChanged(existing.getFoundedYear(), request.getFoundedYear())) { existing.setFoundedYear(request.getFoundedYear()); changedFields.add("founded year"); }
+        if (applyIfChanged(existing.getTeamSize(), request.getTeamSize())) { existing.setTeamSize(request.getTeamSize()); changedFields.add("team size"); }
+        if (applyIfChanged(existing.getMrr(), request.getMrr())) { existing.setMrr(request.getMrr()); changedFields.add("MRR"); }
+        if (applyIfChanged(existing.getFundingGoal(), request.getFundingGoal())) { existing.setFundingGoal(request.getFundingGoal()); changedFields.add("funding goal"); }
+        if (applyIfChanged(existing.getCategory(), request.getCategory())) { existing.setCategory(request.getCategory()); changedFields.add("category"); }
+        if (applyIfChanged(existing.getStage(), request.getStage())) { existing.setStage(request.getStage()); changedFields.add("stage"); }
+        if (applyIfChanged(existing.getCurrentRound(), request.getCurrentRound())) { existing.setCurrentRound(request.getCurrentRound()); changedFields.add("funding round"); }
+        if (applyIfChanged(existing.getValuation(), request.getValuation())) { existing.setValuation(request.getValuation()); changedFields.add("valuation"); }
+        if (applyIfChanged(existing.getEquityOffered(), request.getEquityOffered())) { existing.setEquityOffered(request.getEquityOffered()); changedFields.add("equity offered"); }
+        if (applyIfChanged(existing.getWebsiteUrl(), request.getWebsiteUrl())) { existing.setWebsiteUrl(request.getWebsiteUrl()); changedFields.add("website"); }
+        if (applyIfChanged(existing.getLogoUrl(), request.getLogoUrl())) { existing.setLogoUrl(request.getLogoUrl()); changedFields.add("logo"); }
+        if (applyIfChanged(existing.getLinkedinUrl(), request.getLinkedinUrl())) { existing.setLinkedinUrl(request.getLinkedinUrl()); changedFields.add("LinkedIn"); }
+        if (applyIfChanged(existing.getTwitterUrl(), request.getTwitterUrl())) { existing.setTwitterUrl(request.getTwitterUrl()); changedFields.add("Twitter"); }
+
+        Startup saved = repository.save(existing);
+        createProfileUpdate(saved, changedFields);
+        return saved;
     }
 
     public void delete(Long id) {
         Startup existing = getById(id);
-        String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
-        boolean isAdmin = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
-                            .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
-        if(!existing.getFounderEmail().equals(currentUser) && !isAdmin) {
+        String currentUser = permissionService.currentUserEmail();
+        if(!existing.getFounderEmail().equals(currentUser) && !permissionService.isAdmin()) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not allowed to delete");
         }
         repository.deleteById(id);
@@ -153,5 +175,21 @@ public class StartupService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid startup status");
         }
         return normalized;
+    }
+
+    private boolean applyIfChanged(Object currentValue, Object requestedValue) {
+        return requestedValue != null && !Objects.equals(currentValue, requestedValue);
+    }
+
+    private void createProfileUpdate(Startup startup, List<String> changedFields) {
+        if (changedFields.isEmpty()) {
+            return;
+        }
+
+        StartupUpdate update = new StartupUpdate();
+        update.setStartupId(startup.getId());
+        update.setTitle("Startup profile updated");
+        update.setContent("Updated " + String.join(", ", changedFields) + ".");
+        startupUpdateRepository.save(update);
     }
 }

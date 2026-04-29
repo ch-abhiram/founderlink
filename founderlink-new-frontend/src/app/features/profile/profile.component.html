@@ -1,7 +1,6 @@
 <p-toast></p-toast>
 <div class="page-container">
   <div class="profile-layout animate-fade-up">
-    <!-- Left panel -->
     <div class="profile-side">
       <div class="avatar-card fl-card">
         <div class="big-avatar">{{ avatarInitials }}</div>
@@ -18,12 +17,14 @@
         <button class="side-nav-item" [class.active]="activeSection==='preferences'" (click)="activeSection='preferences'">
           <i class="pi pi-sliders-h"></i> Preferences
         </button>
+        <button class="side-nav-item" [class.active]="activeSection==='invites'" (click)="activeSection='invites'">
+          <i class="pi pi-users"></i> Team Invites
+          <span *ngIf="pendingInvitesCount > 0" class="notif-badge">{{ pendingInvitesCount }}</span>
+        </button>
       </div>
     </div>
 
-    <!-- Right panel -->
     <div class="profile-main">
-      <!-- Profile section -->
       <div *ngIf="activeSection==='profile'" class="section-panel fl-card animate-fade-in">
         <div class="panel-head"><h2>Profile Information</h2><p>Update your personal details.</p></div>
         <div class="form-grid">
@@ -38,16 +39,16 @@
         </div>
         <div class="field" style="margin-top:16px">
           <label class="fl-label">Bio</label>
-          <textarea class="fl-textarea" [(ngModel)]="profile.bio" name="bio" placeholder="A short bio about yourself…" rows="4"></textarea>
+          <textarea class="fl-textarea" [(ngModel)]="profile.bio" name="bio" placeholder="A short bio about yourself..." rows="4"></textarea>
         </div>
         <div class="form-grid" style="margin-top:16px">
           <div class="field">
             <label class="fl-label">LinkedIn URL</label>
-            <input class="fl-input" type="url" [(ngModel)]="profile.linkedinUrl" placeholder="https://linkedin.com/in/…" />
+            <input class="fl-input" type="url" [(ngModel)]="profile.linkedinUrl" placeholder="https://linkedin.com/in/..." />
           </div>
           <div class="field">
             <label class="fl-label">Twitter / X</label>
-            <input class="fl-input" type="url" [(ngModel)]="profile.twitterUrl" placeholder="https://x.com/…" />
+            <input class="fl-input" type="url" [(ngModel)]="profile.twitterUrl" placeholder="https://x.com/..." />
           </div>
         </div>
         <div class="panel-actions">
@@ -58,13 +59,12 @@
         </div>
       </div>
 
-      <!-- Security section -->
       <div *ngIf="activeSection==='security'" class="section-panel fl-card animate-fade-in">
         <div class="panel-head"><h2>Security</h2><p>Manage your password and account security.</p></div>
         <div class="field" style="margin-bottom:16px">
           <label class="fl-label">Current Password</label>
           <div class="pw-wrap">
-            <input class="fl-input" [type]="showPw ? 'text' : 'password'" [(ngModel)]="pwForm.currentPassword" placeholder="••••••••" />
+            <input class="fl-input" [type]="showPw ? 'text' : 'password'" [(ngModel)]="pwForm.currentPassword" placeholder="........" />
             <button type="button" class="pw-toggle" (click)="showPw=!showPw"><i class="pi" [class.pi-eye]="!showPw" [class.pi-eye-slash]="showPw"></i></button>
           </div>
         </div>
@@ -86,20 +86,65 @@
         </div>
       </div>
 
-      <!-- Preferences section -->
       <div *ngIf="activeSection==='preferences'" class="section-panel fl-card animate-fade-in">
-        <div class="panel-head"><h2>Preferences</h2><p>App preferences and notification settings.</p></div>
-        <div class="pref-row">
-          <div><div class="pref-label">Email Notifications</div><div class="pref-sub">Receive email alerts for new investments and messages</div></div>
-          <div class="toggle active"></div>
+        <div class="panel-head"><h2>Preferences</h2><p>Tell FounderLink what kinds of startups and collaborators you want to see.</p></div>
+        <div class="form-grid">
+          <div class="field">
+            <label class="fl-label">Industries</label>
+            <input class="fl-input" type="text" [(ngModel)]="preferences.industries" placeholder="FinTech, AI, HealthTech" />
+          </div>
+          <div class="field">
+            <label class="fl-label">Stages</label>
+            <input class="fl-input" type="text" [(ngModel)]="preferences.stages" placeholder="MVP, Growth" />
+          </div>
         </div>
-        <div class="pref-row">
-          <div><div class="pref-label">In-App Notifications</div><div class="pref-sub">Show notifications in the bell icon</div></div>
-          <div class="toggle active"></div>
+        <div class="form-grid" style="margin-top:16px">
+          <div class="field">
+            <label class="fl-label">Funding Range</label>
+            <input class="fl-input" type="text" [(ngModel)]="preferences.fundingRange" placeholder="$50K-$250K" />
+          </div>
+          <div class="field">
+            <label class="fl-label">Collaboration Style</label>
+            <input class="fl-input" type="text" [(ngModel)]="preferences.collabStyle" placeholder="Hands-on, advisory, async" />
+          </div>
         </div>
-        <div class="pref-row">
-          <div><div class="pref-label">Dark Mode</div><div class="pref-sub">Always on — the only way to use FounderLink</div></div>
-          <div class="toggle active" style="opacity:0.5;cursor:not-allowed"></div>
+        <div class="field" style="margin-top:16px">
+          <label class="fl-label">LinkedIn URL</label>
+          <input class="fl-input" type="url" [(ngModel)]="preferences.linkedinUrl" placeholder="https://linkedin.com/in/you" />
+        </div>
+        <div class="panel-actions">
+          <button class="btn-primary" (click)="savePreferences()" [disabled]="saving">
+            <span class="spinner-sm" *ngIf="saving"></span>
+            <span *ngIf="!saving"><i class="pi pi-check"></i> Save Preferences</span>
+          </button>
+        </div>
+      </div>
+
+      <div *ngIf="activeSection==='invites'" class="section-panel fl-card animate-fade-in">
+        <div class="panel-head"><h2>Team Invites</h2><p>Review startup invitations from founders and co-founders.</p></div>
+        <div *ngIf="invites.length === 0" class="empty-state" style="padding:24px 0">
+          <div class="empty-icon"><i class="pi pi-users"></i></div>
+          <h3>No team invites</h3>
+          <p>You don't have any startup team invitations right now.</p>
+        </div>
+        <div *ngIf="invites.length > 0" class="invite-list">
+          <div class="invite-card fl-card" *ngFor="let invite of invites">
+            <div class="invite-meta">
+              <div>
+                <div class="invite-title">Startup #{{ invite.startupId }}</div>
+                <div class="invite-sub">{{ invite.role }} • {{ invite.permissionLevel }} • {{ invite.equityShare ?? invite.equityPercentage ?? 0 }}% equity</div>
+                <div class="invite-date">{{ invite.createdAt | date:'medium' }}</div>
+              </div>
+              <span class="badge" [ngClass]="{'badge-success':invite.status==='ACCEPTED','badge-pending':invite.status==='PENDING','badge-rejected':invite.status==='REJECTED'}">{{ invite.status }}</span>
+            </div>
+            <div class="invite-actions" *ngIf="invite.status === 'PENDING'">
+              <button class="btn-secondary" (click)="respondToInvite(invite, 'REJECTED')" [disabled]="inviteActionId === invite.id">Decline</button>
+              <button class="btn-primary" (click)="respondToInvite(invite, 'ACCEPTED')" [disabled]="inviteActionId === invite.id">
+                <span *ngIf="inviteActionId !== invite.id">Accept Invite</span>
+                <span *ngIf="inviteActionId === invite.id">Updating...</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

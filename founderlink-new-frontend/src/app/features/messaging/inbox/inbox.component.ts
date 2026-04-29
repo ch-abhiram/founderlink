@@ -52,7 +52,14 @@ export class InboxComponent implements OnInit, OnDestroy {
       participantEmail: this.selectedConv.participantEmail,
       content: this.newMessage
     }).subscribe({
-      next: () => { this.newMessage = ''; this.sending = false; },
+      next: () => {
+        this.newMessage = '';
+        this.sending = false;
+        this.loadConversations();
+        if (this.selectedConv) {
+          this.msgSvc.getConversationMessages(this.selectedConv.id).subscribe(msgs => this.messages = msgs);
+        }
+      },
       error: () => this.sending = false
     });
   }

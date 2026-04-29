@@ -6,7 +6,7 @@
       <h1 class="section-title">My Startups</h1>
       <p class="section-subtitle">All your listed companies in one place.</p>
     </div>
-    <a routerLink="/founder/startups/new" class="btn-primary"><i class="pi pi-plus"></i> New Startup</a>
+    <a *ngIf="role === 'ROLE_FOUNDER'" routerLink="/founder/startups/new" class="btn-primary"><i class="pi pi-plus"></i> New Startup</a>
   </div>
 
   <div *ngIf="loading" class="cards-grid stagger">
@@ -17,7 +17,7 @@
     <div class="empty-icon"><i class="pi pi-briefcase"></i></div>
     <h3>No startups listed yet</h3>
     <p>Create your first startup to start attracting investors and co-founders.</p>
-    <a routerLink="/founder/startups/new" class="btn-primary" style="margin-top:16px"><i class="pi pi-plus"></i> Create Startup</a>
+    <a *ngIf="role === 'ROLE_FOUNDER'" routerLink="/founder/startups/new" class="btn-primary" style="margin-top:16px"><i class="pi pi-plus"></i> Create Startup</a>
   </div>
 
   <div class="cards-grid stagger" *ngIf="!loading && startups.length > 0">
@@ -46,7 +46,9 @@
         <a [routerLink]="['/startups', s.id]" class="btn-ghost"><i class="pi pi-eye"></i> View</a>
         <a [routerLink]="['/founder/startups', s.id, 'edit']" class="btn-ghost"><i class="pi pi-pencil"></i> Edit</a>
         <a [routerLink]="['/founder/startups', s.id, 'team']" class="btn-ghost"><i class="pi pi-users"></i> Team</a>
-        <button class="btn-danger-sm" (click)="deleteStartup(s)"><i class="pi pi-trash"></i></button>
+        <a [routerLink]="['/founder/startups', s.id, 'updates']" class="btn-ghost"><i class="pi pi-megaphone"></i> Updates</a>
+        <a [routerLink]="['/founder/startups', s.id, 'documents']" class="btn-ghost"><i class="pi pi-upload"></i> Docs</a>
+        <button *ngIf="isOwner(s)" class="btn-danger-sm" (click)="deleteStartup(s)"><i class="pi pi-trash"></i></button>
       </div>
     </div>
   </div>

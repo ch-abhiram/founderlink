@@ -1,6 +1,7 @@
 export interface Conversation {
   id: number;
   startupId: number;
+  startupName?: string;
   participantEmail?: string;
   founderEmail?: string;
   createdAt?: string;

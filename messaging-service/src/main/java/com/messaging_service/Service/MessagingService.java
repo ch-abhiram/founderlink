@@ -206,6 +206,7 @@ public class MessagingService {
         ConversationResponseDTO dto = new ConversationResponseDTO();
         dto.setId(conversation.getId());
         dto.setStartupId(conversation.getStartupId());
+        dto.setStartupName(startup.getName());
         dto.setParticipantEmail(conversation.getParticipantEmail());
         dto.setFounderEmail(startup.getFounderEmail());
         dto.setCreatedAt(conversation.getCreatedAt());

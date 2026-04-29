@@ -3,6 +3,7 @@ package com.team_service.Service;
 import com.team_service.Config.RabbitConfig;
 import com.team_service.DTO.InviteMemberRequest;
 import com.team_service.DTO.StartupDto;
+import com.team_service.DTO.UpdateRoleRequest;
 import com.team_service.DTO.UserDto;
 import com.team_service.Entity.TeamMember;
 import com.team_service.Feign.StartupClient;
@@ -143,6 +144,23 @@ class TeamServiceTest {
     }
 
     @Test
+    void testUpdateInviteStatus_AcceptedCoFounderPromotesPlatformRole() {
+        setupSecurityContext("user@test.com");
+        member.setRole("COFOUNDER");
+
+        when(repository.findById(10L)).thenReturn(Optional.of(member));
+        when(startupClient.getStartup(1L)).thenReturn(startupDto);
+        when(repository.save(any(TeamMember.class))).thenAnswer(i -> i.getArgument(0));
+        when(userClient.updateUserRole(eq("user@test.com"), any(UpdateRoleRequest.class), eq("team-service@internal"), eq("ROLE_ADMIN")))
+                .thenReturn(userDto);
+
+        TeamMember result = teamService.updateInviteStatus(10L, "ACCEPTED");
+
+        assertEquals("ACCEPTED", result.getStatus());
+        verify(userClient).updateUserRole(eq("user@test.com"), any(UpdateRoleRequest.class), eq("team-service@internal"), eq("ROLE_ADMIN"));
+    }
+
+    @Test
     void testGetStartupTeam() {
         when(repository.findByStartupId(1L)).thenReturn(List.of(member));
 
@@ -169,5 +187,31 @@ class TeamServiceTest {
         teamService.removeMember(10L);
 
         verify(repository).delete(member);
+    }
+
+    @Test
+    void testInviteMemberAcceptedAdminTeamMemberAllowed() {
+        setupSecurityContext("manager@test.com");
+
+        TeamMember acceptedManager = new TeamMember();
+        acceptedManager.setStartupId(1L);
+        acceptedManager.setUserEmail("manager@test.com");
+        acceptedManager.setStatus("ACCEPTED");
+        acceptedManager.setPermissionLevel("ADMIN");
+
+        when(startupClient.getStartup(1L)).thenReturn(startupDto);
+        when(repository.findByStartupIdAndUserEmail(1L, "manager@test.com")).thenReturn(Optional.of(acceptedManager));
+        when(userClient.getUserByEmail("user@test.com")).thenReturn(userDto);
+        when(repository.findByStartupIdAndUserEmail(1L, "user@test.com")).thenReturn(Optional.empty());
+        when(repository.save(any(TeamMember.class))).thenAnswer(i -> {
+            TeamMember saved = i.getArgument(0);
+            saved.setId(11L);
+            return saved;
+        });
+
+        TeamMember result = teamService.inviteMember(inviteRequest);
+
+        assertEquals(11L, result.getId());
+        assertEquals("PENDING", result.getStatus());
     }
 }

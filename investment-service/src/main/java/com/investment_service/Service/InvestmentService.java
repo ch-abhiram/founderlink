@@ -25,7 +25,7 @@ import lombok.RequiredArgsConstructor;
 public class InvestmentService {
 
     private static final List<String> ALLOWED_STATUSES = List.of("PENDING", "COMPLETED", "APPROVED", "REJECTED");
-    private static final List<String> FOUNDER_VISIBLE_STATUSES = List.of("APPROVED", "COMPLETED");
+    private static final List<String> FOUNDER_VISIBLE_STATUSES = List.of("PENDING", "APPROVED", "COMPLETED");
 
     private final InvestmentRepository repository;
     private final StartupClient startupClient;

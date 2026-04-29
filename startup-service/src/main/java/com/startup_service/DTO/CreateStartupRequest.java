@@ -24,4 +24,9 @@ public class CreateStartupRequest {
     private String stage;
     private String currentRound;
     private Double valuation;
+    private Double equityOffered;
+    private String websiteUrl;
+    private String logoUrl;
+    private String linkedinUrl;
+    private String twitterUrl;
 }

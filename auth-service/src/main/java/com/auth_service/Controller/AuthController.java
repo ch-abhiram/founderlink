@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.auth_service.DTO.ChangePasswordRequest;
+import com.auth_service.DTO.ForgotPasswordRequest;
 import com.auth_service.DTO.LoginRequest;
 import com.auth_service.DTO.LoginResponse;
 import com.auth_service.DTO.MessageResponse;
@@ -18,6 +19,7 @@ import com.auth_service.DTO.RefreshRequest;
 import com.auth_service.DTO.ResendOtpRequest;
 import com.auth_service.DTO.RegisterRequest;
 import com.auth_service.DTO.RegisterResponse;
+import com.auth_service.DTO.ResetPasswordRequest;
 import com.auth_service.DTO.VerifyOtpRequest;
 import com.auth_service.DTO.VerificationResponse;
 import com.auth_service.Exception.UnauthorizedException;
@@ -37,6 +39,8 @@ public class AuthController {
     @PostMapping("/register")
     public RegisterResponse register(@RequestBody @Valid RegisterRequest request) {
         return authService.register(
+                request.getFirstName(),
+                request.getLastName(),
                 request.getEmail(),
                 request.getPassword(),
                 request.getRole()
@@ -62,6 +66,18 @@ public class AuthController {
     public MessageResponse resendOtp(@RequestBody @Valid ResendOtpRequest request) {
         authService.resendOtp(request.getEmail());
         return new MessageResponse("A new verification code has been sent to your email.");
+    }
+
+    @PostMapping("/forgot-password")
+    public MessageResponse forgotPassword(@RequestBody @Valid ForgotPasswordRequest request) {
+        authService.forgotPassword(request.getEmail());
+        return new MessageResponse("If your account exists, a password reset code has been sent.");
+    }
+
+    @PostMapping("/reset-password")
+    public MessageResponse resetPassword(@RequestBody @Valid ResetPasswordRequest request) {
+        authService.resetPassword(request.getEmail(), request.getToken(), request.getNewPassword());
+        return new MessageResponse("Password reset successfully");
     }
 
     @PostMapping("/refresh")

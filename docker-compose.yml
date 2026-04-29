@@ -218,6 +218,9 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       MANAGEMENT_TRACING_ENABLED: "true"
       ZIPKIN_ENDPOINT: http://zipkin:9411/api/v2/spans
+      STARTUP_DOCUMENTS_UPLOAD_DIR: /app/uploads/startup-documents
+    volumes:
+      - startup_documents:/app/uploads/startup-documents
     depends_on:
       postgres:
         condition: service_healthy
@@ -440,6 +443,7 @@ volumes:
   sonarqube_data:
   sonarqube_extensions:
   sonarqube_logs:
+  startup_documents:
 
 networks:
   founderlink:

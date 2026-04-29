@@ -6,6 +6,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Column;
 import org.hibernate.annotations.CreationTimestamp;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -28,6 +29,7 @@ public class Startup {
 
     private String name;
 
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     private String founderEmail;
@@ -55,6 +57,16 @@ public class Startup {
     private Double valuation;
 
     private String status = "PENDING"; // PENDING / OPEN / CLOSED / REJECTED
+
+    private Double equityOffered;
+
+    private String websiteUrl;
+
+    private String logoUrl;
+
+    private String linkedinUrl;
+
+    private String twitterUrl;
 
     @ElementCollection
     private List<String> followers = new ArrayList<>();

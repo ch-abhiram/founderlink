@@ -8,7 +8,7 @@
         <i class="pi" [class.pi-heart]="!isFollowing" [class.pi-heart-fill]="isFollowing" [style.color]="isFollowing ? 'var(--accent-rose)' : ''"></i>
         {{ isFollowing ? 'Following' : 'Follow' }}
       </button>
-      <a *ngIf="isFounder" [routerLink]="['/founder/startups', startup.id, 'edit']" class="btn-secondary"><i class="pi pi-pencil"></i> Edit</a>
+      <a *ngIf="canManageStartup" [routerLink]="['/founder/startups', startup.id, 'edit']" class="btn-secondary"><i class="pi pi-pencil"></i> Edit</a>
       <button *ngIf="isInvestor" class="btn-primary" (click)="openInvestModal()"><i class="pi pi-dollar"></i> Invest Now</button>
       <button *ngIf="isInvestor" class="btn-secondary" (click)="messageFounder()"><i class="pi pi-envelope"></i> Message Founder</button>
     </div>
@@ -69,7 +69,7 @@
     <div class="fl-card section-card">
       <div class="section-card-header">
         <h3>Team Members</h3>
-        <a *ngIf="isFounder" [routerLink]="['/founder/startups', startup.id, 'team']" class="btn-ghost"><i class="pi pi-plus"></i> Manage Team</a>
+        <a *ngIf="canManageStartup" [routerLink]="['/founder/startups', startup.id, 'team']" class="btn-ghost"><i class="pi pi-plus"></i> Manage Team</a>
       </div>
       <div class="empty-state" *ngIf="teamMembers.length === 0">
         <div class="empty-icon"><i class="pi pi-users"></i></div>
@@ -83,7 +83,15 @@
             <div class="member-email">{{ m.memberEmail }}</div>
             <div class="member-role">{{ m.role }} · {{ m.equityShare }}% equity</div>
           </div>
-          <span class="badge" [ngClass]="{'badge-success':m.status==='ACCEPTED','badge-pending':m.status==='PENDING','badge-rejected':m.status==='REJECTED'}">{{ m.status }}</span>
+          <div class="team-row-actions">
+            <span class="badge" [ngClass]="{'badge-success':m.status==='ACCEPTED','badge-pending':m.status==='PENDING','badge-rejected':m.status==='REJECTED'}">{{ m.status }}</span>
+            <div class="inline-invite-actions" *ngIf="canRespondToInvite(m)">
+              <button class="btn-secondary" (click)="respondToInvite(m, 'REJECTED')" [disabled]="inviteActionId === m.id">Decline</button>
+              <button class="btn-primary" (click)="respondToInvite(m, 'ACCEPTED')" [disabled]="inviteActionId === m.id">
+                {{ inviteActionId === m.id ? 'Updating...' : 'Accept' }}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -113,11 +121,11 @@
       <h3>Documents</h3>
       <div class="empty-state" *ngIf="documents.length === 0"><div class="empty-icon"><i class="pi pi-file"></i></div><h3>No documents</h3><p>No pitch decks or documents uploaded yet.</p></div>
       <div class="docs-list" *ngIf="documents.length > 0">
-        <a class="doc-row" *ngFor="let d of documents" [href]="d.url || d.fileUrl" target="_blank">
+        <button type="button" class="doc-row" *ngFor="let d of documents" (click)="openDocument(d)">
           <i class="pi pi-file-pdf doc-icon"></i>
           <div class="doc-info"><div class="doc-name">{{ d.name || d.url || d.fileUrl }}</div><div class="doc-type">{{ d.docType || d.documentType }}</div></div>
           <i class="pi pi-download" style="color:var(--text-muted)"></i>
-        </a>
+        </button>
       </div>
     </div>
   </div>

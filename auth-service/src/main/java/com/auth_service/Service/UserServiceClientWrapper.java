@@ -22,14 +22,17 @@ public class UserServiceClientWrapper {
         return userClient.getUser(email).getRole();
     }
 
-    public void createUserProfile(String email, String role) {
+    public void createUserProfile(String email, String role, String firstName, String lastName) {
         try {
             userClient.getUser(email);
             log.info("User profile already exists in user-service for email={}", email);
             return;
         } catch (FeignException.NotFound ex) {
-            String derivedName = deriveDisplayName(email);
-            userClient.createUser(new CreateUserRequest(email, derivedName, role));
+            String displayName = combineName(firstName, lastName);
+            if (displayName.isBlank()) {
+                displayName = deriveDisplayName(email);
+            }
+            userClient.createUser(new CreateUserRequest(email, displayName, role));
             log.info("User profile created in user-service for email={}", email);
             return;
         }
@@ -43,5 +46,11 @@ public class UserServiceClientWrapper {
     private String deriveDisplayName(String email) {
         String localPart = email != null && email.contains("@") ? email.substring(0, email.indexOf('@')) : "user";
         return localPart.trim().isEmpty() ? "user" : localPart;
+    }
+
+    private String combineName(String firstName, String lastName) {
+        return String.join(" ",
+                firstName == null ? "" : firstName.trim(),
+                lastName == null ? "" : lastName.trim()).trim();
     }
 }

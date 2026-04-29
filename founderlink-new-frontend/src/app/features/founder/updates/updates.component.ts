@@ -8,12 +8,14 @@ import { MessageService } from 'primeng/api';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputTextareaModule } from 'primeng/inputtextarea';
 import { ButtonModule } from 'primeng/button';
+import { ToastModule } from 'primeng/toast';
 import { TimeAgoPipe } from '../../../shared/pipes/time-ago.pipe';
 
 @Component({
   selector: 'app-updates',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, InputTextModule, InputTextareaModule, ButtonModule, TimeAgoPipe],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, InputTextModule, InputTextareaModule, ButtonModule, ToastModule, TimeAgoPipe],
+  providers: [MessageService],
   templateUrl: './updates.component.html',
   styles: ``
 })

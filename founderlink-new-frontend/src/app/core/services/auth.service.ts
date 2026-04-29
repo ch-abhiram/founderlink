@@ -36,6 +36,14 @@ export class AuthService {
     return this.http.post(`${this.baseUrl}/resend-otp`, { email });
   }
 
+  forgotPassword(email: string): Observable<any> {
+    return this.http.post(`${this.baseUrl}/forgot-password`, { email });
+  }
+
+  resetPassword(data: { email: string; token: string; newPassword: string }): Observable<any> {
+    return this.http.post(`${this.baseUrl}/reset-password`, data);
+  }
+
   refresh(): Observable<LoginResponse> {
     const refreshToken = this.getRefreshToken();
     if (!refreshToken) { this.clearTokens(); return throwError(() => new Error('No refresh token')); }

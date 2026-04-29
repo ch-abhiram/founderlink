@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 public class InvestmentResponseDTO {
     private Long id;
     private Long startupId;
+    private String startupName;
     private String investorEmail;
     private String investorFirm;
     private String founderEmail;

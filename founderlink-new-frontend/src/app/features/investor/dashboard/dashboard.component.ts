@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { InvestmentService } from '../../../core/services/investment.service';
 import { StartupService } from '../../../core/services/startup.service';
+import { UserService } from '../../../core/services/user.service';
 import { Investment } from '../../../core/models/investment.model';
 import { Startup } from '../../../core/models/startup.model';
 import { catchError, of, forkJoin } from 'rxjs';
@@ -25,10 +26,24 @@ export class InvestorDashboardComponent implements OnInit {
   get activeCount(): number { return this.investments.filter(i=>i.status==='APPROVED' || i.status==='COMPLETED').length; }
   get pendingCount(): number { return this.investments.filter(i=>i.status==='PENDING').length; }
 
-  constructor(private authSvc: AuthService, private investSvc: InvestmentService, private startupSvc: StartupService) {}
+  constructor(
+    private authSvc: AuthService,
+    private investSvc: InvestmentService,
+    private startupSvc: StartupService,
+    private userSvc: UserService
+  ) {}
 
   ngOnInit() {
-    this.firstName = (this.authSvc.getEmail() || 'Investor').split('@')[0];
+    const email = this.authSvc.getEmail() || 'Investor';
+    this.firstName = email.split('@')[0];
+
+    this.userSvc.getProfile().pipe(catchError(() => of(null))).subscribe(user => {
+      const name = (user?.name || '').trim();
+      if (name) {
+        this.firstName = name.split(' ')[0];
+      }
+    });
+
     forkJoin({
       investments: this.investSvc.getMyInvestments().pipe(catchError(()=>of([]))),
       startups: this.startupSvc.search({ status: 'OPEN' }, 0, 6).pipe(catchError(()=>of({content:[]})))

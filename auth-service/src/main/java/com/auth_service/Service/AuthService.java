@@ -45,6 +45,10 @@ public class AuthService {
     private long otpExpiryMinutes;
 
     public RegisterResponse register(String email, String password, String role) {
+        return register(null, null, email, password, role);
+    }
+
+    public RegisterResponse register(String firstName, String lastName, String email, String password, String role) {
         String normalizedEmail = normalizeEmail(email);
         if (userRepository.findByEmail(normalizedEmail).isPresent()) {
             throw new ConflictException("User already exists");
@@ -63,7 +67,7 @@ public class AuthService {
         otpEmailService.sendOtp(normalizedEmail, otp);
 
         try {
-            userServiceClientWrapper.createUserProfile(normalizedEmail, role);
+            userServiceClientWrapper.createUserProfile(normalizedEmail, role, firstName, lastName);
         } catch (Exception ex) {
             // Keep auth registration resilient even if user-service is down or user already exists.
             log.warn("User profile sync to user-service failed for email={}: {}", normalizedEmail, ex.getMessage());
@@ -203,6 +207,45 @@ public class AuthService {
         String otp = generateOtp();
         redisService.storeOtp(normalizedEmail, otp, otpExpiryMinutes);
         otpEmailService.sendOtp(normalizedEmail, otp);
+    }
+
+    public void forgotPassword(String email) {
+        String normalizedEmail = normalizeEmail(email);
+        userRepository.findByEmail(normalizedEmail).ifPresent(user -> {
+            String otp = generateOtp();
+            redisService.storeResetToken(normalizedEmail, otp, otpExpiryMinutes);
+            redisService.clearResetAttempts(normalizedEmail);
+            otpEmailService.sendPasswordResetOtp(normalizedEmail, otp);
+        });
+    }
+
+    public void resetPassword(String email, String token, String newPassword) {
+        String normalizedEmail = normalizeEmail(email);
+        User user = userRepository.findByEmail(normalizedEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        String storedToken = redisService.getResetToken(normalizedEmail);
+        if (storedToken == null) {
+            throw new ForbiddenOperationException("Reset token has expired or was never issued. Please request a new one.");
+        }
+
+        int attempts = redisService.incrementResetAttempts(normalizedEmail);
+        if (attempts > 5) {
+            redisService.deleteResetToken(normalizedEmail);
+            redisService.clearResetAttempts(normalizedEmail);
+            throw new ForbiddenOperationException("Too many failed attempts. Please request a new reset code.");
+        }
+
+        if (!storedToken.equals(token)) {
+            throw new ForbiddenOperationException("Invalid reset token. " + (5 - attempts) + " attempts remaining.");
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+
+        refreshTokenRepository.deleteByEmail(normalizedEmail);
+        redisService.deleteResetToken(normalizedEmail);
+        redisService.clearResetAttempts(normalizedEmail);
     }
 
     public void logout(String token) {

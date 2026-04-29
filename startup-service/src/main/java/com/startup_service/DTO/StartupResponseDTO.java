@@ -21,6 +21,11 @@ public class StartupResponseDTO {
     private String currentRound;
     private Double valuation;
     private String status;
+    private Double equityOffered;
+    private String websiteUrl;
+    private String logoUrl;
+    private String linkedinUrl;
+    private String twitterUrl;
     private int followersCount;
     private LocalDateTime createdAt;
 }

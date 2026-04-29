@@ -14,6 +14,7 @@ import org.springframework.web.server.ResponseStatusException;
 import com.team_service.Config.RabbitConfig;
 import com.team_service.DTO.InviteMemberRequest;
 import com.team_service.DTO.StartupDto;
+import com.team_service.DTO.UpdateRoleRequest;
 import com.team_service.Entity.TeamMember;
 import com.team_service.Feign.StartupClient;
 import com.team_service.Feign.UserClient;
@@ -28,6 +29,9 @@ public class TeamService {
 
     private static final List<String> ALLOWED_STATUSES = List.of("PENDING", "ACCEPTED", "REJECTED");
     private static final List<String> ALLOWED_PERMISSION_LEVELS = List.of("OWNER", "ADMIN", "MEMBER");
+    private static final List<String> MANAGER_PERMISSION_LEVELS = List.of("OWNER", "ADMIN");
+    private static final String INTERNAL_ACTOR_EMAIL = "team-service@internal";
+    private static final String INTERNAL_ACTOR_ROLE = "ROLE_ADMIN";
 
     private final TeamMemberRepository repository;
     private final StartupClient startupClient;
@@ -46,8 +50,8 @@ public class TeamService {
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Unable to load startup details");
         }
 
-        if (!startup.getFounderEmail().equals(currentUser)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only founder can invite members");
+        if (!canManageTeam(startup, currentUser)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the founder or an accepted admin-level team member can invite members");
         }
 
         try {
@@ -95,7 +99,12 @@ public class TeamService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only update your own invites");
         }
 
-        member.setStatus(normalizeStatus(status));
+        String normalizedStatus = normalizeStatus(status);
+        if ("ACCEPTED".equals(normalizedStatus) && "COFOUNDER".equalsIgnoreCase(member.getRole())) {
+            promoteAcceptedCoFounder(member.getUserEmail());
+        }
+
+        member.setStatus(normalizedStatus);
         TeamMember saved = repository.save(member);
 
         StartupDto startup;
@@ -143,8 +152,8 @@ public class TeamService {
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Unable to load startup details");
         }
 
-        if (!startup.getFounderEmail().equals(currentUser) && !member.getUserEmail().equals(currentUser)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only founder or the member themselves can remove");
+        if (!member.getUserEmail().equals(currentUser) && !canManageTeam(startup, currentUser)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the founder, an accepted admin-level team member, or the member themselves can remove");
         }
 
         repository.delete(member);
@@ -167,5 +176,33 @@ public class TeamService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid permission level");
         }
         return normalized;
+    }
+
+    private boolean canManageTeam(StartupDto startup, String currentUser) {
+        if (startup.getFounderEmail().equals(currentUser)) {
+            return true;
+        }
+
+        return repository.findByStartupIdAndUserEmail(startup.getId(), currentUser)
+                .filter(member -> "ACCEPTED".equals(member.getStatus()))
+                .map(TeamMember::getPermissionLevel)
+                .map(String::toUpperCase)
+                .filter(MANAGER_PERMISSION_LEVELS::contains)
+                .isPresent();
+    }
+
+    private void promoteAcceptedCoFounder(String userEmail) {
+        try {
+            userClient.updateUserRole(
+                    userEmail,
+                    new UpdateRoleRequest("ROLE_COFOUNDER"),
+                    INTERNAL_ACTOR_EMAIL,
+                    INTERNAL_ACTOR_ROLE
+            );
+        } catch (FeignException.NotFound e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Invited user not found for role promotion");
+        } catch (FeignException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Unable to promote co-founder role");
+        }
     }
 }

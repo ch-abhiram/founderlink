@@ -23,6 +23,14 @@ export class UserService {
     return this.http.put(`${this.baseUrl}/${encodeURIComponent(this.getCurrentEmail())}`, data);
   }
 
+  getPreferences(): Observable<any> {
+    return this.http.get(`${this.baseUrl}/${encodeURIComponent(this.getCurrentEmail())}/preferences`);
+  }
+
+  updatePreferences(data: any): Observable<any> {
+    return this.http.put(`${this.baseUrl}/${encodeURIComponent(this.getCurrentEmail())}/preferences`, data);
+  }
+
   getAllUsers(): Observable<any[]> {
     return this.http.get<any[]>(this.baseUrl);
   }

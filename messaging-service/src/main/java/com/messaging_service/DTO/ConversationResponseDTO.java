@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 public class ConversationResponseDTO {
     private Long id;
     private Long startupId;
+    private String startupName;
     private String participantEmail;
     private String founderEmail;
     private LocalDateTime createdAt;

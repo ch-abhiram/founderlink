@@ -7,12 +7,18 @@ import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.MediaTypeFactory;
 import org.springframework.http.ResponseEntity;
 import java.net.URI;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import jakarta.validation.Valid;
 
 import com.startup_service.DTO.CreateStartupRequest;
@@ -48,8 +54,10 @@ public class StartupController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<StartupResponseDTO>> getAll(@PageableDefault(size = 10) Pageable pageable) {
-        return ResponseEntity.ok(service.getAll(pageable).map(this::toDto));
+    public ResponseEntity<Page<StartupResponseDTO>> getAll(
+            @RequestParam(required = false) String founderEmail,
+            @PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(service.getAll(founderEmail, pageable).map(this::toDto));
     }
 
     @GetMapping("/search")
@@ -134,9 +142,40 @@ public class StartupController {
                 .body(toDto(document));
     }
 
+    @PostMapping(value = "/{id}/documents/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<StartupDocumentResponseDTO> uploadDocument(
+            @PathVariable Long id,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String docType,
+            @RequestParam("file") MultipartFile file) {
+        StartupDocument document = startupContentService.uploadDocument(id, name, docType, file);
+        return ResponseEntity
+                .created(URI.create("/startups/" + id + "/documents/" + document.getId()))
+                .body(toDto(document));
+    }
+
     @GetMapping("/{id}/documents")
     public ResponseEntity<List<StartupDocumentResponseDTO>> getDocuments(@PathVariable Long id) {
         return ResponseEntity.ok(startupContentService.getDocuments(id).stream().map(this::toDto).collect(Collectors.toList()));
+    }
+
+    @GetMapping("/{id}/documents/{documentId}/download")
+    public ResponseEntity<Resource> downloadDocument(@PathVariable Long id, @PathVariable Long documentId) {
+        StartupDocument document = startupContentService.getDocument(id, documentId);
+        Resource resource = startupContentService.loadDocumentFile(document);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, ContentDisposition.inline()
+                        .filename(document.getName())
+                        .build()
+                        .toString())
+                .contentType(MediaTypeFactory.getMediaType(resource).orElse(MediaType.APPLICATION_OCTET_STREAM))
+                .body(resource);
+    }
+
+    @DeleteMapping("/{id}/documents/{documentId}")
+    public ResponseEntity<Void> deleteDocument(@PathVariable Long id, @PathVariable Long documentId) {
+        startupContentService.deleteDocument(id, documentId);
+        return ResponseEntity.noContent().build();
     }
 
     private StartupResponseDTO toDto(Startup startup) {
@@ -157,6 +196,11 @@ public class StartupController {
         dto.setCurrentRound(startup.getCurrentRound());
         dto.setValuation(startup.getValuation());
         dto.setStatus(startup.getStatus());
+        dto.setEquityOffered(startup.getEquityOffered());
+        dto.setWebsiteUrl(startup.getWebsiteUrl());
+        dto.setLogoUrl(startup.getLogoUrl());
+        dto.setLinkedinUrl(startup.getLinkedinUrl());
+        dto.setTwitterUrl(startup.getTwitterUrl());
         dto.setFollowersCount(startup.getFollowers() != null ? startup.getFollowers().size() : 0);
         dto.setCreatedAt(startup.getCreatedAt());
         return dto;

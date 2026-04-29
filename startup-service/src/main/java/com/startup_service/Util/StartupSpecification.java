@@ -11,7 +11,7 @@ public class StartupSpecification {
     private StartupSpecification() {
     }
 
-    public static Specification<Startup> search(String category, String status, String currentRound, String stage) {
+    public static Specification<Startup> search(String category, String status, String currentRound, String stage, String founderEmail) {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
@@ -27,8 +27,15 @@ public class StartupSpecification {
             if (stage != null && !stage.isBlank()) {
                 predicates.add(criteriaBuilder.equal(criteriaBuilder.lower(root.get("stage")), stage.toLowerCase()));
             }
+            if (founderEmail != null && !founderEmail.isBlank()) {
+                predicates.add(criteriaBuilder.equal(criteriaBuilder.lower(root.get("founderEmail")), founderEmail.toLowerCase()));
+            }
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
+    }
+
+    public static Specification<Startup> search(String category, String status, String currentRound, String stage) {
+        return search(category, status, currentRound, stage, null);
     }
 }

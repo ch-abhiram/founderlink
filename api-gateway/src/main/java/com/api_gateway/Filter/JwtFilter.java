@@ -33,7 +33,8 @@ public class JwtFilter implements GlobalFilter {
             path.startsWith("/auth/register") ||
             path.startsWith("/auth/verify") ||
             path.startsWith("/auth/resend-otp") ||
-            path.startsWith("/auth/change-password") ||
+            path.startsWith("/auth/forgot-password") ||
+            path.startsWith("/auth/reset-password") ||
             path.startsWith("/auth/refresh") ||
             path.startsWith("/actuator") ||
             path.contains("/v3/api-docs") || 

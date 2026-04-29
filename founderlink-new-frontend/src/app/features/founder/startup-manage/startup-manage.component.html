@@ -100,6 +100,45 @@
       </div>
     </div>
 
+    <!-- Documents -->
+    <div class="form-section fl-card">
+      <div class="form-section-head"><i class="pi pi-file-arrow-up"></i> Documents</div>
+      <div class="field-group three">
+        <div class="field">
+          <label class="fl-label">Document Name</label>
+          <input class="fl-input" type="text" [(ngModel)]="documentForm.name" name="documentName" placeholder="Pitch Deck" />
+        </div>
+        <div class="field">
+          <label class="fl-label">Document Type</label>
+          <select class="fl-select" [(ngModel)]="documentForm.docType" name="documentType">
+            <option *ngFor="let type of docTypes" [value]="type.value">{{ type.label }}</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="fl-label">Upload File</label>
+          <input class="fl-input file-input" type="file" name="documentFile" (change)="onDocumentSelected($event)" />
+        </div>
+      </div>
+      <div class="field">
+        <label class="fl-label">Public Document URL</label>
+        <input class="fl-input" type="url" [(ngModel)]="documentForm.url" name="documentUrl" placeholder="https://docs.google.com/..." />
+      </div>
+      <p class="document-hint">Attach a file or paste a public URL. It will be saved when you submit this startup form.</p>
+
+      <div class="documents-list" *ngIf="isEdit && documents.length > 0">
+        <div class="document-row" *ngFor="let document of documents">
+          <button type="button" class="document-main" (click)="openDocument(document)">
+            <i class="pi pi-file"></i>
+            <span>{{ document.name }}</span>
+            <small>{{ document.docType || 'DOCUMENT' }}</small>
+          </button>
+          <button type="button" class="document-icon-action" (click)="deleteDocument(document)" title="Delete document">
+            <i class="pi pi-trash"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Actions -->
     <div class="form-actions">
       <button type="button" class="btn-secondary" (click)="cancel()">Cancel</button>

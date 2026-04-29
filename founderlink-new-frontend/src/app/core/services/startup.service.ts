@@ -25,13 +25,17 @@ export class StartupService {
       delete payload.targetAmount;
     }
     delete payload.raisedAmount;
-    delete payload.equityOffered;
-    delete payload.websiteUrl;
-    delete payload.logoUrl;
-    delete payload.linkedinUrl;
-    delete payload.twitterUrl;
     delete payload.founderEmail;
     return payload;
+  }
+
+  private toFrontendDocument(document: StartupDocument): StartupDocument {
+    const url = document.url || document.documentUrl;
+    return {
+      ...document,
+      url: url && url.startsWith('/') ? `${environment.apiUrl}${url}` : url,
+      uploadedAt: document.uploadedAt ?? document.createdAt,
+    };
   }
 
   search(filters: any = {}, page = 0, size = 12): Observable<any> {
@@ -88,15 +92,46 @@ export class StartupService {
   }
 
   getUpdates(id: number): Observable<StartupUpdate[]> {
-    return this.http.get<StartupUpdate[]>(`${this.baseUrl}/${id}/updates`);
+    return this.http.get<StartupUpdate[]>(`${this.baseUrl}/${id}/updates`).pipe(
+      map(items => items.map(item => ({
+        ...item,
+        postedAt: item.postedAt ?? item.createdAt,
+      })))
+    );
   }
 
   getDocuments(id: number): Observable<StartupDocument[]> {
-    return this.http.get<StartupDocument[]>(`${this.baseUrl}/${id}/documents`);
+    return this.http.get<StartupDocument[]>(`${this.baseUrl}/${id}/documents`).pipe(
+      map(items => items.map(item => this.toFrontendDocument(item)))
+    );
   }
 
   addDocument(id: number, data: any): Observable<StartupDocument> {
-    return this.http.post<StartupDocument>(`${this.baseUrl}/${id}/documents`, data);
+    return this.http.post<StartupDocument>(`${this.baseUrl}/${id}/documents`, data).pipe(
+      map(item => this.toFrontendDocument(item))
+    );
+  }
+
+  uploadDocument(id: number, file: File, data: { name?: string; docType?: string }): Observable<StartupDocument> {
+    const formData = new FormData();
+    formData.append('file', file);
+    if (data.name) formData.append('name', data.name);
+    if (data.docType) formData.append('docType', data.docType);
+    return this.http.post<StartupDocument>(`${this.baseUrl}/${id}/documents/upload`, formData).pipe(
+      map(item => this.toFrontendDocument(item))
+    );
+  }
+
+  isUploadedDocument(document: StartupDocument): boolean {
+    return !!document.url && /\/startups\/\d+\/documents\/\d+\/download/.test(document.url);
+  }
+
+  downloadDocument(document: StartupDocument): Observable<Blob> {
+    return this.http.get(document.url || '', { responseType: 'blob' });
+  }
+
+  deleteDocument(startupId: number, documentId: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${startupId}/documents/${documentId}`);
   }
 
   postUpdate(id: number, data: any): Observable<StartupUpdate> {

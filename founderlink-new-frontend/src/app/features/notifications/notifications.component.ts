@@ -72,7 +72,8 @@ export class NotificationsComponent implements OnInit {
   iconFor(type: string): string {
     const map: Record<string,string> = {
       INVESTMENT: 'pi-dollar', FOLLOW: 'pi-heart', MESSAGE: 'pi-comments',
-      STARTUP_APPROVED: 'pi-check-circle', STARTUP_REJECTED: 'pi-times-circle', UPDATE: 'pi-bell'
+      STARTUP_APPROVED: 'pi-check-circle', STARTUP_REJECTED: 'pi-times-circle', UPDATE: 'pi-bell',
+      TEAM: 'pi-users', SYSTEM: 'pi-cog'
     };
     return map[type] || 'pi-bell';
   }

@@ -19,24 +19,31 @@ export class NavbarComponent implements OnInit, OnDestroy {
   unreadCount = 0;
   isAuthenticated = false;
   private subs: Subscription[] = [];
+  private pollSub?: Subscription;
 
   constructor(private authService: AuthService, private notifService: NotificationService) {}
 
   ngOnInit() {
     this.subs.push(this.authService.isAuthenticated$.subscribe(v => {
       this.isAuthenticated = v;
-      if (v) this.startPolling();
+      if (!v) {
+        this.unreadCount = 0;
+        this.pollSub?.unsubscribe();
+        this.pollSub = undefined;
+        return;
+      }
+      this.startPolling();
     }));
   }
 
   startPolling() {
-    const poll$ = interval(environment.notificationPollIntervalMs).pipe(
+    this.pollSub?.unsubscribe();
+    this.pollSub = interval(environment.notificationPollIntervalMs).pipe(
       startWith(0),
       switchMap(() => this.notifService.getNotifications(true))
     ).subscribe(ns => this.unreadCount = ns.length);
-    this.subs.push(poll$);
   }
 
   onToggle() { this.toggleSidebar.emit(); }
-  ngOnDestroy() { this.subs.forEach(s => s.unsubscribe()); }
+  ngOnDestroy() { this.pollSub?.unsubscribe(); this.subs.forEach(s => s.unsubscribe()); }
 }

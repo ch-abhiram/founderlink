@@ -48,7 +48,7 @@
 .update-content { font-size: 0.875rem; color: var(--text-secondary); line-height: 1.6; }
 
 .docs-list { display: flex; flex-direction: column; gap: 8px; }
-.doc-row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: var(--bg-elevated); border-radius: var(--radius-md); border: 1px solid var(--border-subtle); text-decoration: none; transition: border-color var(--transition-fast); &:hover { border-color: var(--accent-primary); } }
+.doc-row { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 14px; background: var(--bg-elevated); border-radius: var(--radius-md); border: 1px solid var(--border-subtle); text-decoration: none; text-align: left; cursor: pointer; transition: border-color var(--transition-fast); &:hover { border-color: var(--accent-primary); } }
 .doc-icon { font-size: 1.3rem; color: var(--accent-rose); }
 .doc-info { flex: 1; }
 .doc-name { font-size: 0.875rem; font-weight: 500; color: var(--text-primary); }

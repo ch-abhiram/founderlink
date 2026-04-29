@@ -24,12 +24,13 @@ export class TeamService {
   }
 
   inviteMember(data: any): Observable<any> {
+    const normalizedRole = (data.role ?? '').toUpperCase();
     return this.http.post<any>(`${this.baseUrl}/invite`, {
       startupId: data.startupId,
       userEmail: data.userEmail ?? data.memberEmail,
       role: data.role,
       equityPercentage: data.equityPercentage ?? data.equityShare,
-      permissionLevel: data.permissionLevel ?? 'MEMBER',
+      permissionLevel: data.permissionLevel ?? (normalizedRole === 'COFOUNDER' ? 'ADMIN' : 'MEMBER'),
     }).pipe(map(member => this.toFrontendMember(member)));
   }
 

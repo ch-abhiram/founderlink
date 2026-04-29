@@ -11,5 +11,5 @@
 .cstat { text-align: center; }
 .cstat-val { font-family: var(--font-display); font-weight: 700; font-size: 1rem; }
 .cstat-lbl { font-size: 0.7rem; color: var(--text-muted); margin-top: 2px; }
-.card-actions { display: flex; gap: 6px; align-items: center; }
+.card-actions { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
 .btn-danger-sm { padding: 7px 10px; background: rgba(244,63,94,0.08); border: 1px solid rgba(244,63,94,0.2); border-radius: var(--radius-sm); color: var(--accent-rose); cursor: pointer; transition: all var(--transition-fast); &:hover { background: rgba(244,63,94,0.18); } }

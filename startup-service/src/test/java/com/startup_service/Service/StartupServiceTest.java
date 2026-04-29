@@ -11,6 +11,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doThrow;
 
 import java.util.List;
 import java.util.Optional;
@@ -33,6 +34,7 @@ import com.startup_service.DTO.CreateStartupRequest;
 import com.startup_service.DTO.UserDto;
 import com.startup_service.Entity.Startup;
 import com.startup_service.Repository.StartupRepository;
+import com.startup_service.Repository.StartupUpdateRepository;
 
 @ExtendWith(MockitoExtension.class)
 class StartupServiceTest {
@@ -45,6 +47,12 @@ class StartupServiceTest {
 
     @Mock
     private RabbitTemplate rabbitTemplate;
+
+    @Mock
+    private StartupPermissionService permissionService;
+
+    @Mock
+    private StartupUpdateRepository startupUpdateRepository;
 
     @InjectMocks
     private StartupService startupService;
@@ -171,12 +179,30 @@ class StartupServiceTest {
         Startup updated = startupService.update(1L, request);
 
         assertEquals("Updated", updated.getDescription());
+        verify(permissionService).requireStartupManager(mockStartup);
+        verify(startupUpdateRepository).save(any());
+    }
+
+    @Test
+    void testUpdateForbiddenForNonManager() {
+        setupSecurityContext("member@test.com", "ROLE_COFOUNDER");
+        when(repository.findById(1L)).thenReturn(Optional.of(mockStartup));
+        doThrow(new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to manage this startup"))
+                .when(permissionService).requireStartupManager(mockStartup);
+
+        var request = new com.startup_service.DTO.UpdateStartupRequest();
+        request.setDescription("Updated");
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> startupService.update(1L, request));
+
+        assertEquals(HttpStatus.FORBIDDEN, exception.getStatusCode());
     }
 
     @Test
     void testDeleteFounderAllowed() {
         setupSecurityContext("founder@test.com", "ROLE_FOUNDER");
         when(repository.findById(1L)).thenReturn(Optional.of(mockStartup));
+        when(permissionService.currentUserEmail()).thenReturn("founder@test.com");
 
         startupService.delete(1L);
 

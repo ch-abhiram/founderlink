@@ -15,7 +15,9 @@ import org.springframework.web.bind.annotation.*;
 import com.investment_service.Entity.Investment;
 import com.investment_service.DTO.CreateInvestmentRequest;
 import com.investment_service.DTO.InvestmentResponseDTO;
+import com.investment_service.DTO.StartupDto;
 import com.investment_service.DTO.UpdateInvestmentStatusRequest;
+import com.investment_service.Feign.StartupClient;
 import com.investment_service.Service.InvestmentService;
 
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 public class InvestmentController {
 
     private final InvestmentService service;
+    private final StartupClient startupClient;
 
     @PostMapping
     public ResponseEntity<InvestmentResponseDTO> invest(@RequestBody @Valid CreateInvestmentRequest request) {
@@ -64,6 +67,7 @@ public class InvestmentController {
         InvestmentResponseDTO dto = new InvestmentResponseDTO();
         dto.setId(investment.getId());
         dto.setStartupId(investment.getStartupId());
+        dto.setStartupName(resolveStartupName(investment.getStartupId()));
         dto.setInvestorEmail(investment.getInvestorEmail());
         dto.setInvestorFirm(investment.getInvestorFirm());
         dto.setFounderEmail(investment.getFounderEmail());
@@ -71,5 +75,14 @@ public class InvestmentController {
         dto.setStatus(investment.getStatus());
         dto.setCreatedAt(investment.getCreatedAt());
         return dto;
+    }
+
+    private String resolveStartupName(Long startupId) {
+        try {
+            StartupDto startup = startupClient.getStartup(startupId);
+            return startup.getName();
+        } catch (Exception ex) {
+            return null;
+        }
     }
 }

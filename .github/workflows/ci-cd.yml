@@ -113,6 +113,36 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Set up Java
+        if: matrix.context != 'founderlink-new-frontend'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      - name: Package backend service
+        if: matrix.context != 'founderlink-new-frontend'
+        run: |
+          chmod +x mvnw
+          ./mvnw -q -DskipTests package
+        working-directory: ${{ matrix.context }}
+
+      - name: Set up Node
+        if: matrix.context == 'founderlink-new-frontend'
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: founderlink-new-frontend/package-lock.json
+
+      - name: Build frontend artifact
+        if: matrix.context == 'founderlink-new-frontend'
+        run: |
+          npm ci
+          npm run build
+        working-directory: founderlink-new-frontend
+
       - name: Set lowercase image owner
         run: echo "IMAGE_OWNER=${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_ENV"
 

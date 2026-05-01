@@ -60,7 +60,7 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
     this.notifService.markAsRead(notif.id).subscribe(() => {
       this.fetchNotifications();
       overlay.hide();
-      this.router.navigate(['/notifications']);
+      this.router.navigate([notif.type === 'MESSAGE' ? '/messages' : '/notifications']);
     });
   }
 

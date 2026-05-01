@@ -6,6 +6,7 @@ import com.messaging_service.DTO.StartupDto;
 import com.messaging_service.Entity.Conversation;
 import com.messaging_service.Entity.Message;
 import com.messaging_service.Feign.StartupClient;
+import com.messaging_service.Feign.TeamClient;
 import com.messaging_service.Repository.ConversationRepository;
 import com.messaging_service.Repository.MessageRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -38,6 +40,10 @@ class MessagingServiceTest {
     private MessageRepository messageRepository;
     @Mock
     private StartupClient startupClient;
+    @Mock
+    private TeamClient teamClient;
+    @Mock
+    private RabbitTemplate rabbitTemplate;
 
     @InjectMocks
     private MessagingService messagingService;
@@ -75,6 +81,7 @@ class MessagingServiceTest {
         setupSecurityContext("user@test.com");
         
         when(startupClient.getStartup(1L)).thenReturn(startupDto);
+        when(teamClient.getStartupTeam(eq(1L), eq("user@test.com"), anyString())).thenReturn(List.of());
         when(conversationRepository.findByStartupIdAndParticipantEmail(1L, "user@test.com"))
                 .thenReturn(Optional.of(conversation));
         when(messageRepository.save(any(Message.class))).thenAnswer(i -> {

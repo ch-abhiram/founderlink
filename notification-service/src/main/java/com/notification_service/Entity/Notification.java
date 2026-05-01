@@ -37,7 +37,7 @@ public class Notification {
     private String message;
 
     @Column(nullable = false)
-    private String type; // INVESTMENT, TEAM, SYSTEM
+    private String type; // INVESTMENT, TEAM, SYSTEM, MESSAGE
 
     @Column(nullable = false)
     private String status = "UNREAD";

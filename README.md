@@ -16,6 +16,7 @@ FounderLink is built with Java 21, Spring Boot 3, and Spring Cloud. It handles t
 - [Environment Variables](#environment-variables)
 - [Running Tests](#running-tests)
 - [SonarQube](#sonarqube)
+- [CI/CD Roadmap](#cicd-roadmap)
 - [Project Structure](#project-structure)
 
 ---
@@ -464,6 +465,53 @@ docker run --rm \
 ```
 
 Results are visible at `http://localhost:19000/projects`.
+
+---
+
+## CI/CD Roadmap
+
+This project is already a good fit for container-based CI/CD because every backend service has its own `Dockerfile` and the full stack is described in `docker-compose.yml`.
+
+Recommended deployment flow:
+
+```text
+GitHub push
+  -> run Maven tests
+  -> build Docker images
+  -> push images to a container registry
+  -> deploy the new images to a cloud container platform
+```
+
+### Suggested first pipeline
+
+Use **GitHub Actions** for CI because the repository is hosted on GitHub. The workflow lives at `.github/workflows/ci-cd.yml`.
+
+On every pull request and every push to `main` or `master`, it runs:
+
+1. Maven tests for each Spring Boot service.
+2. Frontend dependency install and production build.
+
+On pushes to `main` or `master`, it also publishes Docker images to GitHub Container Registry:
+
+```text
+ghcr.io/<github-username>/founderlink-api-gateway:latest
+ghcr.io/<github-username>/founderlink-auth-service:latest
+ghcr.io/<github-username>/founderlink-frontend:latest
+```
+
+This gives the project a provider-neutral CD step even without Azure. A cloud deployment target can be added later by pulling the same images from GHCR.
+
+### Hosting options
+
+| Option | Best when | Notes |
+|--------|-----------|-------|
+| Azure Container Apps | You want managed microservice hosting | Best Azure fit for this repo without managing Kubernetes |
+| Azure App Service for Containers | You want a simpler single-container style deployment | Easier, but less natural for many services |
+| Docker Hub / GitHub Container Registry + Render/Railway/Fly.io | You do not have an Azure account yet | Good for student/demo deployments |
+| Local Docker Compose | You only need local demo/testing | Already supported by this repository |
+| AKS | You need Kubernetes | Powerful, but too heavy for a first deployment |
+
+For a first cloud deployment, prefer **GitHub Actions + Docker images + Azure Container Apps** when Azure is available. If Azure is not available, use **GitHub Actions + GitHub Container Registry** first, then deploy to a student-friendly host.
 
 ---
 

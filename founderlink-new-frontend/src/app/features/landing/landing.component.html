@@ -27,7 +27,7 @@
       Meet <span class="gradient-text">Capital</span>
     </h1>
     <p class="hero-sub">
-      FounderLink connects visionary founders with the right investors — intelligently, transparently, and without the gatekeepers.
+      FounderLink connects visionary founders with the right investors - intelligently, transparently, and without the gatekeepers.
     </p>
     <div class="hero-cta">
       <a routerLink="/register" class="btn-primary hero-btn">
@@ -41,23 +41,23 @@
     </div>
 
     <!-- Floating card -->
-    <div class="hero-card glass-strong">
+    <div class="hero-card glass-strong" *ngIf="featuredStartup">
       <div class="card-row">
         <div class="card-dot green"></div>
-        <span class="card-label">Series A — $4.2M raised</span>
+        <span class="card-label">{{ featuredStartup.currentRound || featuredStartup.stage || 'Open round' }} - {{ formatAmount(featuredStartup.raisedAmount || 0) }} raised</span>
         <span class="card-badge">Live</span>
       </div>
-      <div class="card-title">NovaSynth AI</div>
-      <div class="card-sub">B2B SaaS · ML Infrastructure</div>
+      <div class="card-title">{{ featuredStartup.name }}</div>
+      <div class="card-sub">{{ featuredStartup.category || 'Startup' }}<span *ngIf="featuredStartup.stage"> - {{ featuredStartup.stage }}</span></div>
       <div class="card-progress">
-        <div class="progress-bar"><div class="progress-fill" style="width: 78%"></div></div>
-        <span>78% funded</span>
+        <div class="progress-bar"><div class="progress-fill" [style.width.%]="featuredFundingPct"></div></div>
+        <span>{{ featuredFundingPct }}% funded</span>
       </div>
     </div>
   </section>
 
   <!-- STATS -->
-  <section class="stats-section">
+  <section class="stats-section" *ngIf="stats.length">
     <div class="stats-grid stagger">
       <div class="stat-block animate-fade-up" *ngFor="let s of stats">
         <div class="stat-value gradient-text">{{ s.value }}</div>
@@ -84,7 +84,7 @@
   <section class="cta-band">
     <div class="cta-inner glass-strong">
       <h2 class="display">Ready to raise?</h2>
-      <p>Join 2,400+ startups already on the platform.</p>
+      <p>Join the founders and investors already building on the platform.</p>
       <a routerLink="/register" class="btn-primary">
         <i class="pi pi-arrow-right"></i>
         Create your account
@@ -98,6 +98,6 @@
       <div class="logo-mark sm"><i class="pi pi-link"></i></div>
       FounderLink
     </div>
-    <p class="footer-copy">© 2025 FounderLink. Built for founders, by founders.</p>
+    <p class="footer-copy">&copy; 2025 FounderLink. Built for founders, by founders.</p>
   </footer>
 </div>

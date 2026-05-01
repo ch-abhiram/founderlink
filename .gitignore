@@ -42,6 +42,7 @@ Thumbs.db
 
 # Local docs
 docs/
+sprint/
 
 # Local helper scripts and exported archives
 scripts/Import-LocalEnv.ps1

@@ -5,9 +5,11 @@ import com.messaging_service.DTO.ConversationResponseDTO;
 import com.messaging_service.DTO.MessageResponseDTO;
 import com.messaging_service.DTO.SendMessageRequest;
 import com.messaging_service.DTO.StartupDto;
+import com.messaging_service.DTO.TeamMemberDto;
 import com.messaging_service.Entity.Conversation;
 import com.messaging_service.Entity.Message;
 import com.messaging_service.Feign.StartupClient;
+import com.messaging_service.Feign.TeamClient;
 import com.messaging_service.Repository.ConversationRepository;
 import com.messaging_service.Repository.MessageRepository;
 import feign.FeignException;
@@ -37,6 +39,7 @@ public class MessagingService {
     private final ConversationRepository conversationRepository;
     private final MessageRepository messageRepository;
     private final StartupClient startupClient;
+    private final TeamClient teamClient;
     private final RabbitTemplate rabbitTemplate;
 
     @Transactional
@@ -53,16 +56,13 @@ public class MessagingService {
         }
 
         String participantEmail;
-        
-        // If the current user is the startup founder, they must specify who they are replying to
-        boolean founderReply = startup.getFounderEmail().equals(currentUser);
-        if (founderReply) {
-            if (request.getParticipantEmail() == null || request.getParticipantEmail().trim().isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Founder must specify participant email to reply to");
+        boolean startupSideMessage = canRepresentStartup(startup, currentUser);
+        if (startupSideMessage) {
+            if (!hasText(request.getParticipantEmail())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Participant email is required to reply from the startup team");
             }
-            participantEmail = request.getParticipantEmail();
+            participantEmail = request.getParticipantEmail().trim();
         } else {
-            // Otherwise, the current user is the participant initiating or contributing to the chat
             participantEmail = currentUser;
         }
 
@@ -86,8 +86,14 @@ public class MessagingService {
         message.setContent(request.getContent());
         Message savedMessage = messageRepository.save(message);
 
-        if (founderReply) {
-            publishFounderReplyEmailEvent(startup, participantEmail, savedMessage);
+        if (startupSideMessage && !participantEmail.equals(currentUser)) {
+            publishMessageEvent(startup, participantEmail, savedMessage);
+        } else {
+            publishMessageEvent(startup, startup.getFounderEmail(), savedMessage);
+            getAcceptedTeamMembersForNotification(startup.getId(), currentUser).stream()
+                    .map(TeamMemberDto::getUserEmail)
+                    .filter(email -> !email.equals(currentUser))
+                    .forEach(email -> publishMessageEvent(startup, email, savedMessage));
         }
 
         return toMessageDto(savedMessage);
@@ -118,8 +124,8 @@ public class MessagingService {
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Unable to load startup details");
         }
 
-        if (!startup.getFounderEmail().equals(currentUser)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the founder can view all startup conversations");
+        if (!canRepresentStartup(startup, currentUser)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the founder or accepted startup team members can view startup conversations");
         }
 
         return conversationRepository.findByStartupId(startupId).stream()
@@ -141,11 +147,15 @@ public class MessagingService {
         List<Conversation> byFounder = conversationRepository.findAll().stream()
                 .filter(conversation -> isFounderConversation(conversation, currentUser))
                 .toList();
+        List<Conversation> byTeam = conversationRepository.findAll().stream()
+                .filter(conversation -> isAcceptedTeamConversation(conversation, currentUser))
+                .toList();
 
         Map<Long, Conversation> merged = new LinkedHashMap<>();
         byParticipant.forEach(c -> merged.put(c.getId(), c));
         bySender.forEach(c -> merged.put(c.getId(), c));
         byFounder.forEach(c -> merged.put(c.getId(), c));
+        byTeam.forEach(c -> merged.put(c.getId(), c));
 
         return merged.values().stream()
                 .sorted(Comparator.comparing(Conversation::getUpdatedAt, Comparator.nullsLast(Comparator.reverseOrder())))
@@ -167,7 +177,7 @@ public class MessagingService {
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Unable to load startup details");
         }
         
-        if (!startup.getFounderEmail().equals(currentUser)) {
+        if (!canRepresentStartup(startup, currentUser)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have access to this conversation");
         }
     }
@@ -181,6 +191,59 @@ public class MessagingService {
         } catch (FeignException e) {
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Unable to load startup details");
         }
+    }
+
+    private boolean isAcceptedTeamConversation(Conversation conversation, String currentUser) {
+        try {
+            StartupDto startup = startupClient.getStartup(conversation.getStartupId());
+            if (currentUser.equals(startup.getFounderEmail())) {
+                return false;
+            }
+            return isAcceptedTeamMember(startup.getId(), currentUser);
+        } catch (FeignException.NotFound e) {
+            return false;
+        } catch (FeignException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Unable to load startup details");
+        }
+    }
+
+    private boolean canRepresentStartup(StartupDto startup, String currentUser) {
+        return startup.getFounderEmail().equals(currentUser) || isAcceptedTeamMember(startup.getId(), currentUser);
+    }
+
+    private boolean isAcceptedTeamMember(Long startupId, String currentUser) {
+        return getAcceptedTeamMembers(startupId, currentUser).stream()
+                .anyMatch(member -> currentUser.equals(member.getUserEmail()));
+    }
+
+    private List<TeamMemberDto> getAcceptedTeamMembers(Long startupId, String currentUser) {
+        try {
+            return teamClient.getStartupTeam(startupId, currentUser, currentRole()).stream()
+                    .filter(member -> "ACCEPTED".equalsIgnoreCase(member.getStatus()))
+                    .toList();
+        } catch (FeignException.NotFound e) {
+            return List.of();
+        } catch (FeignException.Forbidden e) {
+            return List.of();
+        } catch (FeignException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Unable to load startup team");
+        }
+    }
+
+    private List<TeamMemberDto> getAcceptedTeamMembersForNotification(Long startupId, String currentUser) {
+        try {
+            return getAcceptedTeamMembers(startupId, currentUser);
+        } catch (ResponseStatusException ex) {
+            log.warn("Could not load startup team for message notifications on startupId={}: {}", startupId, ex.getReason());
+            return List.of();
+        }
+    }
+
+    private String currentRole() {
+        return SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+                .findFirst()
+                .map(Object::toString)
+                .orElse("ROLE_USER");
     }
 
     private MessageResponseDTO toMessageDto(Message message) {
@@ -214,24 +277,28 @@ public class MessagingService {
         return dto;
     }
 
-    private void publishFounderReplyEmailEvent(StartupDto startup, String participantEmail, Message savedMessage) {
+    private void publishMessageEvent(StartupDto startup, String recipientEmail, Message savedMessage) {
         try {
             Map<String, Object> event = new HashMap<>();
             event.put("startupId", startup.getId());
             event.put("startupName", startup.getName());
             event.put("founderEmail", startup.getFounderEmail());
-            event.put("recipientEmail", participantEmail);
+            event.put("senderEmail", savedMessage.getSenderEmail());
+            event.put("recipientEmail", recipientEmail);
             event.put("content", savedMessage.getContent());
             event.put("conversationId", savedMessage.getConversationId());
 
             rabbitTemplate.convertAndSend(
                     RabbitConfig.EXCHANGE_MESSAGING,
-                    RabbitConfig.ROUTING_KEY_FOUNDER_REPLY,
+                    RabbitConfig.ROUTING_KEY_MESSAGE_RECEIVED,
                     event
             );
         } catch (Exception ex) {
-            // Keep chat API successful even if email event publishing fails.
-            log.warn("Failed to publish founder reply email event for recipient={}: {}", participantEmail, ex.getMessage());
+            log.warn("Failed to publish message notification event for recipient={}: {}", recipientEmail, ex.getMessage());
         }
+    }
+
+    private boolean hasText(String value) {
+        return value != null && !value.trim().isEmpty();
     }
 }

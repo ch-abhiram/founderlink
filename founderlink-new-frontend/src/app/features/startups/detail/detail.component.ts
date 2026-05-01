@@ -39,6 +39,7 @@ export class DetailComponent implements OnInit {
   documents: any[] = [];
   updates: any[] = [];
   inviteActionId: number | null = null;
+  messageActionEmail = '';
 
   constructor(
     private route: ActivatedRoute, private router: Router,
@@ -101,6 +102,32 @@ export class DetailComponent implements OnInit {
 
   canRespondToInvite(member: any): boolean {
     return member?.memberEmail === this.currentEmail && member?.status === 'PENDING';
+  }
+
+  canMessageTeamMember(member: any): boolean {
+    return this.canManageStartup &&
+      member?.memberEmail &&
+      member.memberEmail !== this.currentEmail &&
+      member.status === 'ACCEPTED';
+  }
+
+  messageTeamMember(member: any) {
+    if (!this.startup?.id || !this.canMessageTeamMember(member)) return;
+    this.messageActionEmail = member.memberEmail;
+    this.msgSvc.sendMessage({
+      startupId: this.startup.id,
+      participantEmail: member.memberEmail,
+      content: `Hi, let's coordinate on ${this.startup.name}.`
+    }).subscribe({
+      next: () => {
+        this.messageActionEmail = '';
+        this.router.navigate(['/messages']);
+      },
+      error: err => {
+        this.messageActionEmail = '';
+        this.msg.add({severity:'error', summary:'Message failed', detail: err?.error?.message || 'Unable to open conversation.'});
+      }
+    });
   }
 
   respondToInvite(member: any, status: 'ACCEPTED' | 'REJECTED') {

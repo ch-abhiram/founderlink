@@ -25,6 +25,7 @@ public class RabbitConfig {
     public static final String QUEUE_NOTIFY_TEAM_INVITE = "notify.team.invite.queue";
     public static final String QUEUE_NOTIFY_TEAM_STATUS = "notify.team.status.queue";
     public static final String QUEUE_NOTIFY_MESSAGE_REPLY = "notify.message.reply.queue";
+    public static final String QUEUE_NOTIFY_MESSAGE_RECEIVED = "notify.message.received.queue";
 
     @Bean
     public MessageConverter jsonMessageConverter() {
@@ -89,6 +90,11 @@ public class RabbitConfig {
     }
 
     @Bean
+    public Queue notifyMessageReceivedQueue() {
+        return new Queue(QUEUE_NOTIFY_MESSAGE_RECEIVED, true);
+    }
+
+    @Bean
     public Binding bindingNotifyInvestmentCreated() {
         return BindingBuilder.bind(notifyInvestmentCreatedQueue()).to(investmentExchange()).with("investment.created");
     }
@@ -116,5 +122,10 @@ public class RabbitConfig {
     @Bean
     public Binding bindingNotifyMessageReply() {
         return BindingBuilder.bind(notifyMessageReplyQueue()).to(messagingExchange()).with("message.reply.founder");
+    }
+
+    @Bean
+    public Binding bindingNotifyMessageReceived() {
+        return BindingBuilder.bind(notifyMessageReceivedQueue()).to(messagingExchange()).with("message.received");
     }
 }

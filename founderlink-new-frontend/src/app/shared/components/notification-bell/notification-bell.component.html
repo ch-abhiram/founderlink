@@ -21,7 +21,7 @@
              (click)="markAsRead(notif, op)">
           <div class="flex items-start gap-3">
              <div class="mt-1">
-               <i class="pi text-primary" [ngClass]="{'pi-info-circle': notif.type === 'SYSTEM', 'pi-users': notif.type === 'TEAM', 'pi-dollar': notif.type === 'INVESTMENT'}"></i>
+               <i class="pi text-primary" [ngClass]="{'pi-info-circle': notif.type === 'SYSTEM', 'pi-users': notif.type === 'TEAM', 'pi-dollar': notif.type === 'INVESTMENT', 'pi-envelope': notif.type === 'MESSAGE'}"></i>
              </div>
              <div>
                <p class="text-sm font-medium">{{ notif.title }}</p>

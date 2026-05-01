@@ -14,6 +14,7 @@ public class RabbitConfig {
 
     public static final String EXCHANGE_MESSAGING = "messaging.exchange";
     public static final String ROUTING_KEY_FOUNDER_REPLY = "message.reply.founder";
+    public static final String ROUTING_KEY_MESSAGE_RECEIVED = "message.received";
 
     @Bean
     public Exchange messagingExchange() {

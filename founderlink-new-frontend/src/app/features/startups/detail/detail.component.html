@@ -85,6 +85,9 @@
           </div>
           <div class="team-row-actions">
             <span class="badge" [ngClass]="{'badge-success':m.status==='ACCEPTED','badge-pending':m.status==='PENDING','badge-rejected':m.status==='REJECTED'}">{{ m.status }}</span>
+            <button class="btn-secondary" *ngIf="canMessageTeamMember(m)" (click)="messageTeamMember(m)" [disabled]="messageActionEmail === m.memberEmail">
+              {{ messageActionEmail === m.memberEmail ? 'Opening...' : 'Message' }}
+            </button>
             <div class="inline-invite-actions" *ngIf="canRespondToInvite(m)">
               <button class="btn-secondary" (click)="respondToInvite(m, 'REJECTED')" [disabled]="inviteActionId === m.id">Decline</button>
               <button class="btn-primary" (click)="respondToInvite(m, 'ACCEPTED')" [disabled]="inviteActionId === m.id">

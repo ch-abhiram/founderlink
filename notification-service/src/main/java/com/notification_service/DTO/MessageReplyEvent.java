@@ -7,6 +7,7 @@ public class MessageReplyEvent {
     private Long startupId;
     private String startupName;
     private String founderEmail;
+    private String senderEmail;
     private String recipientEmail;
     private String content;
     private Long conversationId;

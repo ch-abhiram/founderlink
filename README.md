@@ -1,372 +1,449 @@
 # FounderLink
 
-**A microservices backend platform connecting founders, investors, and startup teams.**
+FounderLink is a completed full-stack microservices platform for connecting founders, investors, co-founders, and admins in a startup ecosystem.
 
-FounderLink is built with Java 21, Spring Boot 3, and Spring Cloud. It handles the full lifecycle of a startup ecosystem — authentication, startup creation, team collaboration, investment tracking, direct messaging, and event-driven notifications — all through independently deployable services behind a single API gateway.
-
----
+The system includes an Angular web application, Spring Boot microservices, service discovery, centralized configuration, PostgreSQL databases, Redis-backed token invalidation, RabbitMQ event messaging, in-app and email notifications, Swagger documentation, Docker Compose orchestration, SonarQube configuration, and GitHub Actions CI/CD.
 
 ## Table of Contents
 
+- [Project Status](#project-status)
+- [Core Features](#core-features)
 - [Architecture](#architecture)
 - [Services](#services)
 - [Tech Stack](#tech-stack)
-- [API Reference](#api-reference)
 - [Quick Start](#quick-start)
 - [Environment Variables](#environment-variables)
+- [Useful URLs](#useful-urls)
+- [API Overview](#api-overview)
 - [Running Tests](#running-tests)
+- [CI/CD](#cicd)
 - [SonarQube](#sonarqube)
-- [CI/CD Roadmap](#cicd-roadmap)
 - [Project Structure](#project-structure)
+- [Database Layout](#database-layout)
 
----
+## Project Status
+
+This project is complete and ready for local demo, evaluation, and container-based deployment.
+
+Completed modules:
+
+- Role-based authentication and authorization.
+- Founder, investor, co-founder, and admin workflows.
+- Startup creation, discovery, approval, updates, documents, and follow/unfollow.
+- Team invite and team member management.
+- Investment request and founder approval/rejection flow.
+- Messaging between investors/users and startup founders.
+- Event-driven notification handling through RabbitMQ.
+- Angular frontend with protected routes, role-aware navigation, dashboards, forms, and data views.
+- Docker Compose environment for the complete platform.
+- Backend unit/controller tests and frontend build pipeline.
+- GitHub Actions workflow for testing, building, and publishing Docker images.
+
+## Core Features
+
+### Founder
+
+- Register, verify email, log in, and manage profile.
+- Create and edit startup profiles.
+- Manage startup details, social links, updates, and documents.
+- Invite and manage team members.
+- View investment requests received for owned startups.
+- Approve or reject investment requests.
+- Reply to startup-related messages.
+
+### Investor
+
+- Discover and filter startups.
+- View startup details.
+- Follow startups.
+- Submit investment requests.
+- Track own investment activity.
+- Message startup founders.
+
+### Co-Founder / Team Member
+
+- Accept or reject team invites.
+- Access team/startup collaboration areas according to assigned role.
+- Participate in startup management workflows where permitted.
+
+### Admin
+
+- Review pending startups.
+- Approve, reject, or manage startup status.
+- View platform users.
+- Change user roles.
+- Review investment activity.
 
 ## Architecture
 
-```
-                         ┌─────────────────────────────┐
-                         │         Config Server         │
-                         │           :8888               │
-                         └──────────────┬──────────────┘
-                                        │ config on startup
-          ┌─────────────────────────────▼─────────────────────────────┐
-          │                      Eureka Server                         │
-          │                         :8761                              │
-          └──────────┬──────────────────────────┬─────────────────────┘
-                     │ registers                 │ discovers
-          ┌──────────▼──────────────────────────▼─────────────────────┐
-          │                       API Gateway                          │
-          │           :8083  —  JWT validation + routing               │
-          └──┬──────┬──────┬──────┬──────┬──────┬──────┬──────┬───────┘
-             │      │      │      │      │      │      │      │
-           auth   user  startup  team invest  msg  notify   (more)
-          :8089  :9000  :8084  :8085  :8088  :8087  :8086
+```text
+Angular Frontend
+    |
+    v
+API Gateway
+    |
+    +--> Auth Service
+    +--> User Service
+    +--> Startup Service
+    +--> Team Service
+    +--> Investment Service
+    +--> Messaging Service
+    +--> Notification Service
 
-Each service owns its own PostgreSQL database. Async events flow
-through RabbitMQ. Redis backs the gateway's JWT blacklist.
+Supporting services:
+    Config Server
+    Eureka Server
+    PostgreSQL
+    Redis
+    RabbitMQ
+    Zipkin
+    SonarQube
 ```
 
-### Request flow
+Request flow:
 
-```
+```text
 Client
-  └─► API Gateway          validates JWT, injects X-User-Email / X-User-Role headers
-        └─► Domain Service  trusts gateway headers, enforces business rules
-              └─► PostgreSQL (own schema)
-              └─► RabbitMQ  (publishes domain events)
-                    └─► Notification Service  (consumes events, sends emails)
+  -> API Gateway
+      validates JWT
+      checks Redis token blacklist
+      injects trusted X-User-Email and X-User-Role headers
+      routes to domain services
+  -> Domain Service
+      enforces business rules
+      persists data in its own database
+      publishes events when needed
+  -> RabbitMQ
+      delivers domain events
+  -> Notification Service
+      creates notifications and sends email when enabled
 ```
 
-### Event bus
-
-| Publisher         | Exchange              | Routing key              | Consumer             |
-|-------------------|-----------------------|--------------------------|----------------------|
-| auth-service      | `user.events`         | —                        | (internal log)       |
-| startup-service   | `startup.exchange`    | `startup.created`        | notification-service |
-| investment-service| `investment.exchange` | `investment.created`     | notification-service |
-| investment-service| `investment.exchange` | `investment.status`      | notification-service |
-| team-service      | `team.exchange`       | `team.invite.sent`       | notification-service |
-| team-service      | `team.exchange`       | `team.invite.status`     | notification-service |
-| messaging-service | `messaging.exchange`  | `message.reply.founder`  | notification-service |
-
----
+Each backend service is independently deployable and owns its own database. Services communicate through the gateway, Feign clients, and RabbitMQ events.
 
 ## Services
 
-| Service              | Responsibility                                      | Port   |
-|----------------------|-----------------------------------------------------|--------|
-| `config-server`      | Centralised configuration for all services          | `8888` |
-| `eureka-server`      | Service discovery and registry                      | `8761` |
-| `api-gateway`        | JWT validation, routing, Redis blacklist check      | `8083` |
-| `auth-service`       | Register, login, email verification, token refresh  | `8089` |
-| `user-service`       | User profiles, skills, portfolio, role management   | `9000` |
-| `startup-service`    | Startup CRUD, search, follow, status lifecycle      | `8084` |
-| `team-service`       | Team invites, membership, invite status updates     | `8085` |
-| `investment-service` | Investment requests, founder approval/rejection     | `8088` |
-| `messaging-service`  | Startup conversations, inbox, founder replies       | `8087` |
-| `notification-service`| In-app notifications, email delivery via RabbitMQ  | `8086` |
-
-### Supporting infrastructure
-
-| Component   | Purpose                                         |
-|-------------|-------------------------------------------------|
-| PostgreSQL   | One database per domain (`auth_db`, `user_db`, etc.) |
-| Redis        | JWT blacklist for logout invalidation           |
-| RabbitMQ     | Async event delivery between services           |
-| Zipkin       | Distributed tracing across service calls        |
-| SonarQube    | Code quality, coverage, and security scanning   |
-
----
+| Service | Responsibility | Internal Port | Host Port |
+| --- | --- | ---: | ---: |
+| `config-server` | Centralized runtime configuration | `8888` | `18888` |
+| `eureka-server` | Service discovery and registry | `8761` | `18761` |
+| `api-gateway` | Gateway routing, JWT validation, Redis blacklist check | `8083` | `19080` |
+| `auth-service` | Register, login, OTP verification, refresh tokens, logout | `8089` | via gateway |
+| `user-service` | User profiles, preferences, admin role management | `9000` | via gateway |
+| `startup-service` | Startup CRUD, search, status lifecycle, follows, updates, documents | `8084` | via gateway |
+| `team-service` | Team invites, membership, roles, invite status | `8085` | via gateway |
+| `investment-service` | Investment requests and founder decisions | `8088` | via gateway |
+| `messaging-service` | Conversations, inbox, startup messages, founder replies | `8087` | via gateway |
+| `notification-service` | In-app notifications and email event consumers | `8086` | via gateway |
+| `founderlink-new-frontend` | Angular web application | `80` in Docker / `4200` local dev | `14200` Docker / `4200` local dev |
 
 ## Tech Stack
 
-**Language & Runtime**
-- Java 21
-- Maven (per-service wrappers included)
+### Frontend
 
-**Core Frameworks**
+- Angular 17
+- TypeScript
+- Angular Router with protected routes
+- PrimeNG and PrimeIcons
+- Tailwind CSS
+- ECharts / ngx-echarts
+- RxJS
+
+### Backend
+
+- Java 21
 - Spring Boot 3
 - Spring Cloud Gateway
+- Spring Cloud Config
 - Spring Cloud Netflix Eureka
 - Spring Security
 - Spring Data JPA
-- Spring AMQP (RabbitMQ)
-- OpenFeign (inter-service HTTP calls)
+- Spring AMQP
+- OpenFeign
+- Flyway
+- Springdoc OpenAPI / Swagger UI
+- JUnit 5 and Mockito
 
-**Resilience & Observability**
-- Resilience4j (circuit breaker on user-service calls)
-- Flyway (database migrations)
-- Springdoc OpenAPI / Swagger UI (aggregated via gateway)
-- Micrometer + Zipkin (distributed tracing)
-- JaCoCo (test coverage)
+### Infrastructure
 
-**Infrastructure**
 - PostgreSQL 16
 - Redis 7
-- RabbitMQ 3
-- Docker + Docker Compose
-- SonarQube (Community Edition)
-
----
-
-## API Reference
-
-All requests go through the gateway at `http://localhost:19080`. Protected routes require:
-```
-Authorization: Bearer <access_token>
-```
-
-### Auth — `/auth`
-
-| Method | Path              | Auth | Description                                 |
-|--------|-------------------|------|---------------------------------------------|
-| POST   | `/auth/register`  | —    | Register a new user (triggers email verify) |
-| POST   | `/auth/login`     | —    | Login, returns access + refresh tokens      |
-| GET    | `/auth/verify`    | —    | Verify email via `?token=` query param      |
-| POST   | `/auth/refresh`   | —    | Exchange refresh token for new access token |
-| POST   | `/auth/logout`    | ✓    | Blacklists current access token in Redis    |
-
-**Register request body**
-```json
-{
-  "email": "jane@example.com",
-  "password": "secret123",
-  "role": "ROLE_FOUNDER"
-}
-```
-Valid roles: `ROLE_FOUNDER`, `ROLE_INVESTOR`, `ROLE_COFOUNDER`, `ROLE_ADMIN`
-
-**Login response**
-```json
-{
-  "accessToken": "eyJ...",
-  "refreshToken": "uuid-v4",
-  "email": "jane@example.com",
-  "role": "ROLE_FOUNDER"
-}
-```
-
----
-
-### Users — `/users`
-
-| Method | Path                    | Auth  | Description                    |
-|--------|-------------------------|-------|--------------------------------|
-| GET    | `/users/me`             | ✓     | Get own profile                |
-| GET    | `/users/{email}`        | ✓     | Get profile by email           |
-| PUT    | `/users/{email}`        | ✓     | Update profile (name, bio etc) |
-| GET    | `/admin/users`          | ADMIN | List all users                 |
-| PUT    | `/admin/users/{email}/role` | ADMIN | Change a user's role       |
-
----
-
-### Startups — `/startups`
-
-| Method | Path                        | Auth    | Description                              |
-|--------|-----------------------------|---------|------------------------------------------|
-| POST   | `/startups`                 | FOUNDER | Create a startup                         |
-| GET    | `/startups`                 | ✓       | List all (paginated)                     |
-| GET    | `/startups/search`          | ✓       | Filter by `category`, `status`, `currentRound` |
-| GET    | `/startups/{id}`            | ✓       | Get startup by ID                        |
-| PUT    | `/startups/{id}`            | FOUNDER | Update own startup                       |
-| DELETE | `/startups/{id}`            | FOUNDER/ADMIN | Delete startup                    |
-| PUT    | `/startups/{id}/status`     | ADMIN   | Update status (`PENDING`/`OPEN`/`CLOSED`/`REJECTED`) |
-| POST   | `/startups/{id}/follow`     | ✓       | Follow a startup                         |
-| DELETE | `/startups/{id}/unfollow`   | ✓       | Unfollow a startup                       |
-| GET    | `/startups/{id}/followers`  | ✓       | Get follower list                        |
-
----
-
-### Team — `/team`
-
-| Method | Path                        | Auth    | Description                         |
-|--------|-----------------------------|---------|-------------------------------------|
-| POST   | `/team/invite`              | FOUNDER | Invite a user to a startup's team   |
-| PUT    | `/team/invite/{id}/status`  | ✓       | Accept or reject own invite         |
-| GET    | `/team/startup/{startupId}` | ✓       | Get all members of a startup        |
-| GET    | `/team/my`                  | ✓       | Get own invites / memberships       |
-| DELETE | `/team/{id}`                | FOUNDER/MEMBER | Remove a team member         |
-
----
-
-### Investments — `/investments`
-
-| Method | Path                         | Auth     | Description                          |
-|--------|------------------------------|----------|--------------------------------------|
-| POST   | `/investments`               | INVESTOR | Submit an investment request         |
-| GET    | `/investments/me`            | ✓        | Get own investments                  |
-| GET    | `/investments/startup/{id}`  | FOUNDER  | View all investors in a startup      |
-| PUT    | `/investments/{id}/approve`  | FOUNDER  | Approve an investment                |
-| PUT    | `/investments/{id}/reject`   | FOUNDER  | Reject an investment                 |
-
----
-
-### Messaging — `/messages`
-
-| Method | Path                           | Auth | Description                               |
-|--------|--------------------------------|------|-------------------------------------------|
-| POST   | `/messages`                    | ✓    | Send a message (creates conversation if needed) |
-| GET    | `/messages/conversation/{id}`  | ✓    | Get all messages in a conversation        |
-| GET    | `/messages/startup/{id}`       | FOUNDER | All conversations for a startup        |
-| GET    | `/messages/me`                 | ✓    | Own conversations (participant + sender)  |
-
-Founders reply by including `participantEmail` in the request body.
-
----
-
-### Notifications — `/notifications`
-
-| Method | Path                      | Auth | Description                        |
-|--------|---------------------------|------|------------------------------------|
-| GET    | `/notifications`          | ✓    | Get own notifications              |
-| PUT    | `/notifications/{id}/read`| ✓    | Mark a notification as read        |
-| PUT    | `/notifications/read-all` | ✓    | Mark all notifications as read     |
-
-Notifications are created automatically by domain events (new investment, team invite, etc.).
-
----
-
-### Swagger UI
-
-Aggregated documentation is available at the gateway:
-
-```
-http://localhost:19080/swagger-ui.html
-```
-
-Docs for each service are available individually at `/v3/api-docs` endpoints under their gateway prefix (e.g. `/auth/v3/api-docs`, `/startups/v3/api-docs`).
-
----
+- RabbitMQ 3 with management UI
+- Zipkin
+- SonarQube Community Edition
+- Docker and Docker Compose
+- GitHub Actions
+- GitHub Container Registry
 
 ## Quick Start
 
 ### Prerequisites
 
-- Docker Desktop (includes Docker Compose)
-- Java 21 (only needed if building outside Docker)
+- Java 21
+- Maven or the included Maven wrappers
+- Node.js 20 and npm
+- Docker Desktop
+- Git
 
-### 1. Clone the repo
+### 1. Clone the repository
 
 ```bash
-git clone https://github.com/ch-abhiram/founderlink.git
+git clone <repository-url>
 cd founderlink
 ```
 
-### 2. Set up environment
+### 2. Configure environment variables
+
+Copy the Docker environment template:
 
 ```bash
 cp .env.docker.example .env
 ```
 
-Open `.env` and set at minimum:
+On Windows PowerShell:
+
+```powershell
+Copy-Item .env.docker.example .env
+```
+
+Update `.env` with secure values:
 
 ```env
-JWT_SECRET=your-long-random-secret-minimum-32-chars
-POSTGRES_PASSWORD=your-db-password
-RABBITMQ_USERNAME=your-rabbitmq-user
-RABBITMQ_PASSWORD=your-rabbitmq-password
+POSTGRES_PASSWORD=change-me
+RABBITMQ_USERNAME=change-me
+RABBITMQ_PASSWORD=change-me
+JWT_SECRET=change-me-to-a-long-random-secret
 ```
 
-### 3. Start everything
+`JWT_SECRET` must be a long random value suitable for HMAC-SHA256 signing.
+
+### 3. Start the complete stack
 
 ```bash
-docker compose up --build
+docker compose up -d --build
 ```
 
-This starts all services in dependency order:
-1. PostgreSQL → creates all databases
-2. Redis, RabbitMQ
-3. Config Server → pulls `config-repo/` configuration
-4. Eureka Server → service registry
-5. API Gateway + all domain services
+The first startup can take a few minutes because Docker builds every service image and waits for health checks.
 
-### 4. Verify
+### 4. Open the application
 
-| URL                                      | What you should see            |
-|------------------------------------------|--------------------------------|
-| `http://localhost:18761`                 | Eureka dashboard               |
-| `http://localhost:19080/swagger-ui.html` | Aggregated Swagger UI          |
-| `http://localhost:15672`                 | RabbitMQ Management (guest/guest) |
-| `http://localhost:19000`                 | SonarQube (admin/admin)        |
-
-### 5. First API call
+If running the frontend locally:
 
 ```bash
-# Register
-curl -X POST http://localhost:19080/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"email":"founder@example.com","password":"secret123","role":"ROLE_FOUNDER"}'
+cd founderlink-new-frontend
+npm install
+npm start
+```
 
-# Login
+Open the Dockerized frontend:
+
+```text
+http://localhost:14200
+```
+
+For local frontend development:
+
+```text
+http://localhost:4200
+```
+
+Backend API traffic goes through:
+
+```text
+http://localhost:19080
+```
+
+### 5. Stop the stack
+
+```bash
+docker compose down
+```
+
+To remove volumes as well:
+
+```bash
+docker compose down -v
+```
+
+## Environment Variables
+
+The main variables are defined in `.env.docker.example`.
+
+| Variable | Default | Description |
+| --- | --- | --- |
+| `POSTGRES_USER` | `postgres` | PostgreSQL superuser |
+| `POSTGRES_PASSWORD` | required | PostgreSQL password |
+| `RABBITMQ_USERNAME` | required | RabbitMQ username |
+| `RABBITMQ_PASSWORD` | required | RabbitMQ password |
+| `JWT_SECRET` | required | JWT signing secret |
+| `POSTGRES_HOST_PORT` | `15432` | PostgreSQL host port |
+| `REDIS_HOST_PORT` | `16379` | Redis host port |
+| `RABBITMQ_HOST_PORT` | `15673` | RabbitMQ AMQP host port |
+| `RABBITMQ_MANAGEMENT_HOST_PORT` | `15672` | RabbitMQ dashboard port |
+| `FRONTEND_HOST_PORT` | `14200` | Dockerized frontend host port |
+| `ZIPKIN_HOST_PORT` | `19411` | Zipkin dashboard port |
+| `CONFIG_SERVER_HOST_PORT` | `18888` | Config server host port |
+| `EUREKA_HOST_PORT` | `18761` | Eureka dashboard port |
+| `API_GATEWAY_HOST_PORT` | `19080` | API gateway host port |
+| `SONARQUBE_HOST_PORT` | `19000` | SonarQube dashboard port |
+| `MAIL_ENABLED` | `false` | Enables real email delivery |
+| `MAIL_HOST` | `smtp.gmail.com` | SMTP host |
+| `MAIL_PORT` | `587` | SMTP port |
+| `MAIL_USERNAME` | empty | SMTP username |
+| `MAIL_PASSWORD` | empty | SMTP password |
+| `OTP_EXPIRY_MINUTES` | `10` | OTP validity window |
+
+## Useful URLs
+
+| Tool / App | URL |
+| --- | --- |
+| Angular frontend, Docker | `http://localhost:14200` |
+| Angular frontend, local dev | `http://localhost:4200` |
+| API Gateway | `http://localhost:19080` |
+| Swagger UI | `http://localhost:19080/swagger-ui.html` |
+| Eureka dashboard | `http://localhost:18761` |
+| RabbitMQ dashboard | `http://localhost:15672` |
+| Zipkin dashboard | `http://localhost:19411` |
+| SonarQube dashboard | `http://localhost:19000` |
+| PostgreSQL | `localhost:15432` |
+| Redis | `localhost:16379` |
+
+## API Overview
+
+All backend requests should go through the API Gateway:
+
+```text
+http://localhost:19080
+```
+
+Protected routes require:
+
+```http
+Authorization: Bearer <access_token>
+```
+
+### Authentication
+
+| Method | Path | Description |
+| --- | --- | --- |
+| `POST` | `/auth/register` | Register a user |
+| `POST` | `/auth/login` | Log in and receive access/refresh tokens |
+| `POST` | `/auth/verify-otp` | Verify registration OTP |
+| `POST` | `/auth/resend-otp` | Resend OTP |
+| `POST` | `/auth/refresh` | Refresh access token |
+| `POST` | `/auth/logout` | Blacklist current access token |
+| `POST` | `/auth/forgot-password` | Start password reset |
+| `POST` | `/auth/reset-password` | Reset password |
+| `POST` | `/auth/change-password` | Change password for logged-in user |
+
+Example login:
+
+```bash
 curl -X POST http://localhost:19080/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"founder@example.com","password":"secret123"}'
 ```
 
-> **Note on email verification:** Registration emails are logged to the auth-service console as verification tokens. Check the Docker logs and call `/auth/verify?token=<token>` before logging in.
+Supported roles:
 
----
+```text
+ROLE_FOUNDER
+ROLE_INVESTOR
+ROLE_COFOUNDER
+ROLE_ADMIN
+```
 
-## Environment Variables
+### Users
 
-All variables are defined in `.env` (from `.env.docker.example`).
+| Method | Path | Description |
+| --- | --- | --- |
+| `GET` | `/users/{email}` | Get profile by email |
+| `POST` | `/users` | Create user profile, normally called by auth-service |
+| `GET` | `/users` | Admin: list users |
+| `PUT` | `/users/{email}` | Update profile |
+| `GET` | `/users/{email}/preferences` | Get user preferences |
+| `PUT` | `/users/{email}/preferences` | Update user preferences |
+| `PUT` | `/users/{email}/role` | Admin: update user role |
 
-| Variable                    | Default               | Description                            |
-|-----------------------------|-----------------------|----------------------------------------|
-| `JWT_SECRET`                | *(required)*          | HMAC-SHA256 secret — minimum 32 chars  |
-| `POSTGRES_USER`             | `postgres`            | PostgreSQL superuser                   |
-| `POSTGRES_PASSWORD`         | *(required)*          | PostgreSQL superuser password          |
-| `RABBITMQ_USERNAME`         | *(required)*          | RabbitMQ admin username                |
-| `RABBITMQ_PASSWORD`         | *(required)*          | RabbitMQ admin password                |
-| `POSTGRES_HOST_PORT`        | `15432`               | PostgreSQL exposed port on host        |
-| `REDIS_HOST_PORT`           | `16379`               | Redis exposed port on host             |
-| `RABBITMQ_HOST_PORT`        | `15673`               | RabbitMQ AMQP port on host             |
-| `RABBITMQ_MANAGEMENT_HOST_PORT` | `15672`           | RabbitMQ Management UI port on host    |
-| `API_GATEWAY_HOST_PORT`     | `19080`               | Gateway exposed port on host           |
-| `EUREKA_HOST_PORT`          | `18761`               | Eureka dashboard port on host          |
-| `CONFIG_SERVER_HOST_PORT`   | `18888`               | Config server port on host             |
-| `SONARQUBE_HOST_PORT`       | `19000`               | SonarQube UI port on host              |
-| `ZIPKIN_HOST_PORT`          | `19411`               | Zipkin tracing port on host            |
+### Startups
 
-Service-level environment variables (datasource URL, Eureka zone, Redis host, etc.) are resolved at runtime from the config server. See `config-repo/` for defaults.
+| Method | Path | Description |
+| --- | --- | --- |
+| `POST` | `/startups` | Founder: create startup |
+| `GET` | `/startups` | List startups |
+| `GET` | `/startups/search` | Search/filter startups |
+| `GET` | `/startups/{id}` | View startup details |
+| `PUT` | `/startups/{id}` | Founder: update startup |
+| `DELETE` | `/startups/{id}` | Founder/Admin: delete startup |
+| `PUT` | `/startups/{id}/approve` | Admin: approve startup |
+| `PUT` | `/startups/{id}/reject` | Admin: reject startup |
+| `POST` | `/startups/{id}/follow` | Follow startup |
+| `DELETE` | `/startups/{id}/unfollow` | Unfollow startup |
+| `GET` | `/startups/{id}/followers` | View followers |
+| `POST` | `/startups/{id}/updates` | Create startup update |
+| `GET` | `/startups/{id}/updates` | List startup updates |
+| `POST` | `/startups/{id}/documents` | Add document metadata |
+| `POST` | `/startups/{id}/documents/upload` | Upload startup document |
+| `GET` | `/startups/{id}/documents` | List startup documents |
+| `GET` | `/startups/{id}/documents/{documentId}/download` | Download startup document |
+| `DELETE` | `/startups/{id}/documents/{documentId}` | Delete startup document |
 
----
+### Team
+
+| Method | Path | Description |
+| --- | --- | --- |
+| `POST` | `/team/invite` | Founder: invite team member |
+| `PUT` | `/team/invite/{id}/status` | Accept or reject invite |
+| `GET` | `/team/startup/{startupId}` | Get startup team |
+| `GET` | `/team/my` | Get current user's invites/memberships |
+| `DELETE` | `/team/{id}` | Remove team member |
+
+### Investments
+
+| Method | Path | Description |
+| --- | --- | --- |
+| `POST` | `/investments` | Investor: submit investment request |
+| `GET` | `/investments/me` | View own investments |
+| `GET` | `/investments` | Admin: view all investments |
+| `GET` | `/investments/startup/{id}` | Founder: view startup investment requests |
+| `PUT` | `/investments/{id}/status` | Founder/Admin: update investment status |
+
+### Messaging
+
+| Method | Path | Description |
+| --- | --- | --- |
+| `POST` | `/messages` | Send a message |
+| `GET` | `/messages/conversation/{id}` | Get conversation messages |
+| `GET` | `/messages/startup/{id}` | Founder: get startup conversations |
+| `GET` | `/messages/me` | Get current user's conversations |
+
+### Notifications
+
+| Method | Path | Description |
+| --- | --- | --- |
+| `GET` | `/notifications` | Get current user's notifications |
+| `PUT` | `/notifications/{id}/read` | Mark one notification as read |
+| `PUT` | `/notifications/read-all` | Mark all notifications as read |
 
 ## Running Tests
 
-Each service has its own test suite with JUnit 5 and Mockito.
+Each Spring Boot service has its own test suite.
 
-**Run tests for one service:**
+Run one service:
 
 ```bash
-# Linux / macOS
-cd auth-service && ./mvnw test
-
-# Windows
-cd auth-service && .\mvnw.cmd test
+cd auth-service
+./mvnw test
 ```
 
-**Run all services in sequence (Windows PowerShell):**
+Windows PowerShell:
+
+```powershell
+cd auth-service
+.\mvnw.cmd test
+```
+
+Run all backend tests from the repository root:
 
 ```powershell
 @("api-gateway","auth-service","config-server","eureka-server",
@@ -377,39 +454,83 @@ cd auth-service && .\mvnw.cmd test
 }
 ```
 
-**Run all services in sequence (Linux / macOS):**
+Run frontend build:
 
 ```bash
-for svc in api-gateway auth-service config-server eureka-server \
-           investment-service messaging-service notification-service \
-           startup-service team-service user-service; do
-  echo "Testing $svc..."
-  cd $svc && ./mvnw -q test && cd ..
-done
+cd founderlink-new-frontend
+npm install
+npm run build
 ```
 
-Coverage reports are generated per service at `<service>/target/site/jacoco/index.html`.
+Run frontend tests:
 
----
+```bash
+cd founderlink-new-frontend
+npm test
+```
+
+Backend coverage reports are generated under:
+
+```text
+<service>/target/site/jacoco/index.html
+```
+
+## CI/CD
+
+The repository includes a completed GitHub Actions workflow at:
+
+```text
+.github/workflows/ci-cd.yml
+```
+
+The workflow runs on pull requests and pushes to `main` or `master`.
+
+It performs:
+
+- Backend tests for each Spring Boot service.
+- Frontend dependency installation and production build.
+- Docker image packaging.
+- Docker image publishing to GitHub Container Registry on push.
+
+Published image pattern:
+
+```text
+ghcr.io/<github-username>/founderlink-api-gateway:latest
+ghcr.io/<github-username>/founderlink-auth-service:latest
+ghcr.io/<github-username>/founderlink-user-service:latest
+ghcr.io/<github-username>/founderlink-startup-service:latest
+ghcr.io/<github-username>/founderlink-team-service:latest
+ghcr.io/<github-username>/founderlink-investment-service:latest
+ghcr.io/<github-username>/founderlink-messaging-service:latest
+ghcr.io/<github-username>/founderlink-notification-service:latest
+ghcr.io/<github-username>/founderlink-config-server:latest
+ghcr.io/<github-username>/founderlink-eureka-server:latest
+ghcr.io/<github-username>/founderlink-frontend:latest
+```
 
 ## SonarQube
 
-The repo includes a `sonar-project.properties` at the root that scans all services as one project.
-
-### Start SonarQube
+Start SonarQube locally:
 
 ```bash
 docker compose up -d postgres sonarqube
 ```
 
-Open `http://localhost:19000` and log in with `admin` / `admin`. On first login you will be prompted to change the password. Then generate a project token under **Account → Security**.
+Open:
 
-### Build all services first
+```text
+http://localhost:19000
+```
 
-SonarQube needs compiled bytecode and JaCoCo XML reports to give full analysis. Build before scanning:
+Default login:
+
+```text
+admin / admin
+```
+
+Build and test services before scanning:
 
 ```powershell
-# Windows PowerShell
 @("api-gateway","auth-service","config-server","eureka-server",
   "investment-service","messaging-service","notification-service",
   "startup-service","team-service","user-service") | ForEach-Object {
@@ -417,163 +538,84 @@ SonarQube needs compiled bytecode and JaCoCo XML reports to give full analysis. 
 }
 ```
 
-```bash
-# Linux / macOS
-for svc in api-gateway auth-service config-server eureka-server \
-           investment-service messaging-service notification-service \
-           startup-service team-service user-service; do
-  cd $svc && ./mvnw -q test && cd ..
-done
-```
-
-### Run the scan
-
-**With a local sonar-scanner:**
-
-```bash
-# Linux / macOS
-export SONAR_TOKEN=your-token
-sonar-scanner -Dsonar.host.url=http://localhost:19000 -Dsonar.token=$SONAR_TOKEN
-```
+Run scanner with a generated token:
 
 ```powershell
-# Windows PowerShell
 $env:SONAR_TOKEN = "your-token"
 sonar-scanner -Dsonar.host.url=http://localhost:19000 -Dsonar.token=$env:SONAR_TOKEN
 ```
 
-**With Docker (no local install needed):**
-
-```powershell
-# Windows PowerShell
-$env:SONAR_TOKEN = "your-token"
-docker run --rm `
-  -e SONAR_HOST_URL="http://host.docker.internal:19000" `
-  -e SONAR_TOKEN="$env:SONAR_TOKEN" `
-  -v "${PWD}:/usr/src" `
-  sonarsource/sonar-scanner-cli
-```
-
-```bash
-# Linux / macOS
-export SONAR_TOKEN=your-token
-docker run --rm \
-  -e SONAR_HOST_URL="http://host.docker.internal:19000" \
-  -e SONAR_TOKEN="$SONAR_TOKEN" \
-  -v "$(pwd):/usr/src" \
-  sonarsource/sonar-scanner-cli
-```
-
-Results are visible at `http://localhost:19000/projects`.
-
----
-
-## CI/CD Roadmap
-
-This project is already a good fit for container-based CI/CD because every backend service has its own `Dockerfile` and the full stack is described in `docker-compose.yml`.
-
-Recommended deployment flow:
-
-```text
-GitHub push
-  -> run Maven tests
-  -> build Docker images
-  -> push images to a container registry
-  -> deploy the new images to a cloud container platform
-```
-
-### Suggested first pipeline
-
-Use **GitHub Actions** for CI because the repository is hosted on GitHub. The workflow lives at `.github/workflows/ci-cd.yml`.
-
-On every pull request and every push to `main` or `master`, it runs:
-
-1. Maven tests for each Spring Boot service.
-2. Frontend dependency install and production build.
-
-On pushes to `main` or `master`, it also publishes Docker images to GitHub Container Registry:
-
-```text
-ghcr.io/<github-username>/founderlink-api-gateway:latest
-ghcr.io/<github-username>/founderlink-auth-service:latest
-ghcr.io/<github-username>/founderlink-frontend:latest
-```
-
-This gives the project a provider-neutral CD step even without Azure. A cloud deployment target can be added later by pulling the same images from GHCR.
-
-### Hosting options
-
-| Option | Best when | Notes |
-|--------|-----------|-------|
-| Azure Container Apps | You want managed microservice hosting | Best Azure fit for this repo without managing Kubernetes |
-| Azure App Service for Containers | You want a simpler single-container style deployment | Easier, but less natural for many services |
-| Docker Hub / GitHub Container Registry + Render/Railway/Fly.io | You do not have an Azure account yet | Good for student/demo deployments |
-| Local Docker Compose | You only need local demo/testing | Already supported by this repository |
-| AKS | You need Kubernetes | Powerful, but too heavy for a first deployment |
-
-For a first cloud deployment, prefer **GitHub Actions + Docker images + Azure Container Apps** when Azure is available. If Azure is not available, use **GitHub Actions + GitHub Container Registry** first, then deploy to a student-friendly host.
-
----
+The root `sonar-project.properties` file is configured for unified repository analysis.
 
 ## Project Structure
 
-```
+```text
 founderlink/
-│
-├── api-gateway/                  # Spring Cloud Gateway — JWT filter, routing
-├── auth-service/                 # Auth, refresh tokens, email verification
-├── user-service/                 # User profiles and admin role management
-├── startup-service/              # Startup lifecycle, search, follow
-├── team-service/                 # Team invites and membership
-├── investment-service/           # Investment requests and approval flow
-├── messaging-service/            # Conversations and founder replies
-├── notification-service/         # In-app notifications and email
-│
-├── config-server/                # Spring Cloud Config Server
-├── eureka-server/                # Netflix Eureka — service registry
-│
-├── docker/
-│   └── postgres/
-│       └── init/
-│           └── 01-create-databases.sql   # Creates all domain databases
-│
-├── docker-compose.yml            # Full local environment
-├── .env.docker.example           # Template — copy to .env before starting
-├── sonar-project.properties      # Unified SonarQube scan config
-└── maven-settings.xml            # Maven settings for multi-service builds
+|-- api-gateway/                  Spring Cloud Gateway, JWT filter, routing
+|-- auth-service/                 Auth, OTP, refresh tokens, logout
+|-- user-service/                 User profiles, preferences, admin users
+|-- startup-service/              Startup lifecycle, search, follows, content
+|-- team-service/                 Team invites and membership
+|-- investment-service/           Investment request workflow
+|-- messaging-service/            Conversations and replies
+|-- notification-service/         Notifications and email event consumers
+|-- config-server/                Spring Cloud Config Server
+|-- eureka-server/                Eureka service registry
+|-- founderlink-new-frontend/     Angular frontend application
+|-- config-repo/                  Runtime configuration files
+|-- docker/postgres/init/         PostgreSQL database initialization
+|-- docs/study-pack/              Project explanation and evaluation notes
+|-- .github/workflows/ci-cd.yml   CI/CD workflow
+|-- docker-compose.yml            Full local environment
+|-- .env.docker.example           Environment template
+|-- sonar-project.properties      SonarQube configuration
+|-- maven-settings.xml            Maven settings for local builds
+`-- README.md                     Project documentation
 ```
 
-### Database layout
+## Database Layout
 
-Each service owns its own schema. No cross-database joins — services communicate through APIs and events.
+Each service owns its own PostgreSQL database. This avoids cross-service table coupling and keeps domain logic isolated.
 
-| Database          | Owner service       |
-|-------------------|---------------------|
-| `auth_db`         | auth-service        |
-| `user_db`         | user-service        |
-| `startup_db`      | startup-service     |
-| `investment_db`   | investment-service  |
-| `team_db`         | team-service        |
-| `messaging_db`    | messaging-service   |
-| `notification_db` | notification-service|
+| Database | Owner Service |
+| --- | --- |
+| `auth_db` | `auth-service` |
+| `user_db` | `user-service` |
+| `startup_db` | `startup-service` |
+| `team_db` | `team-service` |
+| `investment_db` | `investment-service` |
+| `messaging_db` | `messaging-service` |
+| `notification_db` | `notification-service` |
+| `sonar_db` | `sonarqube` |
 
-Schema migrations are managed by Flyway in each service's `src/main/resources/db/migration/`.
+Flyway migrations live in each service under:
+
+```text
+src/main/resources/db/migration/
+```
+
+## Event-Driven Notifications
+
+FounderLink uses RabbitMQ to decouple business workflows from notification delivery.
+
+| Publisher | Exchange | Event / Routing Key | Consumer |
+| --- | --- | --- | --- |
+| `startup-service` | `startup.exchange` | `startup.created` | `notification-service` |
+| `investment-service` | `investment.exchange` | `investment.created` | `notification-service` |
+| `investment-service` | `investment.exchange` | `investment.status` | `notification-service` |
+| `team-service` | `team.exchange` | `team.invite.sent` | `notification-service` |
+| `team-service` | `team.exchange` | `team.invite.status` | `notification-service` |
+| `messaging-service` | `messaging.exchange` | `message.reply.founder` | `notification-service` |
+
+## Notes for Evaluation
+
+- The frontend calls the API Gateway instead of calling individual services directly.
+- Gateway authentication centralizes JWT validation and keeps downstream services behind trusted headers.
+- Each backend service has its own persistence layer and Flyway migrations.
+- RabbitMQ keeps notifications asynchronous and prevents notification delivery from blocking core business requests.
+- Docker Compose starts the full system locally with reproducible service dependencies.
+- GitHub Actions validates the project and publishes deployable container images.
 
 ---
 
-## Configuration
-
-Runtime configuration is served by the Config Server from the `config-repo/` directory (or a Git-backed source). Each service fetches its own `.properties` file on startup.
-
-Sensitive values (`JWT_SECRET`, database credentials, RabbitMQ credentials) are never hardcoded — they must be provided as environment variables. The application fails to start if `JWT_SECRET` is missing.
-
-To use a Git-backed config repo instead of the local `config-repo/`:
-
-```properties
-# config-server/src/main/resources/application.properties
-spring.cloud.config.server.git.uri=https://github.com/your-org/founderlink-config-repo
-```
-
----
-
-*Built with Java 21 · Spring Boot 3 · Spring Cloud · PostgreSQL · Redis · RabbitMQ · Docker*
+Built with Java 21, Spring Boot 3, Angular 17, PostgreSQL, Redis, RabbitMQ, Docker, and GitHub Actions.
